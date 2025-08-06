@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 // Bạn có thể đặt tên màu theo ý nghĩa hoặc chức năng của chúng.
 class CustomColors {
   // Màu sắc chính cho ứng dụng của bạn (ví dụ: màu thương hiệu).
-  static const Color primaryColor = Color.fromRGBO(255, 255, 255, 255);
+  static const Color primaryColor =  Color.fromARGB(255, 69, 162, 151);
 
   // Màu nhấn mạnh, thường dùng cho các nút hoặc hành động quan trọng.
   static const Color accentColor = Color.fromRGBO(255, 134, 97, 255);
