@@ -36,7 +36,7 @@ class _BottomBarState extends State<BottomBar> {
       child: StylishBottomBar(
         option: AnimatedBarOptions(
           iconSize: 32,
-          barAnimation: BarAnimation.liquid,
+          barAnimation: BarAnimation.fade,
           iconStyle: IconStyle.animated,
           opacity: 0.85,
         ),
