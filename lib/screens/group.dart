@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/screens/group_create.dart';
+import 'package:myapp/route/app_router.dart';
 
 class GroupScreen extends StatefulWidget {
   const GroupScreen({super.key, required this.title});
@@ -13,30 +13,62 @@ class GroupScreen extends StatefulWidget {
 class _GroupScreenState extends State<GroupScreen> {
   final List<Map<String, dynamic>> familyGroups = [
     {
-      'name': 'Nhóm yêu cún 🐕',
+      'id': '1',
+      'name': 'Nhóm yêu mèo 🐱',
+      'membersCount': 452,
       'members': '452 thành viên',
       'image': 'assets/images/Home1.png',
       'color': Colors.blue.shade50,
     },
     {
-      'name': 'Nhóm yêu cún 🐕',
+      'id': '2',
+      'name': 'Nhóm yêu chuột 🐭',
+      'membersCount': 452,
       'members': '452 thành viên',
       'image': 'assets/images/Home2.png',
       'color': Colors.green.shade50,
     },
     {
-      'name': 'Nhóm yêu cún 🐕',
+      'id': '3',
+      'name': 'Nhóm yêu gà 🐔',
+      'membersCount': 452,
       'members': '452 thành viên',
       'image': 'assets/images/Home3.png',
       'color': Colors.orange.shade50,
     },
     {
-      'name': 'Nhóm yêu cún 🐕',
+      'id': '4',
+      'name': 'Nhóm yêu heo 🐖',
+      'membersCount': 452,
       'members': '452 thành viên',
       'image': 'assets/images/Home4.png',
       'color': Colors.purple.shade50,
     },
+    {
+      'id': '5',
+      'name': 'Nhóm yêu tom & jerry 🐕 & 🐱',
+      'membersCount': 452,
+      'members': '452 thành viên',
+      'image': 'assets/images/Home5.png',
+      'color': Colors.purple.shade50,
+    },
   ];
+
+  void _navigateToFamilyBlog(
+    BuildContext context,
+    String groupId,
+    String groupName,
+    int membersCount,
+    String groupAvatar,
+  ) {
+    AppRouter.goToFamilyBlog(
+      context,
+      groupId: groupId,
+      groupName: groupName,
+      groupMembers: membersCount.toString(),
+      groupAvatar: groupAvatar,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,11 +190,12 @@ class _GroupScreenState extends State<GroupScreen> {
                       color: Colors.grey.shade600,
                     ),
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Đã chọn ${group['name']}'),
-                          backgroundColor: Colors.teal,
-                        ),
+                      _navigateToFamilyBlog(
+                        context,
+                        group['id'],
+                        group['name'],
+                        group['membersCount'],
+                        group['image'],
                       );
                     },
                   ),
@@ -194,10 +227,7 @@ class _GroupScreenState extends State<GroupScreen> {
         ),
         child: FloatingActionButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => GroupCreate()),
-            );
+            AppRouter.goToGroupCreate(context);
           },
           backgroundColor: Colors.transparent,
           elevation: 0,

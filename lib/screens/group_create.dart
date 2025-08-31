@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:myapp/route/app_router.dart';
 import 'dart:io';
 
 // Import các widget components
@@ -135,7 +136,11 @@ class _GroupCreateState extends State<GroupCreate> {
         alertTile: "Thành công",
         content: "Tạo nhóm thành công",
       ),
-    );
+    ).then((_) {
+      if (mounted) {
+        AppRouter.goToFamily(context);
+      }
+    });
 
     _resetAllFields();
     // Navigator.pop(context);
@@ -162,6 +167,7 @@ class _GroupCreateState extends State<GroupCreate> {
         title: 'Tạo nhóm',
         onReset: _resetAllFields,
         onSave: _createGroup,
+        isUseTextButton: true,
         saveButtonText: 'Tạo',
       ),
       body: SingleChildScrollView(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/screens/chat_screen.dart';
+import 'package:myapp/route/app_router.dart';
 
 class ChatBox extends StatefulWidget {
   const ChatBox({super.key});
@@ -105,7 +105,7 @@ class _ChatBoxState extends State<ChatBox> {
                             borderRadius: BorderRadius.circular(25),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha: 0.1),
                                 blurRadius: 10,
                                 offset: const Offset(0, 2),
                               ),
@@ -199,8 +199,8 @@ class _ChatBoxState extends State<ChatBox> {
               boxShadow: [
                 BoxShadow(
                   color: isSelected
-                      ? const Color(0xFF4A90A4).withOpacity(0.3)
-                      : Colors.black.withOpacity(0.1),
+                      ? const Color(0xFF4A90A4).withValues(alpha: 0.3)
+                      : Colors.black.withValues(alpha: 0.1),
                   blurRadius: isSelected ? 12 : 8,
                   offset: const Offset(0, 2),
                 ),
@@ -261,13 +261,7 @@ class _ChatBoxState extends State<ChatBox> {
       }
 
       // Navigate to ChatScreen with the message and selected pet
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              ChatScreen(initialMessage: message, petName: _selectedPet),
-        ),
-      );
+      AppRouter.goToChat(context, message: message, petName: _selectedPet);
 
       _messageController.clear();
     }

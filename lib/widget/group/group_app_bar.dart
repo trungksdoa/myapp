@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/route/app_router.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final Widget? titleWidget;
   final VoidCallback? onReset;
   final VoidCallback? onSave;
   final String saveButtonText;
-
+  final Icon? actionButtonIcon;
+  final VoidCallback? onActionPressed; // Add callback for action button
+  final bool? isUseTextButton; // Control visibility of action button
   const CustomAppBar({
     super.key,
     required this.title,
     this.onReset,
     this.onSave,
     this.saveButtonText = 'Lưu',
+    this.actionButtonIcon,
+    this.onActionPressed,
+    this.isUseTextButton,
+    this.titleWidget,
   });
 
   @override
@@ -20,16 +28,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.white,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: Colors.black),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () => AppRouter.pop(context),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.w600,
-          fontSize: 18,
-        ),
-      ),
+      title:
+          titleWidget ??
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+            ),
+          ),
       centerTitle: false,
       actions: [
         if (onReset != null)
@@ -41,7 +51,20 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               tooltip: 'Reset tất cả',
             ),
           ),
-        if (onSave != null)
+
+        if (actionButtonIcon != null &&
+            (isUseTextButton == null || isUseTextButton == false))
+          Container(
+            margin: const EdgeInsets.only(right: 8, top: 8, bottom: 8),
+            child: IconButton(
+              icon: actionButtonIcon!,
+              onPressed: onActionPressed,
+              tooltip: 'Action',
+            ),
+          ),
+
+        if (onSave != null &&
+            (isUseTextButton == null || isUseTextButton == true))
           Container(
             margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
             child: ElevatedButton(
@@ -83,12 +106,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           content: const Text('Bạn có chắc muốn reset tất cả thông tin?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => AppRouter.pop(context),
               child: const Text('Hủy'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                AppRouter.pop(context);
                 onReset?.call();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(

@@ -10,6 +10,16 @@ class DeviceSize {
     return 1.6; // Desktop
   }
 
+  static double getResponsiveImage(double screenWidth) {
+    if (screenWidth < 350) return 40; // Rất nhỏ
+    if (screenWidth < 400) return 50; // Nhỏ
+    if (screenWidth < 500) return 60; // Thường
+    if (screenWidth < 600) return 70; // Lớn
+    if (screenWidth < 900) return 80; // Tablet
+    if (screenWidth < 1200) return 90; // Tablet lớn
+    return 100; // Desktop
+  }
+
   /// Font size responsive
   static double getResponsiveFontSize(double screenWidth) {
     if (screenWidth < 350) return 10; // Rất nhỏ

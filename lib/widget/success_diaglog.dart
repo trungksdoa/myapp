@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/core/colors.dart';
+import 'package:myapp/route/app_router.dart';
 
 class SuccessDiaglog extends StatelessWidget {
   final String alertTile;
@@ -27,7 +28,7 @@ class SuccessDiaglog extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.buttonPressed,
             ),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => AppRouter.pop(context),
             child: const Text(
               'Tôi đã hiểu',
               style: TextStyle(color: AppColors.textOnPrimary),
