@@ -94,7 +94,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
     super.initState();
   }
 
-  Widget _buildCustomTitle() {
+  Widget _buildCustomTitle(double fontSize) {
     return Row(
       children: [
         CircleAvatar(
@@ -108,12 +108,19 @@ class _FamilyBlogState extends State<FamilyBlog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              widget.groupName ?? 'Nhóm gia đình',
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
+            Container(
+              constraints: const BoxConstraints(
+                maxWidth: 150,
+              ), // Giới hạn width
+              child: Text(
+                widget.groupName ?? 'Nhóm gia đình',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: fontSize,
+                ),
+                overflow: TextOverflow.ellipsis, // Cắt text nếu quá dài
+                maxLines: 1, // Giới hạn 1 dòng
               ),
             ),
             const SizedBox(height: 2),
@@ -123,7 +130,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
                   : '0 thành viên',
               style: TextStyle(
                 color: AppColors.textPrimary.withValues(alpha: 0.9),
-                fontSize: 10,
+                fontSize: fontSize - 2,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -167,7 +174,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              title: _buildCustomTitle(),
+              title: _buildCustomTitle(fontSize),
               background: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
