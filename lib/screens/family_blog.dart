@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:myapp/core/colors.dart';
 import 'package:myapp/core/utils/device_size.dart';
-import 'dart:io';
-
-import 'package:myapp/widget/group/group_app_bar.dart';
 
 class FamilyBlog extends StatefulWidget {
   final String? groupId;
@@ -147,6 +143,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
     final padding = DeviceSize.getResponsivePadding(screenWidth);
     final imageSize = DeviceSize.getResponsiveImage(screenWidth);
     return Scaffold(
+      backgroundColor: Colors.teal.shade50,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -176,11 +173,16 @@ class _FamilyBlogState extends State<FamilyBlog> {
             flexibleSpace: FlexibleSpaceBar(
               title: _buildCustomTitle(fontSize),
               background: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.teal, Colors.tealAccent],
+                    colors: [
+                      Colors.teal.shade600,
+                      Colors.teal.shade400,
+                      Colors.teal.shade300,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
+                    stops: const [0.0, 0.7, 1.0],
                   ),
                 ),
               ),
@@ -205,6 +207,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
                       ),
                     ),
                   );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 },
                 style: IconButton.styleFrom(
                   backgroundColor: AppColors.navBackground.withValues(
@@ -226,14 +229,22 @@ class _FamilyBlogState extends State<FamilyBlog> {
                 return Container(
                   margin: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.teal.shade50,
-                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(
+                      colors: [Colors.white, Colors.teal.shade50],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.teal.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withValues(alpha: 0.2),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                        offset: const Offset(0, 2),
+                        color: Colors.teal.withValues(alpha: 0.15),
+                        spreadRadius: 2,
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -242,72 +253,118 @@ class _FamilyBlogState extends State<FamilyBlog> {
                     children: [
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundImage: widget.groupAvatar != null
-                                ? AssetImage(widget.groupAvatar!)
-                                : const AssetImage(
-                                    'assets/images/default_group_avatar.png',
-                                  ),
+                          Container(
+                            margin: const EdgeInsets.all(12),
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundImage: widget.groupAvatar != null
+                                  ? AssetImage(widget.groupAvatar!)
+                                  : const AssetImage(
+                                      'assets/images/default_group_avatar.png',
+                                    ),
+                            ),
                           ),
                           const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    blog['name'] ?? 'Vô danh',
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    margin: const EdgeInsets.all(4),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.teal.shade100,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: Colors.teal.shade300,
-                                        width: 1,
+                          Expanded(
+                            // Wrap Column trong Expanded để tránh overflow
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      // Wrap Text để tránh overflow
+                                      child: Text(
+                                        blog['name'] ?? 'Vô danh',
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    child: Text(
-                                      blog['pet'] ?? 'Pet',
-                                      style: TextStyle(
-                                        color: Colors.teal.shade700,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      margin: const EdgeInsets.all(4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.teal.shade100,
+                                            Colors.teal.shade200,
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: Colors.teal.shade400,
+                                          width: 1.2,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.teal.withValues(
+                                              alpha: 0.3,
+                                            ),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.pets,
+                                            size: 12,
+                                            color: Colors.teal.shade800,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            blog['pet'] ?? 'Pet',
+                                            style: TextStyle(
+                                              color: Colors.teal.shade800,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 2),
-                              Text(
-                                blog['postTime'] ?? '6 phút trước',
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.normal,
+                                  ],
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.access_time,
+                                      size: 12,
+                                      color: Colors.teal.shade400,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      blog['postTime'] ?? '6 phút trước',
+                                      style: TextStyle(
+                                        color: Colors.teal.shade600,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(width: 10),
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(15),
                         child: LayoutBuilder(
                           builder: (context, constraints) {
                             final images = blog['image'] as List<String>;
@@ -335,20 +392,24 @@ class _FamilyBlogState extends State<FamilyBlog> {
                                 final imgPath = images[imageIndex];
                                 return Container(
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.teal.withValues(alpha: 0.3),
+                                      width: 1.5,
+                                    ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.grey.withValues(
+                                        color: Colors.teal.withValues(
                                           alpha: 0.2,
                                         ),
                                         spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: const Offset(0, 2),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
                                       ),
                                     ],
                                   ),
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(10),
                                     child: Image.asset(
                                       imgPath,
                                       fit: BoxFit
@@ -372,24 +433,55 @@ class _FamilyBlogState extends State<FamilyBlog> {
                           },
                         ),
                       ),
-                      Row(
-                        children: [
-                          const SizedBox(width: 12),
-                          Icon(
-                            Icons.comment,
-                            size: 16,
-                            color: Colors.grey.shade600,
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white,
+                              Colors.teal.shade50, // Màu rất nhẹ
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            blog['comment'] ?? 'No comments',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 17,
-                              fontWeight: FontWeight.normal,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.teal.withValues(alpha: 0.15),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.teal.withValues(alpha: 0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.chat_bubble_outline,
+                              size: 16,
+                              color: Colors.teal.shade600,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                blog['comment'] ?? 'Chưa có bình luận nào',
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.normal,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

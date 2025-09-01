@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/component/main_layout.dart';
+import 'package:myapp/screens/blog_create.dart';
 import 'package:myapp/screens/chat_box.dart';
 import 'package:myapp/screens/group.dart';
 import 'package:myapp/screens/personal.dart';
@@ -114,6 +115,11 @@ class AppRouter {
                       );
                     },
                   ),
+                  GoRoute(
+                    path: '/blog/create',
+                    name: 'blog-create',
+                    builder: (context, state) => const BlogCreate(),
+                  ),
                 ],
               ),
             ],
@@ -196,6 +202,10 @@ class AppRouter {
     if (groupMembers != null) params['groupMembers'] = groupMembers;
     if (groupAvatar != null) params['groupAvatar'] = groupAvatar;
     context.goNamed('family-blog', queryParameters: params);
+  }
+
+  static void goToBlogCreate(BuildContext context) {
+    context.goNamed('blog-create');
   }
 
   static void goToChat(
