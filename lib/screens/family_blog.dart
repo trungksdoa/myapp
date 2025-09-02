@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/core/colors.dart';
 import 'package:myapp/core/utils/device_size.dart';
+import 'package:myapp/core/utils/performance_monitor.dart';
+import 'package:myapp/route/navigate_helper.dart';
+import 'package:myapp/widget/boxContainer.dart';
+import 'package:myapp/model/models.dart';
 
 class FamilyBlog extends StatefulWidget {
   final String? groupId;
@@ -21,69 +25,72 @@ class FamilyBlog extends StatefulWidget {
 }
 
 class _FamilyBlogState extends State<FamilyBlog> {
-  // print(widget.groupAvatar);
-  final List<Map<String, dynamic>> familyGroups = [
-    {
-      'id': '1',
-      'name': 'Huỳnh Gia Bảo',
-      'postTime': "6 phút trước",
-      'pet': 'Tini',
-      'image': [
-        'assets/images/Home1.png',
-        'assets/images/Home2.png',
-        'assets/images/Home3.png',
-      ],
-      'comment': "Cháu lì lắm",
-    },
-    {
-      'id': '2',
-      'name': 'Nguyễn Thị Thùy Dương',
-      'postTime': "6 phút trước",
-      'pet': 'Lulu',
-      'image': [
-        'assets/images/Home4.png',
-        'assets/images/Home5.png',
-        'assets/images/Home1.png',
-      ],
-      'comment': "Cháu biến ăn lắm",
-    },
-    {
-      'id': '3',
-      'name': 'Trần Minh Tuấn',
-      'postTime': "6 phút trước",
-      'pet': 'Milo',
-      'image': [
-        'assets/images/Home4.png',
-        'assets/images/Home5.png',
-        'assets/images/Home1.png',
-      ],
-      'comment': "Hôm nay cháu vui lắm",
-    },
-    {
-      'id': '4',
-      'name': 'Lê Thị Mỹ Linh',
-      'postTime': "6 phút trước",
-      'pet': 'Mimi',
-      'image': [
-        'assets/images/Home2.png',
-        'assets/images/Home3.png',
-        'assets/images/Home4.png',
-      ],
-      'comment': "Hôm nay cháu vui lắm",
-    },
-    {
-      'id': '5',
-      'name': 'Nguyễn Văn Nam',
-      'postTime': "6 phút trước",
-      'pet': 'Tom',
-      'image': [
-        'assets/images/Home5.png',
-        'assets/images/Home1.png',
-        'assets/images/Home2.png',
-      ],
-      'comment': "Hôm nay cháu vui lắm",
-    },
+  // Mock data using Blog model
+  final List<Blog> familyBlogs = [
+    Blog(
+      id: 1,
+      description: "Cháu lì lắm",
+      imgUrls:
+          "assets/images/Home1.png,assets/images/Home2.png,assets/images/Home3.png",
+      accountId: "user1",
+      petIds: [1],
+    ),
+    Blog(
+      id: 2,
+      description: "Cháu biết ăn lắm",
+      imgUrls:
+          "assets/images/Home4.png,assets/images/Home5.png,assets/images/Home1.png",
+      accountId: "user2",
+      petIds: [2],
+    ),
+    Blog(
+      id: 3,
+      description: "Hôm nay cháu vui lắm",
+      imgUrls:
+          "assets/images/Home4.png,assets/images/Home5.png,assets/images/Home1.png",
+      accountId: "user3",
+      petIds: [3],
+    ),
+    Blog(
+      id: 4,
+      description: "Hôm nay cháu vui lắm",
+      imgUrls: "",
+      accountId: "user4",
+      petIds: [4],
+    ),
+    Blog(
+      id: 5,
+      description: "Hôm nay cháu vui lắm",
+      imgUrls:
+          "assets/images/Home5.png,assets/images/Home1.png,assets/images/Home2.png",
+      accountId: "user5",
+      petIds: [5],
+    ),
   ];
+
+  // User names mapping (in real app, this would come from API)
+  final Map<String, String> userNames = {
+    'user1': 'Huỳnh Gia Bảo',
+    'user2': 'Nguyễn Thị Thùy Dương',
+    'user3': 'Trần Minh Tuấn',
+    'user4': 'Lê Thị Mỹ Linh',
+    'user5': 'Nguyễn Văn Nam',
+  };
+
+  // Pet names mapping
+  final Map<int, String> petNames = {
+    1: 'Tini',
+    2: 'Lulu',
+    3: 'Milo',
+    4: 'Mimi',
+    5: 'Tom',
+  };
+
+  // Helper method to get images from imgUrls
+  List<String> getImageList(String imgUrls) {
+    if (imgUrls.isEmpty) return [];
+    return imgUrls.split(',').where((url) => url.isNotEmpty).toList();
+  }
 
   @override
   void initState() {
@@ -91,58 +98,69 @@ class _FamilyBlogState extends State<FamilyBlog> {
   }
 
   Widget _buildCustomTitle(double fontSize) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 20,
-          backgroundImage: widget.groupAvatar != null
-              ? AssetImage(widget.groupAvatar!)
-              : const AssetImage('assets/images/default_group_avatar.png'),
-        ),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Kiểm tra trạng thái collapsed/expanded dựa vào constraint
+        final bool isCollapsed = constraints.maxHeight <= 56;
+
+        return Row(
           children: [
-            Container(
-              constraints: const BoxConstraints(
-                maxWidth: 150,
-              ), // Giới hạn width
-              child: Text(
-                widget.groupName ?? 'Nhóm gia đình',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600,
-                  fontSize: fontSize,
-                ),
-                overflow: TextOverflow.ellipsis, // Cắt text nếu quá dài
-                maxLines: 1, // Giới hạn 1 dòng
-              ),
+            CircleAvatar(
+              radius: isCollapsed ? 18 : 20, // Tăng từ 16 lên 18
+              backgroundImage: widget.groupAvatar != null
+                  ? AssetImage(widget.groupAvatar!)
+                  : const AssetImage('assets/images/default_group_avatar.png'),
             ),
-            const SizedBox(height: 2),
-            Text(
-              widget.groupMembers != null
-                  ? '${widget.groupMembers} thành viên'
-                  : '0 thành viên',
-              style: TextStyle(
-                color: AppColors.textPrimary.withValues(alpha: 0.9),
-                fontSize: fontSize - 2,
-                fontWeight: FontWeight.bold,
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    constraints: BoxConstraints(
+                      maxWidth: isCollapsed ? 140 : 150, // Tăng từ 120 lên 140
+                    ),
+                    child: Text(
+                      widget.groupName ?? 'Nhóm gia đình',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                        fontSize: isCollapsed ? fontSize - 1 : fontSize,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                  // Sửa lại phần này
+                  const SizedBox(height: 2),
+                  Text(
+                    widget.groupMembers != null
+                        ? '${widget.groupMembers} thành viên'
+                        : '0 thành viên',
+                    style: TextStyle(
+                      color: AppColors.textPrimary.withValues(alpha: 0.9),
+                      fontSize: fontSize - 2,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    PerformanceMonitor.start('FamilyBlog build');
+
     final screenWidth = MediaQuery.of(context).size.width;
     final fontSize = DeviceSize.getResponsiveFontSize(screenWidth);
-    final padding = DeviceSize.getResponsivePadding(screenWidth);
-    final imageSize = DeviceSize.getResponsiveImage(screenWidth);
-    return Scaffold(
+
+    final scaffoldWidget = Scaffold(
       backgroundColor: Colors.teal.shade50,
       body: CustomScrollView(
         slivers: [
@@ -150,104 +168,62 @@ class _FamilyBlogState extends State<FamilyBlog> {
             expandedHeight: 80.0,
             floating: false,
             pinned: true,
-            backgroundColor: Colors.teal,
-            leading: Align(
-              alignment: Alignment.center,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 24,
+            clipBehavior: Clip.antiAlias,
+            backgroundColor: Colors.white,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
+              onPressed: () => Navigator.of(context).pop(),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                onPressed: () => Navigator.of(context).pop(),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(
-                    0.2,
-                  ), // Background nhẹ
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
+                elevation: 1,
+                padding: const EdgeInsets.all(
+                  8,
+                ), // Thêm padding để fit khi collapsed
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
               title: _buildCustomTitle(fontSize),
               background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.teal.shade600,
-                      Colors.teal.shade400,
-                      Colors.teal.shade300,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    stops: const [0.0, 0.7, 1.0],
-                  ),
-                ),
+                decoration: const BoxDecoration(color: Colors.white),
               ),
             ),
             actions: [
-              IconButton(
-                icon: const Icon(
-                  Icons.more_vert,
-                  color: Colors.white,
-                  size: 24,
-                ),
-                onPressed: () {
-                  const snackBar = SnackBar(
-                    content: Text('Tính năng đang phát triển'),
-                    duration: Duration(seconds: 1),
-                    behavior: SnackBarBehavior.floating,
-                    margin: EdgeInsets.all(16),
-                    backgroundColor: Colors.black87,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.all(
-                        Radius.circular(8),
-                      ),
-                    ),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              PopupMenuButton(
+                borderRadius: BorderRadius.circular(12),
+                onSelected: (value) {
+                  NavigateHelper.goToSettingGroup(context, value.toString());
                 },
-                style: IconButton.styleFrom(
-                  backgroundColor: AppColors.navBackground.withValues(
-                    alpha: 0.2,
-                  ), // Background nhẹ
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadiusGeometry.all(Radius.circular(8)),
-                  ),
+                itemBuilder: (BuildContext bc) {
+                  return const [
+                    PopupMenuItem(
+                      value: 'group-settings',
+                      child: Text("Cài đặt"), // child phải ở cuối
+                    ),
+                  ];
+                },
+                clipBehavior: Clip.antiAlias,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Icon(Icons.more_vert, color: Colors.black54, size: 24),
                 ),
               ),
-              const SizedBox(width: 8),
             ],
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
-                final blog = familyGroups[index];
-                return Container(
-                  margin: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.white, Colors.teal.shade50],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.teal.withValues(alpha: 0.2),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.teal.withValues(alpha: 0.15),
-                        spreadRadius: 2,
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                final blog = familyBlogs[index];
+                final images = getImageList(blog.imgUrls);
+                final userName = userNames[blog.accountId] ?? 'Unknown User';
+                final petName =
+                    petNames[blog.petIds.isNotEmpty ? blog.petIds.first : 0] ??
+                    'Unknown Pet';
+
+                return BoxContainerShadow.blogCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -266,7 +242,6 @@ class _FamilyBlogState extends State<FamilyBlog> {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            // Wrap Column trong Expanded để tránh overflow
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
@@ -274,9 +249,8 @@ class _FamilyBlogState extends State<FamilyBlog> {
                                 Row(
                                   children: [
                                     Flexible(
-                                      // Wrap Text để tránh overflow
                                       child: Text(
-                                        blog['name'] ?? 'Vô danh',
+                                        userName,
                                         style: const TextStyle(
                                           color: Colors.black,
                                           fontWeight: FontWeight.w600,
@@ -326,7 +300,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
                                           ),
                                           const SizedBox(width: 4),
                                           Text(
-                                            blog['pet'] ?? 'Pet',
+                                            petName,
                                             style: TextStyle(
                                               color: Colors.teal.shade800,
                                               fontSize: 11,
@@ -348,7 +322,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      blog['postTime'] ?? '6 phút trước',
+                                      '6 phút trước', // You can make this dynamic later
                                       style: TextStyle(
                                         color: Colors.teal.shade600,
                                         fontSize: 11,
@@ -363,104 +337,79 @@ class _FamilyBlogState extends State<FamilyBlog> {
                           ),
                         ],
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(15),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final images = blog['image'] as List<String>;
-                            final crossAxisCount = images.length >= 3
-                                ? 3
-                                : images.length;
-                            final itemWidth =
-                                (constraints.maxWidth -
-                                    (crossAxisCount - 1) * 6) /
-                                crossAxisCount;
+                      images.isNotEmpty
+                          ? Container(
+                              padding: const EdgeInsets.all(15),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final crossAxisCount = images.length >= 3
+                                      ? 3
+                                      : images.length;
 
-                            return GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: crossAxisCount,
-                                    crossAxisSpacing: 6,
-                                    mainAxisSpacing: 6,
-                                    childAspectRatio:
-                                        1.2, // Điều chỉnh tỷ lệ ở đây
-                                  ),
-                              itemCount: images.length,
-                              itemBuilder: (context, imageIndex) {
-                                final imgPath = images[imageIndex];
-                                return Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Colors.teal.withValues(alpha: 0.3),
-                                      width: 1.5,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.teal.withValues(
-                                          alpha: 0.2,
+                                  return GridView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: crossAxisCount,
+                                          crossAxisSpacing: 6,
+                                          mainAxisSpacing: 6,
+                                          childAspectRatio: 1.2,
                                         ),
-                                        spreadRadius: 1,
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.asset(
-                                      imgPath,
-                                      fit: BoxFit
-                                          .scaleDown, // scale nhỏ và fit content vùng chứa
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                            return Container(
-                                              color: Colors.grey.shade200,
-                                              child: const Icon(
-                                                Icons.broken_image,
-                                                size: 20,
-                                                color: Colors.grey,
+                                    itemCount: images.length,
+                                    itemBuilder: (context, imageIndex) {
+                                      final imgPath = images[imageIndex];
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.teal.withValues(
+                                              alpha: 0.3,
+                                            ),
+                                            width: 1.5,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.teal.withValues(
+                                                alpha: 0.2,
                                               ),
-                                            );
-                                          },
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white,
-                              Colors.teal.shade50, // Màu rất nhẹ
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.teal.withValues(alpha: 0.15),
-                            width: 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.teal.withValues(alpha: 0.05),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
+                                              spreadRadius: 1,
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                          ],
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          child: Image.asset(
+                                            imgPath,
+                                            fit: BoxFit.scaleDown,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  return Container(
+                                                    color: Colors.grey.shade200,
+                                                    child: const Icon(
+                                                      Icons.broken_image,
+                                                      size: 20,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  );
+                                                },
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                      BoxContainerShadow.comment(
                         child: Row(
                           children: [
                             Icon(
@@ -471,7 +420,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                blog['comment'] ?? 'Chưa có bình luận nào',
+                                blog.description,
                                 style: TextStyle(
                                   color: AppColors.textPrimary,
                                   fontSize: 14,
@@ -486,11 +435,30 @@ class _FamilyBlogState extends State<FamilyBlog> {
                     ],
                   ),
                 );
-              }, childCount: familyGroups.length),
+              }, childCount: familyBlogs.length),
             ),
           ),
+          // Thay thế SizedBox bằng SliverToBoxAdapter
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _navigate(context);
+        },
+        backgroundColor: Colors.teal.shade600,
+        foregroundColor: Colors.white,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.edit, size: 24),
+      ),
     );
+
+    PerformanceMonitor.stop('FamilyBlog build');
+    return scaffoldWidget;
+  }
+
+  void _navigate(BuildContext context) {
+    NavigateHelper.goToBlogCreate(context);
   }
 }

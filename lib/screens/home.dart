@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/core/utils/device_size.dart';
+import 'package:myapp/core/utils/performance_monitor.dart';
+import 'package:myapp/core/utils/image_cache.dart';
 
 import '../component/card_item.dart'; // Nếu cần
 
@@ -22,6 +24,28 @@ class _HomeState extends State<Home> {
     {'icon': "assets/images/Home6.png", 'label': 'Khác'},
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _preloadImages();
+  }
+
+  void _preloadImages() {
+    // Preload service images
+    final imagePaths = services.map((s) => s['icon']!).toList();
+
+    // Add other images used in HomeScreen
+    imagePaths.add('assets/images/preview_map.png');
+    imagePaths.add('assets/images/user_avatar.jpg');
+
+    // Preload images without context first (basic caching)
+    for (final path in imagePaths) {
+      ImageCacheManager.getCachedImage(path);
+    }
+
+    // Detailed preloading will happen in build method
+  }
+
   void showNotification(BuildContext context, String message) {
     final snackBar = SnackBar(
       content: Text(message),
@@ -36,12 +60,13 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    PerformanceMonitor.start('HomeScreen build');
+
     final screenWidth = MediaQuery.of(context).size.width;
     final fontSize = DeviceSize.getResponsiveFontSize(screenWidth);
-    return SizedBox(
-      // Bọc toàn bộ nội dung trong MainLayout
+
+    final widget = SizedBox(
       child: CustomScrollView(
-        // Nội dung cũ của body
         slivers: [
           // MyAppBar(), // Đã di chuyển vào MainLayout
           SliverPadding(
@@ -89,7 +114,7 @@ class _HomeState extends State<Home> {
                           'assets/images/preview_map.png',
                           height: 140,
                           fit: BoxFit.cover,
-                        ),
+                        ), //Keep because it will replace with real map track
                       ),
                     ),
                     SizedBox(width: 16),
@@ -213,5 +238,8 @@ class _HomeState extends State<Home> {
         ],
       ),
     );
+
+    PerformanceMonitor.stop('HomeScreen build');
+    return widget;
   }
 }

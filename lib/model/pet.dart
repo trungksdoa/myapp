@@ -3,6 +3,7 @@ class Pet {
   final String accountId;
   final String petName;
   final DateTime dateOfBirth;
+  final String petImage;
   final String petType;
   final String size;
   final String gender;
@@ -12,6 +13,7 @@ class Pet {
     required this.accountId,
     required this.petName,
     required this.dateOfBirth,
+    required this.petImage,
     required this.petType,
     required this.size,
     required this.gender,

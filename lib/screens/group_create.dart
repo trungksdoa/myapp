@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:myapp/route/app_router.dart';
+import 'package:myapp/route/navigate_helper.dart';
 import 'dart:io';
 
 // Import các widget components
@@ -138,7 +138,7 @@ class _GroupCreateState extends State<GroupCreate> {
       ),
     ).then((_) {
       if (mounted) {
-        AppRouter.goToFamily(context);
+        NavigateHelper.goToFamily(context);
       }
     });
 

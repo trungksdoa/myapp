@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/route/app_router.dart';
+import 'package:myapp/route/navigate_helper.dart';
 
 class ChatBox extends StatefulWidget {
   const ChatBox({super.key});
@@ -261,7 +261,7 @@ class _ChatBoxState extends State<ChatBox> {
       }
 
       // Navigate to ChatScreen with the message and selected pet
-      AppRouter.goToChat(context, message: message, petName: _selectedPet);
+      NavigateHelper.goToChat(context, message: message, petName: _selectedPet);
 
       _messageController.clear();
     }

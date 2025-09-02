@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/route/app_router.dart';
+import 'package:myapp/route/navigate_helper.dart';
+import 'package:myapp/widget/boxContainer.dart';
+import 'package:myapp/model/models.dart';
 
 class GroupScreen extends StatefulWidget {
   const GroupScreen({super.key, required this.title});
@@ -11,61 +13,73 @@ class GroupScreen extends StatefulWidget {
 }
 
 class _GroupScreenState extends State<GroupScreen> {
-  final List<Map<String, dynamic>> familyGroups = [
-    {
-      'id': '1',
-      'name': 'Nhóm yêu mèo 🐱',
-      'membersCount': 452,
-      'members': '452 thành viên',
-      'image': 'assets/images/Home1.png',
-      'color': Colors.blue.shade50,
-    },
-    {
-      'id': '2',
-      'name': 'Nhóm yêu chuột 🐭',
-      'membersCount': 452,
-      'members': '452 thành viên',
-      'image': 'assets/images/Home2.png',
-      'color': Colors.green.shade50,
-    },
-    {
-      'id': '3',
-      'name': 'Nhóm yêu gà 🐔',
-      'membersCount': 452,
-      'members': '452 thành viên',
-      'image': 'assets/images/Home3.png',
-      'color': Colors.orange.shade50,
-    },
-    {
-      'id': '4',
-      'name': 'Nhóm yêu heo 🐖',
-      'membersCount': 452,
-      'members': '452 thành viên',
-      'image': 'assets/images/Home4.png',
-      'color': Colors.purple.shade50,
-    },
-    {
-      'id': '5',
-      'name': 'Nhóm yêu tom & jerry 🐕 & 🐱',
-      'membersCount': 452,
-      'members': '452 thành viên',
-      'image': 'assets/images/Home5.png',
-      'color': Colors.purple.shade50,
-    },
+  final List<Group> familyGroups = [
+    Group(
+      id: 1,
+      name: 'Nhóm yêu mèo 🐱',
+      memberCount: 452,
+      imgUrl: 'assets/images/Home1.png',
+      createdById: 'user1',
+      groupMembers: [
+        GroupMember(id: 1, accountId: 'user1'),
+        GroupMember(id: 2, accountId: 'user2'),
+      ],
+    ),
+    Group(
+      id: 2,
+      name: 'Nhóm yêu chuột 🐭',
+      memberCount: 452,
+      imgUrl: 'assets/images/Home2.png',
+      createdById: 'user1',
+      groupMembers: [
+        GroupMember(id: 3, accountId: 'user3'),
+        GroupMember(id: 4, accountId: 'user4'),
+      ],
+    ),
+    Group(
+      id: 3,
+      name: 'Nhóm yêu gà 🐔',
+      memberCount: 452,
+      imgUrl: 'assets/images/Home3.png',
+      createdById: 'user1',
+    ),
+    Group(
+      id: 4,
+      name: 'Nhóm yêu heo 🐖',
+      memberCount: 452,
+      imgUrl: 'assets/images/Home4.png',
+      createdById: 'user1',
+    ),
+    Group(
+      id: 5,
+      name: 'Nhóm yêu tom & jerry 🐕 & 🐱',
+      memberCount: 452,
+      imgUrl: 'assets/images/Home5.png',
+      createdById: 'user1',
+    ),
+  ];
+
+  // Color mapping for groups
+  final List<Color> groupColors = [
+    Colors.blue.shade50,
+    Colors.green.shade50,
+    Colors.orange.shade50,
+    Colors.purple.shade50,
+    Colors.pink.shade50,
   ];
 
   void _navigateToFamilyBlog(
     BuildContext context,
-    String groupId,
+    int groupId,
     String groupName,
-    int membersCount,
+    int memberCount,
     String groupAvatar,
   ) {
-    AppRouter.goToFamilyBlog(
+    NavigateHelper.goToFamilyBlog(
       context,
-      groupId: groupId,
+      groupId: groupId.toString(),
       groupName: groupName,
-      groupMembers: membersCount.toString(),
+      groupMembers: memberCount.toString(),
       groupAvatar: groupAvatar,
     );
   }
@@ -104,12 +118,11 @@ class _GroupScreenState extends State<GroupScreen> {
           SliverPadding(
             padding: const EdgeInsets.all(16.0),
             sliver: SliverToBoxAdapter(
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(25),
-                ),
+              child: BoxContainerShadow(
+                padding: 16,
+                borderRadius: 25,
+                backgroundColor: Colors.grey.shade200,
+                hasShadow: false,
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Tìm kiếm',
@@ -132,20 +145,12 @@ class _GroupScreenState extends State<GroupScreen> {
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
                 final group = familyGroups[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: group['color'],
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withValues(alpha: 0.2),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
+                final groupColor = groupColors[index % groupColors.length];
+
+                return BoxContainerShadow.groupCard(
+                  backgroundColor: groupColor,
+                  margin: 0,
+                  customMargin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16),
                     leading: Container(
@@ -158,7 +163,7 @@ class _GroupScreenState extends State<GroupScreen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(30),
                         child: Image.asset(
-                          group['image'],
+                          group.imgUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return const Icon(
@@ -171,14 +176,14 @@ class _GroupScreenState extends State<GroupScreen> {
                       ),
                     ),
                     title: Text(
-                      group['name'],
+                      group.name,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     subtitle: Text(
-                      group['members'],
+                      '${group.memberCount} thành viên',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey.shade600,
@@ -192,10 +197,10 @@ class _GroupScreenState extends State<GroupScreen> {
                     onTap: () {
                       _navigateToFamilyBlog(
                         context,
-                        group['id'],
-                        group['name'],
-                        group['membersCount'],
-                        group['image'],
+                        group.id,
+                        group.name,
+                        group.memberCount,
+                        group.imgUrl,
                       );
                     },
                   ),
@@ -227,7 +232,7 @@ class _GroupScreenState extends State<GroupScreen> {
         ),
         child: FloatingActionButton(
           onPressed: () {
-            AppRouter.goToGroupCreate(context);
+            NavigateHelper.goToGroupCreate(context);
           },
           backgroundColor: Colors.transparent,
           elevation: 0,

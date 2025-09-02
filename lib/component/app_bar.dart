@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:myapp/auth_factory.dart';
+import 'package:myapp/service/interface/auth_repository.dart';
 import '../core/colors.dart';
 
 class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -29,6 +31,30 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _MyAppBarState extends State<MyAppBar> {
+  late AuthRepository _authService;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = AuthFactory.instance;
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      await _authService.logout();
+      if (mounted) {
+        // Navigate to login screen after logout
+        Navigator.of(context).pushReplacementNamed('/auth/login');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi đăng xuất: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -71,10 +97,37 @@ class _MyAppBarState extends State<MyAppBar> {
         textAlign: TextAlign.center,
       ),
       actions: [
-        // IconButton(
-        //   icon: Icon(Icons.menu, size: 32, color: AppColors.textOnPrimary),
-        //   onPressed: () {},
-        // ),
+        if (_authService.isAuthenticated) ...[
+          // User avatar/name
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Center(
+              child: Text(
+                _authService.username ?? 'User',
+                style: TextStyle(
+                  color: AppColors.textOnPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+          // Logout button
+          IconButton(
+            icon: Icon(Icons.logout, size: 28, color: AppColors.textOnPrimary),
+            onPressed: _handleLogout,
+            tooltip: 'Đăng xuất',
+          ),
+        ] else ...[
+          // Login button if not authenticated
+          IconButton(
+            icon: Icon(Icons.login, size: 28, color: AppColors.textOnPrimary),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/auth/login');
+            },
+            tooltip: 'Đăng nhập',
+          ),
+        ],
       ],
     );
   }

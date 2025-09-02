@@ -10,7 +10,8 @@ dependencies:
     sdk: flutter  # Thêm dòng này
     
   go_router: ^14.0.0
-
+  shared_preferences: ^2.2.2
+  provider: ^6.1.2
   http: ^1.2.1
   google_maps_flutter: ^2.12.3
   cupertino_icons: ^1.0.8

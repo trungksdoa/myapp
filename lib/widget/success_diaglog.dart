@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/core/colors.dart';
-import 'package:myapp/route/app_router.dart';
+import 'package:myapp/route/navigate_helper.dart';
 
 class SuccessDiaglog extends StatelessWidget {
   final String alertTile;
@@ -28,7 +28,7 @@ class SuccessDiaglog extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.buttonPressed,
             ),
-            onPressed: () => AppRouter.pop(context),
+            onPressed: () => NavigateHelper.pop(context),
             child: const Text(
               'Tôi đã hiểu',
               style: TextStyle(color: AppColors.textOnPrimary),

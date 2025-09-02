@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/core/colors.dart';
 import 'package:myapp/core/utils/device_size.dart';
+import 'package:myapp/core/utils/image_cache.dart';
 
 class PetServiceCard extends StatelessWidget {
   final String assetIcon;
@@ -57,11 +58,11 @@ class PetServiceCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Auto-scale image
+              // Auto-scale image with caching
               Flexible(
                 flex: 3,
-                child: Image.asset(
-                  assetIcon,
+                child: CachedImage(
+                  assetPath: assetIcon,
                   width: responsiveSize,
                   height: responsiveSize,
                   fit: BoxFit.contain,

@@ -1,11 +1,7 @@
 class PetBlog {
-  final String id;
-  final String blogId;
-  final String petId;
+  final int id;
+  final int blogId;
+  final int petId;
 
-  PetBlog({
-    required this.id,
-    required this.blogId,
-    required this.petId,
-  });
+  PetBlog({required this.id, required this.blogId, required this.petId});
 }

@@ -1,13 +1,6 @@
 class GroupMember {
-  final String groupMemId;
+  final int id;
   final String accountId;
-  final String groupId;
-  final bool isMember;
 
-  GroupMember({
-    required this.groupMemId,
-    required this.accountId,
-    required this.groupId,
-    required this.isMember,
-  });
+  GroupMember({required this.id, required this.accountId});
 }

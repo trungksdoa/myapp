@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:myapp/route/app_router.dart";
+import "package:myapp/route/navigate_helper.dart";
 
 class Guilde extends StatelessWidget {
   const Guilde({super.key});
@@ -9,41 +9,41 @@ class Guilde extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 1. Sau khi login thành công
-    AppRouter.navigateAfterLogin(context);
+    NavigateHelper.navigateAfterLogin(context);
     // hoặc với redirect path
-    AppRouter.navigateAfterLogin(context, redirectPath: '/profile');
+    NavigateHelper.navigateAfterLogin(context, redirectPath: '/profile');
 
     // 2. Push page mới (có thể back)
-    AppRouter.push(context, '/profile');
+    NavigateHelper.push(context, '/profile');
 
     // 3. Replace page (không thể back)
-    AppRouter.replace(context, '/home');
+    NavigateHelper.replace(context, '/home');
 
     // 4. Navigate với params
-    AppRouter.navigateWithParams(context, '/user', {
+    NavigateHelper.navigateWithParams(context, '/user', {
       'id': '123',
       'tab': 'profile',
     });
 
     // // 5. Show modal page
-    // AppRouter.showModal(context, ProfileEditPage());
+    // NavigateHelper.showModal(context, ProfileEditPage());
 
     // 6. Navigate với delay (sau dialog)
     // showDialog(
     //   context: context,
     //   builder: (context) => SuccessDialog(...),
     // ).then((_) {
-    //   AppRouter.navigateWithDelay(context, '/home');
+    //   NavigateHelper.navigateWithDelay(context, '/home');
     // });
 
     // 7. Logout
-    AppRouter.logout(context);
+    NavigateHelper().logoutAndNavigateToLogin(context);
 
     // 8. Back về page trước
-    AppRouter.pop(context);
+    NavigateHelper.pop(context);
 
     // 9. Navigate và clear stack
-    AppRouter.navigateAndClearStack(context, '/onboarding');
+    NavigateHelper.navigateAndClearStack(context, '/onboarding');
     return Container();
   }
 }

@@ -5,12 +5,24 @@ import 'package:myapp/component/main_layout.dart';
 import 'package:myapp/screens/blog_create.dart';
 import 'package:myapp/screens/chat_box.dart';
 import 'package:myapp/screens/group.dart';
+import 'package:myapp/screens/group_setting.dart';
 import 'package:myapp/screens/personal.dart';
 import 'package:myapp/screens/shop_screen.dart';
 import 'package:myapp/screens/home.dart';
 import 'package:myapp/screens/group_create.dart';
 import 'package:myapp/screens/family_blog.dart';
 import 'package:myapp/screens/chat_screen.dart';
+// Auth screens
+import 'package:myapp/screens/login.dart';
+import 'package:myapp/screens/register.dart';
+import 'package:myapp/screens/registration_success.dart';
+import 'package:myapp/screens/forgot_password.dart';
+import 'package:myapp/screens/otp_verification.dart';
+import 'package:myapp/screens/reset_password.dart';
+import 'package:myapp/screens/password_reset_success.dart';
+import 'package:myapp/screens/splash_screen.dart';
+// Services
+import 'package:myapp/auth_factory.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -20,11 +32,39 @@ final _familyNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'family');
 final _personalNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'personal');
 
 class AppRouter {
+  // Use AuthFactory instead of direct AuthService instantiation
+  static get _authService => AuthFactory.instance;
+
   static final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/home',
+    initialLocation: '/splash',
+    redirect: (context, state) {
+      final isAuthenticated = _authService.isAuthenticated;
+      final isLoggingIn = state.matchedLocation.startsWith('/auth/login');
+      final isOnSplash = state.matchedLocation == '/splash';
+
+      if (!isAuthenticated &&
+          !isLoggingIn &&
+          !isOnSplash &&
+          !state.matchedLocation.startsWith('/auth/register') &&
+          !state.matchedLocation.startsWith('/auth/otp-verification') &&
+          !state.matchedLocation.startsWith('/auth/forgot-password') &&
+          !state.matchedLocation.startsWith('/auth/reset-password')) {
+        print('Redirecting to login from ${state.matchedLocation}');
+        return '/auth/login';
+      }
+
+      if (isAuthenticated && isLoggingIn) {
+        return '/home';
+      }
+
+      if (isAuthenticated && isOnSplash) {
+        return '/home';
+      }
+
+      return state.fullPath;
+    },
     routes: [
-      // Main Shell Route with Bottom Navigation
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainLayout(navigationShell: navigationShell);
@@ -41,7 +81,6 @@ class AppRouter {
               ),
             ],
           ),
-
           // Shop Branch
           StatefulShellBranch(
             navigatorKey: _shopNavigatorKey,
@@ -120,6 +159,11 @@ class AppRouter {
                     name: 'blog-create',
                     builder: (context, state) => const BlogCreate(),
                   ),
+                  GoRoute(
+                    path: '/settings',
+                    name: 'group-settings',
+                    builder: (context, state) => const GroupSetting(),
+                  ),
                 ],
               ),
             ],
@@ -136,6 +180,65 @@ class AppRouter {
                     const PersonalScreen(title: "personal"),
               ),
             ],
+          ),
+        ],
+      ),
+
+      // Shop Branch
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
+      // Auth Routes
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/auth',
+        redirect: (context, state) {
+          // if (state.matchedLocation == '/auth') {
+          //   return '/auth/login';
+          // }
+          return state.fullPath;
+        },
+        routes: [
+          GoRoute(
+            path: 'login',
+            name: 'login',
+            builder: (context, state) => const LoginScreen(),
+          ),
+          GoRoute(
+            path: 'register',
+            name: 'register',
+            builder: (context, state) => const RegisterScreen(),
+          ),
+          GoRoute(
+            path: 'registration-success', // đã bỏ dấu / ở đầu
+            name: 'registration-success',
+            builder: (context, state) => const RegistrationSuccessScreen(),
+          ),
+          GoRoute(
+            path: 'forgot-password', // đã bỏ dấu / ở đầu
+            name: 'forgot-password',
+            builder: (context, state) => const ForgotPasswordScreen(),
+          ),
+          GoRoute(
+            path: 'otp-verification', // đã bỏ dấu / ở đầu
+            name: 'otp-verification',
+            builder: (context, state) {
+              final email = state.uri.queryParameters['email'] ?? '';
+              return OTPVerificationScreen(email: email);
+            },
+          ),
+          GoRoute(
+            path: 'reset-password', // đã bỏ dấu / ở đầu
+            name: 'reset-password',
+            builder: (context, state) => const ResetPasswordScreen(),
+          ),
+          GoRoute(
+            path: 'password-reset-success', // đã bỏ dấu / ở đầu
+            name: 'password-reset-success',
+            builder: (context, state) => const PasswordResetSuccessScreen(),
           ),
         ],
       ),
@@ -157,240 +260,6 @@ class AppRouter {
           return ChatScreen(initialMessage: initialMessage, petName: petName);
         },
       ),
-      // GoRoute(
-      //   parentNavigatorKey: _rootNavigatorKey,
-      //   path: '/login',
-      //   name: 'login',
-      //   builder: (context, state) => const LoginPage(),
-      // ),
-      // GoRoute(
-      //   parentNavigatorKey: _rootNavigatorKey,
-      //   path: '/onboarding',
-      //   name: 'onboarding',
-      //   builder: (context, state) => const OnboardingPage(),
-      // ),
     ],
   );
-
-  // =====================================
-  // NAVBAR NAVIGATION HELPERS
-  // =====================================
-  static void goToHome(BuildContext context) => context.go('/home');
-  static void goToShop(BuildContext context) => context.go('/shop');
-  static void gotoAI(BuildContext context) => context.go('/ai');
-  static void goToFamily(BuildContext context) => context.go('/family');
-  static void goToPersonal(BuildContext context) => context.go('/personal');
-
-  static void goToGroupCreate(BuildContext context) {
-    context.go('/family/create');
-  }
-
-  static void goToGroupCreateFullscreen(BuildContext context) {
-    context.go('/group-create-fullscreen');
-  }
-
-  static void goToFamilyBlog(
-    BuildContext context, {
-    String? groupId,
-    String? groupName,
-    String? groupMembers,
-    String? groupAvatar,
-  }) {
-    final params = <String, String>{};
-    if (groupId != null) params['groupId'] = groupId;
-    if (groupName != null) params['groupName'] = groupName;
-    if (groupMembers != null) params['groupMembers'] = groupMembers;
-    if (groupAvatar != null) params['groupAvatar'] = groupAvatar;
-    context.goNamed('family-blog', queryParameters: params);
-  }
-
-  static void goToBlogCreate(BuildContext context) {
-    context.goNamed('blog-create');
-  }
-
-  static void goToChat(
-    BuildContext context, {
-    String? message,
-    String? petName,
-  }) {
-    final params = <String, String>{};
-    if (message != null) params['message'] = message;
-    if (petName != null) params['petName'] = petName;
-
-    context.goNamed('chat-screen', queryParameters: params);
-  }
-
-  static void goToChatFullscreen(
-    BuildContext context, {
-    String? message,
-    String? petName,
-  }) {
-    final params = <String, String>{};
-    if (message != null) params['message'] = message;
-    if (petName != null) params['petName'] = petName;
-
-    context.goNamed('chat-fullscreen', queryParameters: params);
-  }
-
-  // =====================================
-  // GENERAL NAVIGATION HELPERS
-  // =====================================
-
-  /// Push một page mới lên stack (có thể back)
-  static void push(BuildContext context, String path) {
-    context.push(path);
-  }
-
-  /// Push với named route
-  static void pushNamed(
-    BuildContext context,
-    String name, {
-    Map<String, String>? pathParameters,
-    Map<String, dynamic>? queryParameters,
-  }) {
-    context.pushNamed(
-      name,
-      pathParameters: pathParameters ?? {},
-      queryParameters: queryParameters ?? {},
-    );
-  }
-
-  /// Replace current route (không thể back)
-  static void replace(BuildContext context, String path) {
-    context.pushReplacement(path);
-  }
-
-  /// Replace với named route
-  static void replaceNamed(
-    BuildContext context,
-    String name, {
-    Map<String, String>? pathParameters,
-    Map<String, dynamic>? queryParameters,
-  }) {
-    context.pushReplacementNamed(
-      name,
-      pathParameters: pathParameters ?? {},
-      queryParameters: queryParameters ?? {},
-    );
-  }
-
-  /// Go to route (clear stack)
-  static void go(BuildContext context, String path) {
-    context.go(path);
-  }
-
-  /// Go với named route
-  static void goNamed(
-    BuildContext context,
-    String name, {
-    Map<String, String>? pathParameters,
-    Map<String, dynamic>? queryParameters,
-  }) {
-    context.goNamed(
-      name,
-      pathParameters: pathParameters ?? {},
-      queryParameters: queryParameters ?? {},
-    );
-  }
-
-  /// Back về page trước
-  static void pop(BuildContext context, [dynamic result]) {
-    if (context.canPop()) {
-      context.pop(result);
-    }
-  }
-
-  /// Kiểm tra có thể pop không
-  static bool canPop(BuildContext context) {
-    return context.canPop();
-  }
-
-  // =====================================
-  // AUTHENTICATION NAVIGATION
-  // =====================================
-
-  /// Navigate sau khi login thành công
-  static void navigateAfterLogin(BuildContext context, {String? redirectPath}) {
-    if (redirectPath != null) {
-      context.go(redirectPath);
-    } else {
-      context.go('/home'); // Default về home
-    }
-  }
-
-  /// Navigate đến login page
-  static void navigateToLogin(BuildContext context, {String? fromPath}) {
-    if (fromPath != null) {
-      context.push('/login?from=$fromPath');
-    } else {
-      context.push('/login');
-    }
-  }
-
-  /// Logout - clear tất cả và về login
-  static void logout(BuildContext context) {
-    context.go('/login');
-  }
-
-  // =====================================
-  // MODAL/FULLSCREEN NAVIGATION
-  // =====================================
-
-  /// Show page as modal (fullscreen dialog)
-  static Future<T?> showModal<T>(BuildContext context, Widget page) {
-    return Navigator.of(context).push<T>(
-      MaterialPageRoute<T>(builder: (context) => page, fullscreenDialog: true),
-    );
-  }
-
-  /// Show bottom sheet modal
-  static Future<T?> showBottomModal<T>(BuildContext context, Widget child) {
-    return showModalBottomSheet<T>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => child,
-    );
-  }
-
-  // =====================================
-  // COMMON NAVIGATION PATTERNS
-  // =====================================
-
-  /// Navigate và clear toàn bộ stack
-  static void navigateAndClearStack(BuildContext context, String path) {
-    context.go(path);
-  }
-
-  /// Navigate đến page với parameters
-  static void navigateWithParams(
-    BuildContext context,
-    String path,
-    Map<String, dynamic> params,
-  ) {
-    final uri = Uri.parse(path);
-    final newUri = uri.replace(
-      queryParameters: params.map((k, v) => MapEntry(k, v.toString())),
-    );
-    context.go(newUri.toString());
-  }
-
-  /// Navigate với delay (ví dụ sau khi show dialog)
-  static Future<void> navigateWithDelay(
-    BuildContext context,
-    String path, {
-    Duration delay = const Duration(milliseconds: 500),
-  }) async {
-    await Future.delayed(delay);
-    if (context.mounted) {
-      context.go(path);
-    }
-  }
-
-  /// Back multiple times
-  static void popMultiple(BuildContext context, int times) {
-    for (int i = 0; i < times && context.canPop(); i++) {
-      context.pop();
-    }
-  }
 }

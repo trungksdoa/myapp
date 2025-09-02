@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/route/app_router.dart';
+import 'package:myapp/route/navigate_helper.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -28,7 +29,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.white,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: Colors.black),
-        onPressed: () => AppRouter.pop(context),
+        onPressed: () => NavigateHelper.pop(context),
       ),
       title:
           titleWidget ??
@@ -106,12 +107,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           content: const Text('Bạn có chắc muốn reset tất cả thông tin?'),
           actions: [
             TextButton(
-              onPressed: () => AppRouter.pop(context),
+              onPressed: () => NavigateHelper.pop(context),
               child: const Text('Hủy'),
             ),
             TextButton(
               onPressed: () {
-                AppRouter.pop(context);
+                NavigateHelper.pop(context);
                 onReset?.call();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
