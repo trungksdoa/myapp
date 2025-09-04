@@ -63,7 +63,7 @@ class _GroupScreenState extends State<GroupScreen> {
 
   void _navigateToFamilyBlog(
     BuildContext context,
-    int groupId,
+    String groupId,
     String groupName,
     String groupSize,
     String groupAvatar,
@@ -74,7 +74,7 @@ class _GroupScreenState extends State<GroupScreen> {
     );
     NavigateHelper.goToFamilyBlog(
       context,
-      groupId: groupId.toString(),
+      groupId: groupId,
       groupName: groupName,
       groupSize: groupSize,
       groupAvatar: groupAvatar,
@@ -194,7 +194,7 @@ class _GroupScreenState extends State<GroupScreen> {
                     onTap: () {
                       _navigateToFamilyBlog(
                         context,
-                        group.id,
+                        group.id.toString(),
                         group.name,
                         group.memberCount.toString(),
                         group.imgUrl,

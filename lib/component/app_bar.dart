@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp/auth_factory.dart';
+import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/service/interface/auth_repository.dart';
 import '../core/colors.dart';
 
@@ -41,11 +42,7 @@ class _MyAppBarState extends State<MyAppBar> {
 
   Future<void> _handleLogout() async {
     try {
-      await _authService.logout();
-      if (mounted) {
-        // Navigate to login screen after logout
-        Navigator.of(context).pushReplacementNamed('/auth/login');
-      }
+      await NavigateHelper().logoutAndNavigateToLogin(context);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/core/utils/device_size.dart';
+import 'package:myapp/model/group.dart';
 import 'package:myapp/model/models.dart';
 import 'package:myapp/widget/boxContainer.dart';
 import 'package:myapp/widget/custom_diaglog.dart';
@@ -18,6 +19,7 @@ class BlogCreate extends StatefulWidget {
 
 class _BlogCreateState extends State<BlogCreate> {
   String petSelect = "";
+  String selectedGroup = "";
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _petSelectController = TextEditingController();
   final List<File> _selectedImages = []; // ✅ Thay đổi từ File? thành List<File>
@@ -89,6 +91,30 @@ class _BlogCreateState extends State<BlogCreate> {
     ),
   ];
 
+  final List<Group> mockGroups = [
+    Group(
+      id: 1,
+      name: 'Nhóm Gia Đình',
+      memberCount: 5,
+      imgUrl: 'assets/images/Home1.png',
+      createdById: 'user1',
+    ),
+    Group(
+      id: 2,
+      name: 'Nhóm Bạn Bè',
+      memberCount: 10,
+      imgUrl: 'assets/images/Home2.png',
+      createdById: 'user1',
+    ),
+    Group(
+      id: 3,
+      name: 'Nhóm Công Việc',
+      memberCount: 8,
+      imgUrl: 'assets/images/Home3.png',
+      createdById: 'user1',
+    ),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -99,6 +125,8 @@ class _BlogCreateState extends State<BlogCreate> {
       _contentController.clear();
       _petSelectController.clear();
       petSelect = "";
+      selectedGroup = "";
+      groupId = "";
       _selectedImages.clear(); // ✅ Clear list instead of single file
     });
   }
@@ -108,6 +136,16 @@ class _BlogCreateState extends State<BlogCreate> {
     setState(() {
       petSelect = realPets.firstWhere((pet) => pet.petId == petId).petName;
       _petSelectController.text = petSelect;
+    });
+  }
+
+  // Hàm để chọn nhóm
+  _selectGroup(int groupId) {
+    setState(() {
+      selectedGroup = mockGroups
+          .firstWhere((group) => group.id == groupId)
+          .name;
+      this.groupId = groupId.toString();
     });
   }
 
@@ -213,6 +251,108 @@ class _BlogCreateState extends State<BlogCreate> {
     );
   }
 
+  // Build Group Grid Widget
+  Widget _buildGroupGrid(double fontSize) {
+    return SizedBox(
+      height: 100,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        itemCount: mockGroups.length,
+        itemBuilder: (context, index) {
+          final group = mockGroups[index];
+          final isSelected = selectedGroup == group.name;
+
+          return GestureDetector(
+            onTap: () => _selectGroup(group.id),
+            child: Container(
+              width: 120,
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.teal.withValues(alpha: 0.1)
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? Colors.teal
+                        : Colors.grey.withValues(alpha: 0.3),
+                    width: isSelected ? 2 : 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isSelected
+                          ? Colors.teal.withValues(alpha: 0.2)
+                          : Colors.grey.withValues(alpha: 0.1),
+                      spreadRadius: 1,
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(22.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withValues(alpha: 0.2),
+                            spreadRadius: 1,
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(22.5),
+                        child: Image.asset(
+                          group.imgUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(22.5),
+                              ),
+                              child: const Icon(
+                                Icons.group,
+                                size: 20,
+                                color: Colors.grey,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      group.name,
+                      style: TextStyle(
+                        fontSize: fontSize * 0.75,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
+                        color: isSelected ? Colors.teal[700] : Colors.grey[700],
+                      ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   _onReset() {
     _resetAll();
   }
@@ -234,6 +374,11 @@ class _BlogCreateState extends State<BlogCreate> {
 
     if (petSelect.isEmpty) {
       _showErrorSnackBar('Bạn có chọn thú cưng muốn đăng nhớ ');
+      error = true;
+    }
+
+    if (selectedGroup.isEmpty) {
+      _showErrorSnackBar('Bạn hãy chọn nhóm để đăng bài');
       error = true;
     }
 
@@ -606,6 +751,62 @@ class _BlogCreateState extends State<BlogCreate> {
                         ),
                       ],
                     ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // 👥 Group Selection Card
+              BoxContainerShadow(
+                padding: 20,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.group, color: Colors.teal, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Chọn nhóm đăng bài',
+                          style: TextStyle(
+                            fontSize: fontSize * 1.1,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Selected Group Display
+                    if (selectedGroup.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.teal.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.teal.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Text(
+                          '👥 $selectedGroup được chọn',
+                          style: TextStyle(
+                            color: Colors.teal[700],
+                            fontWeight: FontWeight.w500,
+                            fontSize: fontSize * 0.9,
+                          ),
+                        ),
+                      ),
+
+                    const SizedBox(height: 16),
+
+                    // Group Grid
+                    _buildGroupGrid(fontSize),
                   ],
                 ),
               ),

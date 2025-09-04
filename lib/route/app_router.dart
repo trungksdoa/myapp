@@ -5,8 +5,10 @@ import 'package:myapp/core/utils/logger_service.dart';
 import 'package:myapp/component/main_layout.dart';
 import 'package:myapp/screens/blog_create.dart';
 import 'package:myapp/screens/chat_box.dart';
+import 'package:myapp/screens/family_blog.dart';
 import 'package:myapp/screens/group.dart';
 import 'package:myapp/screens/group_setting.dart';
+import 'package:myapp/screens/group_setting_members.dart';
 import 'package:myapp/screens/personal.dart';
 import 'package:myapp/screens/shop_screen.dart';
 import 'package:myapp/screens/home.dart';
@@ -164,7 +166,25 @@ class AppRouter {
                   GoRoute(
                     path: 'settings', // Bỏ dấu / → 'settings'
                     name: 'group-settings',
-                    builder: (context, state) => const GroupSetting(),
+                    builder: (context, state) {
+                      final params = state.extra as Map<String, String>?;
+                      final groupId = params?['groupId'];
+                      LoggerService.instance.d(
+                        'Navigating to GroupSetting with groupId: $groupId',
+                      );
+                      return GroupSetting(groupId: groupId);
+                    },
+                    routes: [
+                      GoRoute(
+                        path: 'members',
+                        name: 'group-setting-members',
+                        builder: (context, state) {
+                          final params = state.extra as Map<String, String>?;
+                          final groupId = params?['groupId'];
+                          return GroupSettingMembers(groupId: groupId);
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),

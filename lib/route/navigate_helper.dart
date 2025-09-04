@@ -47,11 +47,27 @@ class NavigateHelper {
   }
 
   static void goToBlogCreate(BuildContext context) {
-    context.goNamed('blog-create');
+    context.pushNamed('blog-create');
   }
 
-  static void goToSettingGroup(BuildContext context, String viewName) {
-    context.pushNamed(viewName);
+  static void goToSettingGroup(
+    BuildContext context,
+    String viewName,
+    String groupId,
+    String avatar,
+  ) {
+    final params = <String, String>{};
+    if (groupId.isNotEmpty) params['groupId'] = groupId;
+    if (avatar.isNotEmpty) params['avatar'] = avatar;
+
+    context.goNamed(viewName, extra: params);
+  }
+
+  static void goToSettingGroupMembers(BuildContext context, String groupId) {
+    final params = <String, String>{};
+    if (groupId.isNotEmpty) params['groupId'] = groupId;
+
+    context.goNamed('group-setting-members', extra: params);
   }
 
   static void goToChat(

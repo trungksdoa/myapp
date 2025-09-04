@@ -8,6 +8,7 @@ class CustomDialog extends StatelessWidget {
   final String buttonText;
   final IconData? iconData;
   final Color? iconColor;
+  final void Function()? onButtonPressed;
 
   const CustomDialog({
     super.key,
@@ -16,6 +17,7 @@ class CustomDialog extends StatelessWidget {
     this.buttonText = 'Tôi đã hiểu',
     this.iconData,
     this.iconColor,
+    this.onButtonPressed,
   });
 
   factory CustomDialog.success({
@@ -74,6 +76,28 @@ class CustomDialog extends StatelessWidget {
     );
   }
 
+  static void showConfirm(
+    BuildContext context, {
+    required String title,
+    required String content,
+    String buttonText = 'Tôi đã hiểu',
+    IconData? iconData,
+    Color? iconColor,
+    void Function()? onButtonPressed,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomDialog(
+        alertTile: title,
+        content: content,
+        buttonText: buttonText,
+        iconData: iconData,
+        iconColor: iconColor,
+        onButtonPressed: onButtonPressed,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -90,7 +114,9 @@ class CustomDialog extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.buttonPressed,
             ),
-            onPressed: () => NavigateHelper.pop(context),
+            onPressed: () => onButtonPressed != null
+                ? onButtonPressed!()
+                : NavigateHelper.pop(context),
             child: Text(
               buttonText,
               style: TextStyle(color: AppColors.textOnPrimary),
