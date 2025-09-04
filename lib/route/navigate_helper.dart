@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/auth_factory.dart';
+import 'package:myapp/core/utils/logger_service.dart';
 import 'package:myapp/service/interface/auth_repository.dart';
 
 class NavigateHelper {
@@ -28,16 +29,21 @@ class NavigateHelper {
     BuildContext context, {
     String? groupId,
     String? groupName,
-    String? groupMembers,
+    String? groupSize,
     String? groupAvatar,
   }) {
     final params = <String, String>{};
     if (groupId != null) params['groupId'] = groupId;
     if (groupName != null) params['groupName'] = groupName;
-    if (groupMembers != null) params['groupMembers'] = groupMembers;
+    if (groupSize != null) params['groupSize'] = groupSize;
     if (groupAvatar != null) params['groupAvatar'] = groupAvatar;
 
-    context.goNamed('family-blog', queryParameters: params);
+    LoggerService.instance.d(
+      'Sending params: $params',
+    ); // Debug: In ra params trước khi gửi
+
+    // Use push so user can go back; use go(uri) if you want to replace/clear
+    context.goNamed('family-blog', extra: params);
   }
 
   static void goToBlogCreate(BuildContext context) {
@@ -304,7 +310,7 @@ class NavigateHelper {
     try {
       await navigationAction();
     } catch (e) {
-      debugPrint('Navigation error: $e');
+      LoggerService.instance.e('Navigation error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,

@@ -1,6 +1,7 @@
 // lib/router/app_router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:myapp/core/utils/logger_service.dart';
 import 'package:myapp/component/main_layout.dart';
 import 'package:myapp/screens/blog_create.dart';
 import 'package:myapp/screens/chat_box.dart';
@@ -34,6 +35,7 @@ final _personalNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'personal');
 class AppRouter {
   // Use AuthFactory instead of direct AuthService instantiation
   static get _authService => AuthFactory.instance;
+  static final logger = LoggerService.instance;
 
   static final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -50,7 +52,7 @@ class AppRouter {
           !state.matchedLocation.startsWith('/auth/otp-verification') &&
           !state.matchedLocation.startsWith('/auth/forgot-password') &&
           !state.matchedLocation.startsWith('/auth/reset-password')) {
-        print('Redirecting to login from ${state.matchedLocation}');
+        logger.d('Redirecting to login from ${state.matchedLocation}');
         return '/auth/login';
       }
 
@@ -104,7 +106,7 @@ class AppRouter {
                 routes: [
                   // Sub-routes cho AI chat
                   GoRoute(
-                    path: '/chat',
+                    path: 'chat', // Bỏ dấu / → 'chat'
                     name: 'chat-screen',
                     builder: (context, state) {
                       final initialMessage =
@@ -126,41 +128,41 @@ class AppRouter {
             navigatorKey: _familyNavigatorKey,
             routes: [
               GoRoute(
-                path: '/family',
+                path: '/family', // Parent
                 name: 'family',
                 builder: (context, state) => const GroupScreen(title: "group"),
                 routes: [
-                  // Sub-routes cho family branch
                   GoRoute(
-                    path: '/create',
-                    name: 'group-create',
-                    builder: (context, state) => const GroupCreate(),
-                  ),
-                  GoRoute(
-                    path: '/blog/home',
+                    path: 'blog/home',
                     name: 'family-blog',
                     builder: (context, state) {
-                      final groupId = state.uri.queryParameters['groupId'];
-                      final groupName = state.uri.queryParameters['groupName'];
-                      final groupMembers =
-                          state.uri.queryParameters['groupMembers'];
-                      final groupAvatar =
-                          state.uri.queryParameters['groupAvatar'];
+                      logger.d(
+                        'Building FamilyBlog with state: ${state.fullPath}',
+                      );
+                      final params = state.extra as Map<String, String>?;
+
+                      logger.d('Received params: $params');
+
                       return FamilyBlog(
-                        groupId: groupId,
-                        groupName: groupName,
-                        groupMembers: groupMembers,
-                        groupAvatar: groupAvatar,
+                        groupId: params?['groupId'],
+                        groupName: params?['groupName'],
+                        groupAvatar: params?['groupAvatar'],
+                        groupSize: params?['groupSize'],
                       );
                     },
                   ),
                   GoRoute(
-                    path: '/blog/create',
+                    path: 'create',
+                    name: 'group-create',
+                    builder: (context, state) => const GroupCreate(),
+                  ),
+                  GoRoute(
+                    path: 'blog/create', // Bỏ dấu / → 'blog/create'
                     name: 'blog-create',
                     builder: (context, state) => const BlogCreate(),
                   ),
                   GoRoute(
-                    path: '/settings',
+                    path: 'settings', // Bỏ dấu / → 'settings'
                     name: 'group-settings',
                     builder: (context, state) => const GroupSetting(),
                   ),

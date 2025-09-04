@@ -1,6 +1,9 @@
 // Performance monitoring utilities for CareNest app
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:myapp/core/utils/logger_service.dart';
+
+final logger = LoggerService.instance;
 
 class PerformanceMonitor {
   static final Map<String, Stopwatch> _timers = {};
@@ -12,7 +15,7 @@ class PerformanceMonitor {
 
     final stopwatch = Stopwatch()..start();
     _timers[eventName] = stopwatch;
-    debugPrint('⏱️ PERFORMANCE: Started - $eventName');
+    logger.d('⏱️ PERFORMANCE: Started - $eventName');
   }
 
   /// Stop tracking and log the performance event
@@ -34,14 +37,14 @@ class PerformanceMonitor {
 
       _events.add(event);
 
-      debugPrint(
+      logger.d(
         '⏱️ PERFORMANCE: $eventName - ${duration}ms ${details != null ? '($details)' : ''}',
       );
 
       // Warn if performance is poor
       if (duration > 16) {
         // More than 16ms per frame (60fps target)
-        debugPrint(
+        logger.d(
           '🚨 PERFORMANCE WARNING: $eventName took ${duration}ms (target: <16ms for 60fps)',
         );
       }
@@ -61,7 +64,7 @@ class PerformanceMonitor {
 
     if (stopwatch.elapsedMilliseconds > 8) {
       // Warning threshold
-      debugPrint(
+      logger.d(
         '🚨 WIDGET BUILD: $widgetName - ${stopwatch.elapsedMilliseconds}ms',
       );
     }
@@ -80,7 +83,7 @@ class PerformanceMonitor {
   static void logMemoryUsage() {
     if (kReleaseMode) return;
 
-    debugPrint('💾 MEMORY: ${_getMemoryInfo()}');
+    logger.d('💾 MEMORY: ${_getMemoryInfo()}');
   }
 
   static String _getMemoryInfo() {

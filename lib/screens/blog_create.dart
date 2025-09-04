@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/core/utils/device_size.dart';
-import 'package:myapp/model/pet.dart';
+import 'package:myapp/model/models.dart';
 import 'package:myapp/widget/boxContainer.dart';
+import 'package:myapp/widget/custom_diaglog.dart';
 
 import 'package:myapp/widget/group/group_app_bar.dart';
 
@@ -32,9 +33,9 @@ class _BlogCreateState extends State<BlogCreate> {
     {'name': 'Luna', 'image': 'assets/images/Home6.png'},
   ];
 
-  final realPets = [
+  final List<Pet> realPets = [
     Pet(
-      petId: '1',
+      petId: 1,
       accountId:
           'user1', // Assuming a default account ID; replace with actual value if available
       petName: 'Kiki',
@@ -45,7 +46,7 @@ class _BlogCreateState extends State<BlogCreate> {
       gender: 'Female', // Assuming; adjust as needed
     ),
     Pet(
-      petId: '2',
+      petId: 2,
       accountId: 'user1',
       petName: 'Lulu',
       dateOfBirth: DateTime(2019, 8, 20),
@@ -55,7 +56,7 @@ class _BlogCreateState extends State<BlogCreate> {
       gender: 'Female',
     ),
     Pet(
-      petId: '3',
+      petId: 3,
       accountId: 'user1',
       petName: 'Milo',
       dateOfBirth: DateTime(2018, 3, 12),
@@ -66,7 +67,7 @@ class _BlogCreateState extends State<BlogCreate> {
     ),
 
     Pet(
-      petId: '4',
+      petId: 4,
       accountId: 'user1',
       petName: 'Luffy',
       dateOfBirth: DateTime(2018, 3, 12),
@@ -77,7 +78,7 @@ class _BlogCreateState extends State<BlogCreate> {
     ),
 
     Pet(
-      petId: '5',
+      petId: 5,
       accountId: 'user1',
       petName: 'Doremon',
       dateOfBirth: DateTime(2018, 3, 12),
@@ -103,7 +104,7 @@ class _BlogCreateState extends State<BlogCreate> {
   }
 
   // Hàm để chọn pet
-  _selectPet(String petId) {
+  _selectPet(int petId) {
     setState(() {
       petSelect = realPets.firstWhere((pet) => pet.petId == petId).petName;
       _petSelectController.text = petSelect;
@@ -220,7 +221,7 @@ class _BlogCreateState extends State<BlogCreate> {
     if (_verifyOnSave()) {
       return;
     }
-    _showInfoSnackBar('Đăng bài viết thành công!');
+    CustomDialog.success(content: 'Đăng bài viết thành công!');
     // Save logic here
   }
 

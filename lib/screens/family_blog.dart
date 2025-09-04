@@ -5,20 +5,38 @@ import 'package:myapp/core/utils/performance_monitor.dart';
 import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/widget/boxContainer.dart';
 import 'package:myapp/model/models.dart';
+import 'package:myapp/core/utils/image_cache.dart';
 
 class FamilyBlog extends StatefulWidget {
   final String? groupId;
   final String? groupName;
-  final String? groupMembers;
   final String? groupAvatar;
+  final String? groupSize;
 
   const FamilyBlog({
     super.key,
     this.groupId,
     this.groupName,
-    this.groupMembers,
     this.groupAvatar,
+    this.groupSize,
   });
+
+  List<GroupMember> get members {
+    List<GroupMember> allMembers = [];
+    for (int groupId = 1; groupId <= 4; groupId++) {
+      if (groupId == 4) continue; // Group cuối (4) không có members
+      for (int i = 1; i <= 5; i++) {
+        allMembers.add(
+          GroupMember(
+            id: (groupId - 1) * 5 + i,
+            accountId: 'user${(groupId - 1) * 5 + i}',
+            groupId: groupId,
+          ),
+        );
+      }
+    }
+    return allMembers;
+  }
 
   @override
   State<FamilyBlog> createState() => _FamilyBlogState();
@@ -32,59 +50,107 @@ class _FamilyBlogState extends State<FamilyBlog> {
       description: "Cháu lì lắm",
       imgUrls:
           "assets/images/Home1.png,assets/images/Home2.png,assets/images/Home3.png",
-      accountId: "user1",
-      petIds: [1],
+      account: Account(
+        accountId: 'user1',
+        fullName: 'Huỳnh Gia Bảo',
+        imgUrl: 'assets/images/home1.png',
+      ),
+      pets: Pet(
+        petId: 1,
+        accountId: 'user1',
+        petName: 'Tini',
+        dateOfBirth: DateTime(2020, 5, 20),
+        petImage: 'assets/images/pet1.png',
+        petType: 'Dog',
+        size: 'Small',
+        gender: 'Female',
+      ),
     ),
     Blog(
       id: 2,
       description: "Cháu biết ăn lắm",
       imgUrls:
           "assets/images/Home4.png,assets/images/Home5.png,assets/images/Home1.png",
-      accountId: "user2",
-      petIds: [2],
+      account: Account(
+        accountId: 'user2',
+        fullName: 'Nguyễn Thị Thùy Dương',
+        imgUrl: 'assets/images/home2.png',
+      ),
+      pets: Pet(
+        petId: 2,
+        accountId: 'user2',
+        petName: 'Lulu',
+        dateOfBirth: DateTime(2019, 3, 15),
+        petImage: 'assets/images/pet2.png',
+        petType: 'Cat',
+        size: 'Medium',
+        gender: 'Male',
+      ),
     ),
     Blog(
       id: 3,
       description: "Hôm nay cháu vui lắm",
       imgUrls:
           "assets/images/Home4.png,assets/images/Home5.png,assets/images/Home1.png",
-      accountId: "user3",
-      petIds: [3],
+      account: Account(
+        accountId: 'user3',
+        fullName: 'Trần Minh Tuấn',
+        imgUrl: 'assets/images/home3.png',
+      ),
+      pets: Pet(
+        petId: 3,
+        accountId: 'user3',
+        petName: 'Milo',
+        dateOfBirth: DateTime(2021, 7, 10),
+        petImage: 'assets/images/pet3.png',
+        petType: 'Dog',
+        size: 'Large',
+        gender: 'Male',
+      ),
     ),
     Blog(
       id: 4,
       description: "Hôm nay cháu vui lắm",
-      imgUrls: "",
-      accountId: "user4",
-      petIds: [4],
+      imgUrls:
+          "assets/images/Home5.png,assets/images/Home1.png,assets/images/Home2.png",
+      account: Account(
+        accountId: 'user4',
+        fullName: 'Lê Thị Mỹ Linh',
+        imgUrl: 'assets/images/home4.png',
+      ),
+      pets: Pet(
+        petId: 4,
+        accountId: 'user4',
+        petName: 'Mimi',
+        dateOfBirth: DateTime(2018, 12, 5),
+        petImage: 'assets/images/pet4.png',
+        petType: 'Cat',
+        size: 'Small',
+        gender: 'Female',
+      ),
     ),
     Blog(
       id: 5,
       description: "Hôm nay cháu vui lắm",
       imgUrls:
           "assets/images/Home5.png,assets/images/Home1.png,assets/images/Home2.png",
-      accountId: "user5",
-      petIds: [5],
+      account: Account(
+        accountId: 'user5',
+        fullName: 'Nguyễn Văn Nam',
+        imgUrl: 'assets/images/home5.png',
+      ),
+      pets: Pet(
+        petId: 5,
+        accountId: 'user5',
+        petName: 'Tom',
+        dateOfBirth: DateTime(2022, 1, 30),
+        petImage: 'assets/images/pet5.png',
+        petType: 'Dog',
+        size: 'Medium',
+        gender: 'Male',
+      ),
     ),
   ];
-
-  // User names mapping (in real app, this would come from API)
-  final Map<String, String> userNames = {
-    'user1': 'Huỳnh Gia Bảo',
-    'user2': 'Nguyễn Thị Thùy Dương',
-    'user3': 'Trần Minh Tuấn',
-    'user4': 'Lê Thị Mỹ Linh',
-    'user5': 'Nguyễn Văn Nam',
-  };
-
-  // Pet names mapping
-  final Map<int, String> petNames = {
-    1: 'Tini',
-    2: 'Lulu',
-    3: 'Milo',
-    4: 'Mimi',
-    5: 'Tom',
-  };
 
   // Helper method to get images from imgUrls
   List<String> getImageList(String imgUrls) {
@@ -135,8 +201,8 @@ class _FamilyBlogState extends State<FamilyBlog> {
                   // Sửa lại phần này
                   const SizedBox(height: 2),
                   Text(
-                    widget.groupMembers != null
-                        ? '${widget.groupMembers} thành viên'
+                    widget.groupSize != null
+                        ? '${widget.groupSize} thành viên'
                         : '0 thành viên',
                     style: TextStyle(
                       color: AppColors.textPrimary.withValues(alpha: 0.9),
@@ -218,10 +284,20 @@ class _FamilyBlogState extends State<FamilyBlog> {
               delegate: SliverChildBuilderDelegate((context, index) {
                 final blog = familyBlogs[index];
                 final images = getImageList(blog.imgUrls);
-                final userName = userNames[blog.accountId] ?? 'Unknown User';
-                final petName =
-                    petNames[blog.petIds.isNotEmpty ? blog.petIds.first : 0] ??
-                    'Unknown Pet';
+                String userName;
+                try {
+                  userName = blog.account.fullName;
+                } catch (e) {
+                  userName = 'Unknown User';
+                }
+                String petName;
+                try {
+                  petName = blog.pets.petName.isNotEmpty
+                      ? blog.pets.petName
+                      : 'Anonymous Pet';
+                } catch (e) {
+                  petName = 'Anonymous Pet';
+                }
 
                 return BoxContainerShadow.blogCard(
                   child: Column(
@@ -386,20 +462,18 @@ class _FamilyBlogState extends State<FamilyBlog> {
                                           borderRadius: BorderRadius.circular(
                                             10,
                                           ),
-                                          child: Image.asset(
-                                            imgPath,
+                                          // filepath: lib/screens/family_blog.dart
+                                          child: CachedImage(
+                                            assetPath: imgPath,
                                             fit: BoxFit.scaleDown,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                                  return Container(
-                                                    color: Colors.grey.shade200,
-                                                    child: const Icon(
-                                                      Icons.broken_image,
-                                                      size: 20,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  );
-                                                },
+                                            errorWidget: Container(
+                                              color: Colors.grey.shade200,
+                                              child: const Icon(
+                                                Icons.broken_image,
+                                                size: 20,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       );

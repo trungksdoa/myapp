@@ -1,11 +1,14 @@
 import 'package:flutter/foundation.dart';
+import 'package:myapp/core/utils/logger_service.dart';
+import 'package:myapp/core/utils/security_storage.dart';
 import 'package:myapp/service/interface/auth_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Concrete implementation of AuthRepository using SharedPreferences
 /// for local storage and HTTP calls for API communication
 class AuthService extends AuthRepository {
   static final AuthService _instance = AuthService._internal();
+  final SecureStorageService storage = SecureStorageService();
+
   factory AuthService() => _instance;
   AuthService._internal();
 
@@ -15,6 +18,7 @@ class AuthService extends AuthRepository {
   String? _email;
   String? _accessToken;
   String? _refreshToken;
+  String? _role;
 
   // Getters - implementing interface
   @override
@@ -35,6 +39,9 @@ class AuthService extends AuthRepository {
   @override
   String? get refreshToken => _refreshToken;
 
+  @override
+  String? get role => _role;
+
   // Keys for SharedPreferences
   static const String _keyIsAuthenticated = 'is_authenticated';
   static const String _keyUserId = 'user_id';
@@ -42,18 +49,34 @@ class AuthService extends AuthRepository {
   static const String _keyEmail = 'email';
   static const String _keyAccessToken = 'access_token';
   static const String _keyRefreshToken = 'refresh_token';
+  static const String _keyRole = 'role';
+
+  static const String _keySecure = 'secure_data';
 
   @override
   Future<void> initialize() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      Map<String, dynamic>? secureValue = await SecureStorageService.getObject(
+        _keySecure,
+      );
 
-      _isAuthenticated = prefs.getBool(_keyIsAuthenticated) ?? false;
-      _userId = prefs.getString(_keyUserId);
-      _username = prefs.getString(_keyUsername);
-      _email = prefs.getString(_keyEmail);
-      _accessToken = prefs.getString(_keyAccessToken);
-      _refreshToken = prefs.getString(_keyRefreshToken);
+      secureValue ??= {
+        _keyIsAuthenticated: false,
+        _keyUserId: null,
+        _keyUsername: null,
+        _keyEmail: null,
+        _keyAccessToken: null,
+        _keyRefreshToken: null,
+        _keyRole: null,
+      };
+
+      _isAuthenticated = secureValue[_keyIsAuthenticated] ?? false;
+      _userId = secureValue[_keyUserId];
+      _username = secureValue[_keyUsername];
+      _email = secureValue[_keyEmail];
+      _accessToken = secureValue[_keyAccessToken];
+      _refreshToken = secureValue[_keyRefreshToken];
+      _role = secureValue[_keyRole];
 
       // Validate token if exists
       if (_isAuthenticated && _accessToken != null) {
@@ -66,7 +89,7 @@ class AuthService extends AuthRepository {
       notifyListeners();
     } catch (e) {
       if (kDebugMode) {
-        print('Error initializing auth service: $e');
+        LoggerService.instance.e('Error initializing auth service: $e');
       }
       await logout();
     }
@@ -93,7 +116,7 @@ class AuthService extends AuthRepository {
       return false;
     } catch (e) {
       if (kDebugMode) {
-        print('Login error: $e');
+        LoggerService.instance.e('Login error: $e');
       }
       return false;
     }
@@ -124,7 +147,7 @@ class AuthService extends AuthRepository {
       return false;
     } catch (e) {
       if (kDebugMode) {
-        print('Register error: $e');
+        LoggerService.instance.e('Register error: $e');
       }
       return false;
     }
@@ -147,7 +170,7 @@ class AuthService extends AuthRepository {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('Google login error: $e');
+        LoggerService.instance.e('Google login error: $e');
       }
       return false;
     }
@@ -170,7 +193,7 @@ class AuthService extends AuthRepository {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('Facebook login error: $e');
+        LoggerService.instance.e('Facebook login error: $e');
       }
       return false;
     }
@@ -184,7 +207,7 @@ class AuthService extends AuthRepository {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('Send password reset error: $e');
+        LoggerService.instance.e('Send password reset error: $e');
       }
       return false;
     }
@@ -198,7 +221,7 @@ class AuthService extends AuthRepository {
       return otp == '1234'; // Mock OTP verification
     } catch (e) {
       if (kDebugMode) {
-        print('OTP verification error: $e');
+        LoggerService.instance.e('OTP verification error: $e');
       }
       return false;
     }
@@ -212,7 +235,7 @@ class AuthService extends AuthRepository {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('Reset password error: $e');
+        LoggerService.instance.e('Reset password error: $e');
       }
       return false;
     }
@@ -224,8 +247,7 @@ class AuthService extends AuthRepository {
       // TODO: Call logout API if needed
 
       // Clear local data
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
+      await SecureStorageService.deleteKey(_keySecure);
 
       _isAuthenticated = false;
       _userId = null;
@@ -237,7 +259,7 @@ class AuthService extends AuthRepository {
       notifyListeners();
     } catch (e) {
       if (kDebugMode) {
-        print('Logout error: $e');
+        LoggerService.instance.e('Logout error: $e');
       }
     }
   }
@@ -254,14 +276,16 @@ class AuthService extends AuthRepository {
       _accessToken =
           'new_access_token_${DateTime.now().millisecondsSinceEpoch}';
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_keyAccessToken, _accessToken!);
+      final storage = await SecureStorageService.getObject(_keySecure) ?? {};
+
+      storage[_keyAccessToken] = _accessToken;
+      await SecureStorageService.saveObject(_keySecure, storage);
 
       notifyListeners();
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('Refresh token error: $e');
+        LoggerService.instance.e('Refresh token error: $e');
       }
       return false;
     }
@@ -273,23 +297,25 @@ class AuthService extends AuthRepository {
       // TODO: Replace with actual API call
       await Future.delayed(const Duration(seconds: 1));
 
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await SecureStorageService.getObject(_keySecure) ?? {};
 
       if (username != null) {
         _username = username;
-        await prefs.setString(_keyUsername, username);
+        prefs[_keyUsername] = username;
       }
 
       if (email != null) {
         _email = email;
-        await prefs.setString(_keyEmail, email);
+        prefs[_keyEmail] = email;
       }
+
+      await SecureStorageService.saveObject(_keySecure, prefs);
 
       notifyListeners();
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('Update profile error: $e');
+        LoggerService.instance.e('Update profile error: $e');
       }
       return false;
     }
@@ -319,14 +345,13 @@ class AuthService extends AuthRepository {
     required String accessToken,
     required String refreshToken,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-
-    await prefs.setBool(_keyIsAuthenticated, true);
-    await prefs.setString(_keyUserId, userId);
-    await prefs.setString(_keyUsername, username);
-    await prefs.setString(_keyEmail, email);
-    await prefs.setString(_keyAccessToken, accessToken);
-    await prefs.setString(_keyRefreshToken, refreshToken);
+    final prefs = await SecureStorageService.getObject(_keySecure) ?? {};
+    prefs[_keyIsAuthenticated] = true;
+    prefs[_keyUserId] = userId;
+    prefs[_keyUsername] = username;
+    prefs[_keyEmail] = email;
+    prefs[_keyAccessToken] = accessToken;
+    prefs[_keyRefreshToken] = refreshToken;
 
     _isAuthenticated = true;
     _userId = userId;
@@ -348,7 +373,7 @@ class AuthService extends AuthRepository {
       return token.isNotEmpty && !token.contains('expired');
     } catch (e) {
       if (kDebugMode) {
-        print('Token validation error: $e');
+        LoggerService.instance.e('Token validation error: $e');
       }
       return false;
     }

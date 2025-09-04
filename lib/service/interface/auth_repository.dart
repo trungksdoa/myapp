@@ -8,6 +8,7 @@ abstract class AuthRepository extends ChangeNotifier {
   String? get userId;
   String? get username;
   String? get email;
+  String? get role;
   String? get accessToken;
   String? get refreshToken;
 

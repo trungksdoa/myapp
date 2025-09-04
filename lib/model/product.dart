@@ -1,17 +1,53 @@
 class Product {
-  final String productId;
-  final String shopId;
-  final String productName;
-  final String description;
-  final bool status;
+  final String? _productId;
+  final String? _shopId;
+  final String? _productName;
+  final String? _description;
+  final bool? _status;
 
   Product({
-    required this.productId,
-    required this.shopId,
-    required this.productName,
-    required this.description,
-    required this.status,
-  });
+    String? productId,
+    String? shopId,
+    String? productName,
+    String? description,
+    bool? status,
+  }) : _productId = productId,
+       _shopId = shopId,
+       _productName = productName,
+       _description = description,
+       _status = status;
+
+  String get productId {
+    if (_productId == null) throw Exception('productId not set');
+    return _productId;
+  }
+
+  String get shopId {
+    if (_shopId == null) throw Exception('shopId not set');
+    return _shopId;
+  }
+
+  String get productName {
+    if (_productName == null) throw Exception('productName not set');
+    return _productName;
+  }
+
+  String get description {
+    if (_description == null) throw Exception('description not set');
+    return _description;
+  }
+
+  bool get status {
+    if (_status == null) throw Exception('status not set');
+    return _status;
+  }
+
+  // Nullable getters
+  String? get productIdNullable => _productId;
+  String? get shopIdNullable => _shopId;
+  String? get productNameNullable => _productName;
+  String? get descriptionNullable => _description;
+  bool? get statusNullable => _status;
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
@@ -25,11 +61,11 @@ class Product {
 
   Map<String, dynamic> toJson() {
     return {
-      'productId': productId,
-      'shopId': shopId,
-      'productName': productName,
-      'description': description,
-      'status': status,
+      'productId': productIdNullable,
+      'shopId': shopIdNullable,
+      'productName': productNameNullable,
+      'description': descriptionNullable,
+      'status': statusNullable,
     };
   }
 }

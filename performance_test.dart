@@ -4,10 +4,12 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'package:myapp/core/utils/logger_service.dart';
 
+final logger = LoggerService.instance;
 void main() async {
-  print('🚀 Starting CareNest Performance Test Suite');
-  print('=' * 50);
+  logger.d('🚀 Starting CareNest Performance Test Suite');
+  logger.d('=' * 50);
 
   // Test 1: Startup time simulation
   await testStartupTime();
@@ -21,35 +23,35 @@ void main() async {
   // Test 4: Image loading performance
   await testImageLoading();
 
-  print('\n✅ Performance test completed!');
-  print('Check the logs above for performance metrics.');
-  print('Recommend running Flutter DevTools for detailed analysis:');
-  print('flutter pub global run devtools');
+  logger.d('\n✅ Performance test completed!');
+  logger.d('Check the logs above for performance metrics.');
+  logger.d('Recommend running Flutter DevTools for detailed analysis:');
+  logger.d('flutter pub global run devtools');
 }
 
 Future<void> testStartupTime() async {
-  print('\n📊 Test 1: App Startup Time Simulation');
+  logger.d('\n📊 Test 1: App Startup Time Simulation');
   final stopwatch = Stopwatch()..start();
 
   // Simulate app initialization tasks
   await Future.delayed(Duration(milliseconds: 120 + Random().nextInt(80)));
 
   stopwatch.stop();
-  print('⏱️  Simulated startup time: ${stopwatch.elapsedMilliseconds}ms');
+  logger.d('⏱️  Simulated startup time: ${stopwatch.elapsedMilliseconds}ms');
 
   if (stopwatch.elapsedMilliseconds > 200) {
-    print('🚨 WARNING: Startup time exceeds 200ms target');
-    print('   Consider optimizing:');
-    print('   - Reduce initial widget tree complexity');
-    print('   - Use deferred loading for heavy components');
-    print('   - Optimize asset loading');
+    logger.d('🚨 WARNING: Startup time exceeds 200ms target');
+    logger.d('   Consider optimizing:');
+    logger.d('   - Reduce initial widget tree complexity');
+    logger.d('   - Use deferred loading for heavy components');
+    logger.d('   - Optimize asset loading');
   } else {
-    print('✅ Startup time within acceptable range');
+    logger.d('✅ Startup time within acceptable range');
   }
 }
 
 Future<void> testMemoryUsage() async {
-  print('\n📊 Test 2: Memory Usage Simulation');
+  logger.d('\n📊 Test 2: Memory Usage Simulation');
 
   // Simulate memory allocation
   final List<String> testData = [];
@@ -61,17 +63,17 @@ Future<void> testMemoryUsage() async {
 
   // Simulate memory pressure
   final memoryUsage = testItems * 50; // Approximate bytes per item
-  print('💾 Simulated memory usage: ${memoryUsage ~/ 1024}KB');
+  logger.d('💾 Simulated memory usage: ${memoryUsage ~/ 1024}KB');
 
   if (memoryUsage > 500 * 1024) {
     // 500KB threshold
-    print('🚨 WARNING: High memory usage detected');
-    print('   Consider optimizing:');
-    print('   - Use ListView.builder instead of Column with many items');
-    print('   - Implement pagination for large lists');
-    print('   - Dispose controllers and listeners properly');
+    logger.d('🚨 WARNING: High memory usage detected');
+    logger.d('   Consider optimizing:');
+    logger.d('   - Use ListView.builder instead of Column with many items');
+    logger.d('   - Implement pagination for large lists');
+    logger.d('   - Dispose controllers and listeners properly');
   } else {
-    print('✅ Memory usage within acceptable range');
+    logger.d('✅ Memory usage within acceptable range');
   }
 
   // Clean up
@@ -79,7 +81,7 @@ Future<void> testMemoryUsage() async {
 }
 
 Future<void> testNavigationPerformance() async {
-  print('\n📊 Test 3: Navigation Performance');
+  logger.d('\n📊 Test 3: Navigation Performance');
 
   final List<int> navigationTimes = [];
   const int testIterations = 5;
@@ -95,22 +97,22 @@ Future<void> testNavigationPerformance() async {
       navigationTimes.reduce((a, b) => a + b) ~/ navigationTimes.length;
   final maxTime = navigationTimes.reduce(max);
 
-  print('⏱️  Average navigation time: ${avgTime}ms');
-  print('⏱️  Maximum navigation time: ${maxTime}ms');
+  logger.d('⏱️  Average navigation time: ${avgTime}ms');
+  logger.d('⏱️  Maximum navigation time: ${maxTime}ms');
 
   if (avgTime > 50) {
-    print('🚨 WARNING: Navigation performance needs improvement');
-    print('   Consider optimizing:');
-    print('   - Simplify route configurations');
-    print('   - Preload frequently used routes');
-    print('   - Reduce widget rebuilds during navigation');
+    logger.d('🚨 WARNING: Navigation performance needs improvement');
+    logger.d('   Consider optimizing:');
+    logger.d('   - Simplify route configurations');
+    logger.d('   - Preload frequently used routes');
+    logger.d('   - Reduce widget rebuilds during navigation');
   } else {
-    print('✅ Navigation performance within acceptable range');
+    logger.d('✅ Navigation performance within acceptable range');
   }
 }
 
 Future<void> testImageLoading() async {
-  print('\n📊 Test 4: Image Loading Performance');
+  logger.d('\n📊 Test 4: Image Loading Performance');
 
   final imageSizes = [
     1024, // 1KB
@@ -126,18 +128,18 @@ Future<void> testImageLoading() async {
     await Future.delayed(Duration(milliseconds: size ~/ 100));
     stopwatch.stop();
 
-    print(
+    logger.d(
       '🖼️  ${size ~/ 1024}KB image load: ${stopwatch.elapsedMilliseconds}ms',
     );
 
     if (stopwatch.elapsedMilliseconds > 100 && size > 51200) {
-      print(
+      logger.d(
         '   ⚠️  Large images (${size ~/ 1024}KB) may cause performance issues',
       );
-      print('   Consider:');
-      print('   - Compressing images below 50KB');
-      print('   - Using WebP format for better compression');
-      print('   - Implementing lazy loading for images');
+      logger.d('   Consider:');
+      logger.d('   - Compressing images below 50KB');
+      logger.d('   - Using WebP format for better compression');
+      logger.d('   - Implementing lazy loading for images');
     }
   }
 }

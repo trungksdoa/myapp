@@ -1,14 +1,30 @@
+import 'package:myapp/core/utils/logger_service.dart';
+import 'package:myapp/core/utils/security_storage.dart';
 import 'package:myapp/service/interface/auth_repository.dart';
 
 /// Mock implementation of AuthRepository for testing purposes
 /// This allows testing without actual API calls or SharedPreferences
 class MockAuthService extends AuthRepository {
+  final logger = LoggerService.instance;
+  final SecureStorageService storage = SecureStorageService();
+
   bool _isAuthenticated = false;
   String? _userId;
   String? _username;
   String? _email;
   String? _accessToken;
   String? _refreshToken;
+  String? _role;
+
+  // Keys for SecureStorage (same as AuthService)
+  static const String _keyIsAuthenticated = 'is_authenticated';
+  static const String _keyUserId = 'user_id';
+  static const String _keyUsername = 'username';
+  static const String _keyEmail = 'email';
+  static const String _keyAccessToken = 'access_token';
+  static const String _keyRefreshToken = 'refresh_token';
+  static const String _keyRole = 'role';
+  static const String _keySecure = 'secure_data';
 
   // Override behaviors for testing
   bool shouldFailLogin = false;
@@ -35,9 +51,38 @@ class MockAuthService extends AuthRepository {
   String? get refreshToken => _refreshToken;
 
   @override
+  String? get role => _role;
+
+  @override
   Future<void> initialize() async {
-    await Future.delayed(apiDelay);
-    notifyListeners();
+    try {
+      Map<String, dynamic>? secureValue = await SecureStorageService.getObject(
+        _keySecure,
+      );
+
+      secureValue ??= {
+        _keyIsAuthenticated: false,
+        _keyUserId: null,
+        _keyUsername: null,
+        _keyEmail: null,
+        _keyAccessToken: null,
+        _keyRefreshToken: null,
+        _keyRole: null,
+      };
+
+      _isAuthenticated = secureValue[_keyIsAuthenticated] ?? true;
+      _userId = secureValue[_keyUserId] ?? "1";
+      _username = secureValue[_keyUsername] ?? "Guest";
+      _email = secureValue[_keyEmail] ?? "guest@example.com";
+      _accessToken = secureValue[_keyAccessToken] ?? "guest_access_token";
+      _refreshToken = secureValue[_keyRefreshToken] ?? "guest_refresh_token";
+      _role = secureValue[_keyRole] ?? "user";
+
+      notifyListeners();
+    } catch (e) {
+      logger.e('Error initializing mock auth service: $e');
+      await logout();
+    }
   }
 
   @override
@@ -47,13 +92,13 @@ class MockAuthService extends AuthRepository {
     if (shouldFailLogin) return false;
 
     if (username.isNotEmpty && password.isNotEmpty) {
-      _isAuthenticated = true;
-      _userId = 'mock_user_123';
-      _username = username;
-      _email = '$username@mock.com';
-      _accessToken = 'mock_access_token';
-      _refreshToken = 'mock_refresh_token';
-      notifyListeners();
+      await _saveUserData(
+        userId: 'mock_user_123',
+        username: username,
+        email: '$username@mock.com',
+        accessToken: 'mock_access_token',
+        refreshToken: 'mock_refresh_token',
+      );
       return true;
     }
     return false;
@@ -70,13 +115,13 @@ class MockAuthService extends AuthRepository {
     if (shouldFailRegistration) return false;
 
     if (username.isNotEmpty && password.isNotEmpty) {
-      _isAuthenticated = true;
-      _userId = 'mock_user_new';
-      _username = username;
-      _email = '$username@mock.com';
-      _accessToken = 'mock_access_token_new';
-      _refreshToken = 'mock_refresh_token_new';
-      notifyListeners();
+      await _saveUserData(
+        userId: 'mock_user_new',
+        username: username,
+        email: '$username@mock.com',
+        accessToken: 'mock_access_token_new',
+        refreshToken: 'mock_refresh_token_new',
+      );
       return true;
     }
     return false;
@@ -86,14 +131,16 @@ class MockAuthService extends AuthRepository {
   Future<bool> loginWithGoogle() async {
     await Future.delayed(apiDelay);
 
+    await SecureStorageService.saveUserRole("BOSS");
+    await SecureStorageService.savePermissions(["ALL_ACCESS"]);
     // Directly set authentication state without calling login method
-    _isAuthenticated = true;
-    _userId = 'mock_google_user_123';
-    _username = 'Google User';
-    _email = 'googleuser@gmail.com';
-    _accessToken = 'mock_google_access_token';
-    _refreshToken = 'mock_google_refresh_token';
-    notifyListeners();
+    await _saveUserData(
+      userId: 'mock_google_user_123',
+      username: 'Google User',
+      email: 'googleuser@gmail.com',
+      accessToken: 'mock_google_access_token',
+      refreshToken: 'mock_google_refresh_token',
+    );
     return true;
   }
 
@@ -101,14 +148,16 @@ class MockAuthService extends AuthRepository {
   Future<bool> loginWithFacebook() async {
     await Future.delayed(apiDelay);
 
+    await SecureStorageService.saveUserRole("BOSS");
+    await SecureStorageService.savePermissions(["ALL_ACCESS"]);
     // Directly set authentication state without calling login method
-    _isAuthenticated = true;
-    _userId = 'mock_facebook_user_123';
-    _username = 'Facebook User';
-    _email = 'facebookuser@facebook.com';
-    _accessToken = 'mock_facebook_access_token';
-    _refreshToken = 'mock_facebook_refresh_token';
-    notifyListeners();
+    await _saveUserData(
+      userId: 'mock_facebook_user_123',
+      username: 'Facebook User',
+      email: 'facebookuser@facebook.com',
+      accessToken: 'mock_facebook_access_token',
+      refreshToken: 'mock_facebook_refresh_token',
+    );
     return true;
   }
 
@@ -134,6 +183,10 @@ class MockAuthService extends AuthRepository {
   @override
   Future<void> logout() async {
     await Future.delayed(apiDelay);
+
+    // Clear local data
+    await SecureStorageService.deleteKey(_keySecure);
+
     _isAuthenticated = false;
     _userId = null;
     _username = null;
@@ -147,7 +200,13 @@ class MockAuthService extends AuthRepository {
   Future<bool> refreshAccessToken() async {
     await Future.delayed(apiDelay);
     if (_refreshToken == null) return false;
+
     _accessToken = 'new_mock_access_token';
+
+    final storage = await SecureStorageService.getObject(_keySecure) ?? {};
+    storage[_keyAccessToken] = _accessToken;
+    await SecureStorageService.saveObject(_keySecure, storage);
+
     notifyListeners();
     return true;
   }
@@ -155,8 +214,20 @@ class MockAuthService extends AuthRepository {
   @override
   Future<bool> updateProfile({String? username, String? email}) async {
     await Future.delayed(apiDelay);
-    if (username != null) _username = username;
-    if (email != null) _email = email;
+
+    final prefs = await SecureStorageService.getObject(_keySecure) ?? {};
+
+    if (username != null) {
+      _username = username;
+      prefs[_keyUsername] = username;
+    }
+
+    if (email != null) {
+      _email = email;
+      prefs[_keyEmail] = email;
+    }
+
+    await SecureStorageService.saveObject(_keySecure, prefs);
     notifyListeners();
     return true;
   }
@@ -177,22 +248,54 @@ class MockAuthService extends AuthRepository {
     return {'Content-Type': 'application/json'};
   }
 
-  // Test helper methods
-  void setAuthenticatedUser({
+  // Private helper methods
+  Future<void> _saveUserData({
     required String userId,
     required String username,
     required String email,
-  }) {
+    required String accessToken,
+    required String refreshToken,
+  }) async {
+    final prefs = await SecureStorageService.getObject(_keySecure) ?? {};
+
+    prefs[_keyIsAuthenticated] = true;
+    prefs[_keyUserId] = userId;
+    prefs[_keyUsername] = username;
+    prefs[_keyEmail] = email;
+    prefs[_keyAccessToken] = accessToken;
+    prefs[_keyRefreshToken] = refreshToken;
+
+    await SecureStorageService.saveObject(_keySecure, prefs);
+
     _isAuthenticated = true;
     _userId = userId;
     _username = username;
     _email = email;
-    _accessToken = 'mock_token';
-    _refreshToken = 'mock_refresh';
+    _accessToken = accessToken;
+    _refreshToken = refreshToken;
+
     notifyListeners();
   }
 
-  void reset() {
+  // Test helper methods
+  Future<void> setAuthenticatedUser({
+    required String userId,
+    required String username,
+    required String email,
+  }) async {
+    await _saveUserData(
+      userId: userId,
+      username: username,
+      email: email,
+      accessToken: 'mock_token',
+      refreshToken: 'mock_refresh',
+    );
+  }
+
+  Future<void> reset() async {
+    // Clear local data
+    await SecureStorageService.deleteKey(_keySecure);
+
     _isAuthenticated = false;
     _userId = null;
     _username = null;
@@ -241,15 +344,15 @@ class MockAuthService extends AuthRepository {
 
   /// Print current mock state (for debugging)
   void printState() {
-    print('=== MockAuthService State ===');
-    print('isAuthenticated: $_isAuthenticated');
-    print('userId: $_userId');
-    print('username: $_username');
-    print('email: $_email');
-    print('accessToken: $_accessToken');
-    print('shouldFailLogin: $shouldFailLogin');
-    print('shouldFailRegistration: $shouldFailRegistration');
-    print('shouldFailOTP: $shouldFailOTP');
-    print('=============================');
+    logger.d('=== MockAuthService State ===');
+    logger.d('isAuthenticated: $_isAuthenticated');
+    logger.d('userId: $_userId');
+    logger.d('username: $_username');
+    logger.d('email: $_email');
+    logger.d('accessToken: $_accessToken');
+    logger.d('shouldFailLogin: $shouldFailLogin');
+    logger.d('shouldFailRegistration: $shouldFailRegistration');
+    logger.d('shouldFailOTP: $shouldFailOTP');
+    logger.d('=============================');
   }
 }

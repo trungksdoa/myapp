@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/core/utils/logger_service.dart';
 import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/widget/boxContainer.dart';
 import 'package:myapp/model/models.dart';
@@ -20,10 +21,6 @@ class _GroupScreenState extends State<GroupScreen> {
       memberCount: 452,
       imgUrl: 'assets/images/Home1.png',
       createdById: 'user1',
-      groupMembers: [
-        GroupMember(id: 1, accountId: 'user1'),
-        GroupMember(id: 2, accountId: 'user2'),
-      ],
     ),
     Group(
       id: 2,
@@ -31,10 +28,6 @@ class _GroupScreenState extends State<GroupScreen> {
       memberCount: 452,
       imgUrl: 'assets/images/Home2.png',
       createdById: 'user1',
-      groupMembers: [
-        GroupMember(id: 3, accountId: 'user3'),
-        GroupMember(id: 4, accountId: 'user4'),
-      ],
     ),
     Group(
       id: 3,
@@ -72,14 +65,18 @@ class _GroupScreenState extends State<GroupScreen> {
     BuildContext context,
     int groupId,
     String groupName,
-    int memberCount,
+    String groupSize,
     String groupAvatar,
   ) {
+    LoggerService.instance.d('Navigating to family blog with params:');
+    LoggerService.instance.d(
+      'groupId: $groupId, groupName: $groupName, groupSize: $groupSize, groupAvatar: $groupAvatar',
+    );
     NavigateHelper.goToFamilyBlog(
       context,
       groupId: groupId.toString(),
       groupName: groupName,
-      groupMembers: memberCount.toString(),
+      groupSize: groupSize,
       groupAvatar: groupAvatar,
     );
   }
@@ -199,7 +196,7 @@ class _GroupScreenState extends State<GroupScreen> {
                         context,
                         group.id,
                         group.name,
-                        group.memberCount,
+                        group.memberCount.toString(),
                         group.imgUrl,
                       );
                     },

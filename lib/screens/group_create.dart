@@ -10,7 +10,7 @@ import 'package:myapp/widget/group/field_member_widget.dart';
 import 'package:myapp/widget/group/group_app_bar.dart';
 import 'package:myapp/widget/info_guide_widget.dart';
 import 'package:myapp/widget/info_tip_widget.dart';
-import 'package:myapp/widget/success_diaglog.dart';
+import 'package:myapp/widget/custom_diaglog.dart';
 
 class GroupCreate extends StatefulWidget {
   const GroupCreate({super.key});
@@ -132,10 +132,8 @@ class _GroupCreateState extends State<GroupCreate> {
 
     showDialog(
       context: context,
-      builder: (context) => SuccessDiaglog(
-        alertTile: "Thành công",
-        content: "Tạo nhóm thành công",
-      ),
+      builder: (context) =>
+          CustomDialog.success(content: "Tạo nhóm thành công"),
     ).then((_) {
       if (mounted) {
         NavigateHelper.goToFamily(context);

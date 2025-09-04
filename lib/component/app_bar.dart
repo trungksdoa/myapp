@@ -99,19 +99,19 @@ class _MyAppBarState extends State<MyAppBar> {
       actions: [
         if (_authService.isAuthenticated) ...[
           // User avatar/name
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Center(
-              child: Text(
-                _authService.username ?? 'User',
-                style: TextStyle(
-                  color: AppColors.textOnPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 8),
+          //   child: Center(
+          //     child: Text(
+          //       _authService.username ?? 'User',
+          //       style: TextStyle(
+          //         color: AppColors.textOnPrimary,
+          //         fontSize: 14,
+          //         fontWeight: FontWeight.w500,
+          //       ),
+          //     ),
+          //   ),
+          // ),
           // Logout button
           IconButton(
             icon: Icon(Icons.logout, size: 28, color: AppColors.textOnPrimary),
