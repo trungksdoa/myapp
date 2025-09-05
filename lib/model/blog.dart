@@ -4,14 +4,14 @@ import 'package:myapp/model/pet.dart';
 class Blog {
   final int? _id;
   final String? _description;
-  final String? _imgUrls;
+  final List<ImgUrl>? _imgUrls;
   final Account? _account;
   final Pet? _pets;
 
   Blog({
     int? id,
     String? description,
-    String? imgUrls,
+    List<ImgUrl>? imgUrls,
     Account? account,
     Pet? pets,
   }) : _id = id,
@@ -30,7 +30,7 @@ class Blog {
     return _description;
   }
 
-  String get imgUrls {
+  List<ImgUrl> get imgUrls {
     if (_imgUrls == null) throw Exception('imgUrls not set');
     return _imgUrls;
   }
@@ -47,7 +47,22 @@ class Blog {
   // Nullable getters
   int? get idNullable => _id;
   String? get descriptionNullable => _description;
-  String? get imgUrlsNullable => _imgUrls;
+  List<ImgUrl>? get imgUrlsNullable => _imgUrls;
   Account? get accountNullable => _account;
   Pet? get petsNullable => _pets;
+}
+
+class ImgUrl {
+  final int fileId;
+  final String url;
+
+  ImgUrl({required this.fileId, required this.url});
+
+  factory ImgUrl.fromJson(Map<String, dynamic> json) {
+    return ImgUrl(fileId: json['fileId'], url: json['url']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'fileId': fileId, 'url': url};
+  }
 }

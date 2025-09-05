@@ -24,6 +24,7 @@ dependencies:
   logger: ^2.6.1
   flutter_local_notifications: ^19.4.1
   permission_handler: ^11.3.1
+  location_picker_flutter_map: ^4.1.0
 
   # circle_nav_bar: ^1.0.3
 

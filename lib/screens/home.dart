@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:myapp/core/utils/device_size.dart';
 import 'package:myapp/core/utils/performance_monitor.dart';
 import 'package:myapp/core/utils/image_cache.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../component/card_item.dart'; // Nếu cần
 
@@ -106,19 +108,25 @@ class _HomeState extends State<Home> {
                 padding: EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    Expanded(
+                    Flexible(
                       flex: 6,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.asset(
-                          'assets/images/preview_map.png',
+                        child: Container(
                           height: 140,
-                          fit: BoxFit.cover,
-                        ), //Keep because it will replace with real map track
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage(
+                                'assets/images/preview_map.png',
+                              ),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     SizedBox(width: 16),
-                    Expanded(
+                    Flexible(
                       flex: 4,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,7 +140,7 @@ class _HomeState extends State<Home> {
                           ),
                           SizedBox(height: 16),
                           SizedBox(
-                            width: double.infinity, // Hoặc width cụ thể
+                            width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () {},
                               style: ElevatedButton.styleFrom(
@@ -141,7 +149,7 @@ class _HomeState extends State<Home> {
                                 padding: EdgeInsets.symmetric(
                                   vertical: 12,
                                   horizontal: 24,
-                                ), // Thêm padding
+                                ),
                               ),
                               child: Text(
                                 'Đăng nhập',

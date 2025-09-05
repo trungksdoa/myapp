@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/core/utils/logger_service.dart';
 import 'package:myapp/component/main_layout.dart';
-import 'package:myapp/screens/blog_create.dart';
 import 'package:myapp/screens/chat_box.dart';
 import 'package:myapp/screens/family_blog.dart';
 import 'package:myapp/screens/group.dart';
@@ -13,7 +12,6 @@ import 'package:myapp/screens/personal.dart';
 import 'package:myapp/screens/shop_screen.dart';
 import 'package:myapp/screens/home.dart';
 import 'package:myapp/screens/group_create.dart';
-import 'package:myapp/screens/family_blog.dart';
 import 'package:myapp/screens/chat_screen.dart';
 // Auth screens
 import 'package:myapp/screens/login.dart';
@@ -157,11 +155,6 @@ class AppRouter {
                     path: 'create',
                     name: 'group-create',
                     builder: (context, state) => const GroupCreate(),
-                  ),
-                  GoRoute(
-                    path: 'blog/create', // Bỏ dấu / → 'blog/create'
-                    name: 'blog-create',
-                    builder: (context, state) => const BlogCreate(),
                   ),
                   GoRoute(
                     path: 'settings', // Bỏ dấu / → 'settings'

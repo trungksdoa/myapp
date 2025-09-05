@@ -3,6 +3,8 @@ import 'package:myapp/core/colors.dart';
 import 'package:myapp/core/utils/device_size.dart';
 import 'package:myapp/core/utils/performance_monitor.dart';
 import 'package:myapp/route/navigate_helper.dart';
+import 'package:myapp/screens/post_composer.dart';
+import 'package:myapp/screens/edit_composer.dart';
 import 'package:myapp/widget/boxContainer.dart';
 import 'package:myapp/model/models.dart';
 import 'package:myapp/core/utils/image_cache.dart';
@@ -37,8 +39,11 @@ class _FamilyBlogState extends State<FamilyBlog> {
     Blog(
       id: 1,
       description: "Cháu lì lắm",
-      imgUrls:
-          "assets/images/Home1.png,assets/images/Home2.png,assets/images/Home3.png",
+      imgUrls: [
+        ImgUrl(fileId: 1, url: "assets/images/Home1.png"),
+        ImgUrl(fileId: 2, url: "assets/images/Home2.png"),
+        ImgUrl(fileId: 3, url: "assets/images/Home3.png"),
+      ],
       account: Account(
         accountId: 'user1',
         fullName: 'Huỳnh Gia Bảo',
@@ -58,8 +63,11 @@ class _FamilyBlogState extends State<FamilyBlog> {
     Blog(
       id: 2,
       description: "Cháu biết ăn lắm",
-      imgUrls:
-          "assets/images/Home4.png,assets/images/Home5.png,assets/images/Home1.png",
+      imgUrls: [
+        ImgUrl(fileId: 4, url: "assets/images/Home4.png"),
+        ImgUrl(fileId: 5, url: "assets/images/Home5.png"),
+        ImgUrl(fileId: 6, url: "assets/images/Home1.png"),
+      ],
       account: Account(
         accountId: 'user2',
         fullName: 'Nguyễn Thị Thùy Dương',
@@ -79,8 +87,11 @@ class _FamilyBlogState extends State<FamilyBlog> {
     Blog(
       id: 3,
       description: "Hôm nay cháu vui lắm",
-      imgUrls:
-          "assets/images/Home4.png,assets/images/Home5.png,assets/images/Home1.png",
+      imgUrls: [
+        ImgUrl(fileId: 7, url: "assets/images/Home4.png"),
+        ImgUrl(fileId: 8, url: "assets/images/Home5.png"),
+        ImgUrl(fileId: 9, url: "assets/images/Home1.png"),
+      ],
       account: Account(
         accountId: 'user3',
         fullName: 'Trần Minh Tuấn',
@@ -100,8 +111,11 @@ class _FamilyBlogState extends State<FamilyBlog> {
     Blog(
       id: 4,
       description: "Hôm nay cháu vui lắm",
-      imgUrls:
-          "assets/images/Home5.png,assets/images/Home1.png,assets/images/Home2.png",
+      imgUrls: [
+        ImgUrl(fileId: 10, url: "assets/images/Home5.png"),
+        ImgUrl(fileId: 11, url: "assets/images/Home1.png"),
+        ImgUrl(fileId: 12, url: "assets/images/Home2.png"),
+      ],
       account: Account(
         accountId: 'user4',
         fullName: 'Lê Thị Mỹ Linh',
@@ -121,8 +135,11 @@ class _FamilyBlogState extends State<FamilyBlog> {
     Blog(
       id: 5,
       description: "Hôm nay cháu vui lắm",
-      imgUrls:
-          "assets/images/Home5.png,assets/images/Home1.png,assets/images/Home2.png",
+      imgUrls: [
+        ImgUrl(fileId: 13, url: "assets/images/Home5.png"),
+        ImgUrl(fileId: 14, url: "assets/images/Home1.png"),
+        ImgUrl(fileId: 15, url: "assets/images/Home2.png"),
+      ],
       account: Account(
         accountId: 'user5',
         fullName: 'Nguyễn Văn Nam',
@@ -142,9 +159,25 @@ class _FamilyBlogState extends State<FamilyBlog> {
   ];
 
   // Helper method to get images from imgUrls
-  List<String> getImageList(String imgUrls) {
-    if (imgUrls.isEmpty) return [];
-    return imgUrls.split(',').where((url) => url.isNotEmpty).toList();
+  List<String> getImageList(dynamic imgUrls) {
+    if (imgUrls == null) return [];
+
+    // Handle new format: List<ImgUrl>
+    if (imgUrls is List<ImgUrl>) {
+      return imgUrls.map((imgUrl) => imgUrl.url).toList();
+    }
+
+    // Handle List<Map<String, dynamic>> for backward compatibility
+    if (imgUrls is List) {
+      return imgUrls.map((item) => item['url'] as String).toList();
+    }
+
+    // Handle old format: String (for backward compatibility)
+    if (imgUrls is String && imgUrls.isNotEmpty) {
+      return imgUrls.split(',').where((url) => url.isNotEmpty).toList();
+    }
+
+    return [];
   }
 
   // Get filtered blogs based on current filter
@@ -165,19 +198,27 @@ class _FamilyBlogState extends State<FamilyBlog> {
   }
 
   // Handle edit blog
-  void _handleEditBlog(int blogId) {
-    // TODO: Navigate to edit blog screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Chỉnh sửa bài viết #$blogId'),
-        backgroundColor: Colors.blue,
-        duration: const Duration(seconds: 2),
-      ),
+  void _handleEditBlog(Blog blog) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: IntrinsicHeight(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: EditComposer(blogToEdit: blog),
+            ),
+          ),
+        );
+      },
     );
   }
 
   // Handle delete blog
-  void _handleDeleteBlog(int blogId) {
+  void _handleDeleteBlog(Blog blog) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -203,7 +244,9 @@ class _FamilyBlogState extends State<FamilyBlog> {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Đã xóa bài viết #$blogId'),
+                    content: Text(
+                      'Đã xóa bài viết của ${blog.account.fullName}',
+                    ),
                     backgroundColor: Colors.red,
                     duration: const Duration(seconds: 2),
                   ),
@@ -361,6 +404,8 @@ class _FamilyBlogState extends State<FamilyBlog> {
               ),
             ],
           ),
+          // Post composer at the top of the list
+          SliverToBoxAdapter(child: PostComposer()),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             sliver: SliverList(
@@ -500,9 +545,9 @@ class _FamilyBlogState extends State<FamilyBlog> {
                             PopupMenuButton<String>(
                               onSelected: (value) {
                                 if (value == 'edit') {
-                                  _handleEditBlog(blog.id);
+                                  _handleEditBlog(blog);
                                 } else if (value == 'delete') {
-                                  _handleDeleteBlog(blog.id);
+                                  _handleDeleteBlog(blog);
                                 }
                               },
                               itemBuilder: (BuildContext context) => [
@@ -638,23 +683,19 @@ class _FamilyBlogState extends State<FamilyBlog> {
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _navigate(context);
-        },
-        backgroundColor: Colors.teal.shade600,
-        foregroundColor: Colors.white,
-        elevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.edit, size: 24),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     _navigate(context);
+      //   },
+      //   backgroundColor: Colors.teal.shade600,
+      //   foregroundColor: Colors.white,
+      //   elevation: 8,
+      //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      //   child: const Icon(Icons.edit, size: 24),
+      // ),
     );
 
     PerformanceMonitor.stop('FamilyBlog build');
     return scaffoldWidget;
-  }
-
-  void _navigate(BuildContext context) {
-    NavigateHelper.goToBlogCreate(context);
   }
 }

@@ -46,10 +46,6 @@ class NavigateHelper {
     context.goNamed('family-blog', extra: params);
   }
 
-  static void goToBlogCreate(BuildContext context) {
-    context.pushNamed('blog-create');
-  }
-
   static void goToSettingGroup(
     BuildContext context,
     String viewName,
