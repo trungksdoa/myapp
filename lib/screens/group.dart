@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/core/utils/logger_service.dart';
 import 'package:myapp/route/navigate_helper.dart';
-import 'package:myapp/widget/boxContainer.dart';
+import 'package:myapp/widget/box_container.dart';
 import 'package:myapp/model/models.dart';
 
 class GroupScreen extends StatefulWidget {

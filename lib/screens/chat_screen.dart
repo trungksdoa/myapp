@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/widget/index.dart';
 
 // Model đơn giản cho tin nhắn
 class ChatMessage {
@@ -109,39 +110,11 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildMessageBubble(ChatMessage message) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment: message.isUser
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
-        children: [
-          Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.7,
-            ),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: message.isUser ? Colors.blue : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Text(
-              message.message,
-              style: TextStyle(
-                color: message.isUser ? Colors.white : Colors.black,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ],
-      ),
+    return ChatMessageWidget(
+      message: message.message,
+      isFromCurrentUser: message.isUser,
+      timestamp:
+          '12:30', // Có thể truyền timestamp thực tế từ ChatMessage model
     );
   }
 
@@ -152,7 +125,7 @@ class _ChatScreenState extends State<ChatScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),

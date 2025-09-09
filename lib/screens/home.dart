@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/auth_factory.dart';
 import 'package:myapp/core/utils/device_size.dart';
 import 'package:myapp/core/utils/performance_monitor.dart';
 import 'package:myapp/core/utils/image_cache.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:myapp/widget/shop_map.dart';
 
-import '../component/card_item.dart'; // Nếu cần
+import '../component/card_item.dart';
+import '../widget/index.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key, required this.title});
@@ -60,13 +61,69 @@ class _HomeState extends State<Home> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  final auth = AuthFactory.instance;
+
+  Widget _buildMapService(double fontSize) {
+    return SliverToBoxAdapter(
+      child: CustomCard(
+        margin: AppMargin.lg,
+        padding: AppPadding.md,
+        borderRadius: 16.0,
+        elevation: 6.0,
+        child: Row(
+          children: [
+            Flexible(
+              flex: 6,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  height: 140,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/preview_map.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            AppSpacing.horizontalLG,
+            Flexible(
+              flex: 4,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText.title(
+                    text:
+                        'Trải nghiệm tìm kiếm phòng khám uy tín gần khu vực của bạn',
+                    fontSize: fontSize + 2,
+                  ),
+                  AppSpacing.verticalLG,
+                  CustomElevatedButton.primary(
+                    text: 'Đăng nhập',
+                    onPressed: () {},
+                    width: double.infinity,
+                  ),
+                  AppSpacing.verticalXS,
+                  CustomText.caption(
+                    text: "Đăng nhập để trải nghiệm nhiều hơn",
+                    color: Colors.black54,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     PerformanceMonitor.start('HomeScreen build');
-
-    final screenWidth = MediaQuery.of(context).size.width;
-    final fontSize = DeviceSize.getResponsiveFontSize(screenWidth);
-
+    double fontSize = DeviceSize.getResponsiveFontSize(
+      MediaQuery.of(context).size.width,
+    );
     final widget = SizedBox(
       child: CustomScrollView(
         slivers: [
@@ -96,158 +153,65 @@ class _HomeState extends State<Home> {
             ),
           ),
 
-          //Bản đồ
+          if (!auth.isAuthenticated)
+            //Bản đồ
+            _buildMapService(fontSize),
           SliverToBoxAdapter(
-            child: Card(
-              margin: EdgeInsets.all(16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 6,
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    Flexible(
-                      flex: 6,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          height: 140,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage(
-                                'assets/images/preview_map.png',
-                              ),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Flexible(
-                      flex: 4,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Trải nghiệm tìm kiếm phòng khám uy tín gần khu vực của bạn',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: fontSize + 2,
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                shape: StadiumBorder(),
-                                backgroundColor: Colors.teal,
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 12,
-                                  horizontal: 24,
-                                ),
-                              ),
-                              child: Text(
-                                'Đăng nhập',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: fontSize + 1,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            "Đăng nhập để trải nghiệm nhiều hơn",
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: fontSize - 2,
-                              fontFamily: 'Roboto',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ShopMap(title: "map"),
             ),
           ),
-
           // --- Card đánh giá khách hàng ---
-          SliverToBoxAdapter(
-            child: Card(
-              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 5,
-              child: Padding(
-                padding: EdgeInsets.all(15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Đánh giá từ khách hàng',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 8),
-                    // Thay List.generate hiện tại bằng Column với padding giữa các hàng
-                    Column(
-                      children: List.generate(4, (i) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              CircleAvatar(
-                                backgroundImage: AssetImage(
-                                  'assets/images/user_avatar.jpg',
-                                ),
-                                radius: 16, // hơi nhỏ lại cho gọn
-                                backgroundColor: Colors.grey.shade300,
-                              ),
-                              SizedBox(width: 12),
-                              // Text chiếm không gian còn lại để dãy sao đẩy sang phải
-                              Expanded(
-                                child: Text(
-                                  'Giao hàng sớm',
-                                  style: TextStyle(fontSize: fontSize),
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              // Star row nhỏ gọn
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: List.generate(
-                                  5,
-                                  (j) => Icon(
-                                    Icons.star,
-                                    color: Colors.amber,
-                                    size: 16, // nhỏ hơn để hợp tỷ lệ
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          // SliverToBoxAdapter(
+          //   child: CustomCard(
+          //     margin: AppMargin.symmetric(horizontal: 16, vertical: 8),
+          //     padding: AppPadding.lg,
+          //     borderRadius: 16.0,
+          //     elevation: 5.0,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         CustomText.subtitle(text: 'Đánh giá từ khách hàng'),
+          //         AppSpacing.verticalSM,
+          //         Column(
+          //           children: List.generate(4, (i) {
+          //             return Padding(
+          //               padding: AppPadding.verticalSM,
+          //               child: Row(
+          //                 crossAxisAlignment: CrossAxisAlignment.center,
+          //                 children: [
+          //                   CircleAvatar(
+          //                     backgroundImage: AssetImage(
+          //                       'assets/images/user_avatar.jpg',
+          //                     ),
+          //                     radius: 16,
+          //                     backgroundColor: Colors.grey.shade300,
+          //                   ),
+          //                   AppSpacing.horizontalMD,
+          //                   Expanded(
+          //                     child: CustomText.body(text: 'Giao hàng sớm'),
+          //                   ),
+          //                   AppSpacing.horizontalSM,
+          //                   CommonWidgets.starRating(rating: 5, size: 16),
+          //                 ],
+          //               ),
+          //             );
+          //           }),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
 
     PerformanceMonitor.stop('HomeScreen build');
+    // if (auth.isAuthenticated) {
+    //   return ShopMap(title: "map");
+    // }
+
     return widget;
   }
 }

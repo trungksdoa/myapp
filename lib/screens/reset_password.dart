@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/core/colors.dart';
 import 'package:myapp/route/navigate_helper.dart';
-import 'package:myapp/widget/boxContainer.dart';
+import 'package:myapp/widget/box_container.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});

@@ -24,6 +24,7 @@ import 'package:myapp/screens/password_reset_success.dart';
 import 'package:myapp/screens/splash_screen.dart';
 // Services
 import 'package:myapp/auth_factory.dart';
+import 'package:myapp/widget/shop_map.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -91,6 +92,12 @@ class AppRouter {
                 path: '/shop',
                 name: 'shop',
                 builder: (context, state) => const ShopScreen(title: "shop"),
+              ),
+
+              GoRoute(
+                path: 'map',
+                name: 'shop-map',
+                builder: (context, state) => const ShopMap(title: ''),
               ),
             ],
           ),

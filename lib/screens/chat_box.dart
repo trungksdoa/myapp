@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/route/navigate_helper.dart';
+import 'package:myapp/widget/index.dart';
 
 class ChatBox extends StatefulWidget {
   const ChatBox({super.key});
@@ -77,8 +78,23 @@ class _ChatBoxState extends State<ChatBox> {
                         // Pet Selection Row
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: _pets.asMap().entries.map((entry) {
-                            return _buildPetCard(entry.value);
+                          children: _pets.map((petName) {
+                            return PetCard(
+                              petName: petName,
+                              isSelected: _selectedPet == petName,
+                              onTap: () {
+                                setState(() {
+                                  _selectedPet = petName;
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Đã chọn $petName'),
+                                    backgroundColor: const Color(0xFF4A90A4),
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
+                              },
+                            );
                           }).toList(),
                         ),
 
@@ -166,82 +182,6 @@ class _ChatBoxState extends State<ChatBox> {
       ),
 
       // Bottom Navigation
-    );
-  }
-
-  Widget _buildPetCard(String petName) {
-    final isSelected = _selectedPet == petName;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedPet = petName;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Đã chọn $petName'),
-            backgroundColor: const Color(0xFF4A90A4),
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      },
-      child: Column(
-        children: [
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: isSelected
-                  ? Border.all(color: const Color(0xFF4A90A4), width: 3)
-                  : null,
-              boxShadow: [
-                BoxShadow(
-                  color: isSelected
-                      ? const Color(0xFF4A90A4).withValues(alpha: 0.3)
-                      : Colors.black.withValues(alpha: 0.1),
-                  blurRadius: isSelected ? 12 : 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                'assets/images/kakashi.png',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                    Icons.pets,
-                    size: 40,
-                    color: Color(0xFF4A90A4),
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            petName,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              color: isSelected ? const Color(0xFF4A90A4) : Colors.black87,
-            ),
-          ),
-          if (isSelected)
-            Container(
-              margin: const EdgeInsets.only(top: 4),
-              width: 6,
-              height: 6,
-              decoration: const BoxDecoration(
-                color: Color(0xFF4A90A4),
-                shape: BoxShape.circle,
-              ),
-            ),
-        ],
-      ),
     );
   }
 

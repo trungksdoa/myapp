@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/core/colors.dart';
 import 'package:myapp/route/navigate_helper.dart';
-import 'package:myapp/widget/boxContainer.dart';
+import 'package:myapp/widget/index.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -79,97 +79,47 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   color: AppColors.primary,
                 ),
               ),
-              const SizedBox(height: 32),
+              AppSpacing.vertical(32),
 
               // Title
-              const Text(
-                'Quên mật khẩu',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 16),
+              CustomText.title(text: 'Quên mật khẩu', color: Colors.white),
+              AppSpacing.vertical(16),
 
               // Description
-              const Text(
-                'Nhập email của bạn để nhận liên kết đặt lại mật khẩu',
+              CustomText.body(
+                text: 'Nhập email của bạn để nhận liên kết đặt lại mật khẩu',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
-                  height: 1.5,
-                ),
+                color: Colors.white70,
               ),
-              const SizedBox(height: 40),
+              AppSpacing.vertical(40),
 
               // Form
-              BoxContainerShadow(
-                padding: 24,
-                borderRadius: 20,
+              CustomCard.service(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Email Field
-                    TextField(
+                    CustomTextField.email(
                       controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'Nhập địa chỉ email của bạn',
-                        prefixIcon: const Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      hintText: 'Nhập địa chỉ email của bạn',
                     ),
-                    const SizedBox(height: 24),
+                    AppSpacing.vertical(24),
 
                     // Send Reset Link Button
-                    ElevatedButton(
+                    CustomElevatedButton.login(
+                      text: 'Gửi mã',
                       onPressed: _isLoading ? null : _handleSendResetLink,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Text(
-                              'Gửi mã',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                      isLoading: _isLoading,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              AppSpacing.vertical(32),
 
               // Back to Login Link
-              TextButton(
+              CustomElevatedButton.secondary(
+                text: 'Quay lại đăng nhập',
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Quay lại đăng nhập',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
               ),
             ],
           ),

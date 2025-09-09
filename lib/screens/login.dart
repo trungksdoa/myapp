@@ -3,7 +3,7 @@ import 'package:myapp/auth_factory.dart';
 import 'package:myapp/core/colors.dart';
 import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/service/interface/auth_repository.dart';
-import 'package:myapp/widget/boxContainer.dart';
+import 'package:myapp/widget/index.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -154,132 +154,72 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'CareNest',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Đăng nhập',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              const Text(
-                'Nhập thông tin để bắt đầu sử dụng',
-                style: TextStyle(fontSize: 14, color: Colors.white70),
+              CustomText.title(text: 'CareNest', color: Colors.white),
+              AppSpacing.verticalSM,
+              CustomText.subtitle(text: 'Đăng nhập', color: Colors.white),
+              CustomText.caption(
+                text: 'Nhập thông tin để bắt đầu sử dụng',
+                color: Colors.white70,
               ),
               const SizedBox(height: 40),
 
               // Login Form
-              BoxContainerShadow(
-                padding: 24,
-                borderRadius: 20,
+              CustomCard(
+                padding: AppPadding.xl,
+                borderRadius: 20.0,
+                backgroundColor: Colors.white,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Username Field
-                    TextField(
+                    CustomTextField.username(
                       controller: _usernameController,
-                      decoration: InputDecoration(
-                        labelText: 'Tên đăng nhập',
-                        hintText: 'Nhập tên đăng nhập',
-                        prefixIcon: const Icon(Icons.person_outline),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      hintText: 'Nhập tên đăng nhập',
                     ),
-                    const SizedBox(height: 16),
+                    AppSpacing.verticalLG,
 
                     // Password Field
-                    TextField(
+                    CustomTextField.password(
                       controller: _passwordController,
-                      obscureText: !_isPasswordVisible,
-                      decoration: InputDecoration(
-                        labelText: 'Mật khẩu',
-                        hintText: 'Nhập mật khẩu',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _isPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _isPasswordVisible = !_isPasswordVisible;
-                            });
-                          },
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      labelText: 'Mật khẩu',
+                      isPasswordVisible: _isPasswordVisible,
+                      onToggleVisibility: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
+                      hintText: 'Nhập mật khẩu',
                     ),
-                    const SizedBox(height: 8),
+                    AppSpacing.verticalSM,
 
                     // Forgot Password
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: _navigateToForgotPassword,
-                        child: const Text('Quên mật khẩu?'),
+                        child: CustomText.caption(
+                          text: 'Quên mật khẩu?',
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    AppSpacing.verticalLG,
 
                     // Login Button
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Text(
-                              'Đăng nhập',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                    CustomElevatedButton.login(
+                      text: 'Đăng nhập',
+                      onPressed: _handleLogin,
+                      isLoading: _isLoading,
                     ),
-                    const SizedBox(height: 24),
+                    AppSpacing.verticalXXL,
 
                     // Divider
-                    Row(
-                      children: [
-                        Expanded(child: Divider(color: Colors.grey.shade300)),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'Hoặc',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                        Expanded(child: Divider(color: Colors.grey.shade300)),
-                      ],
+                    CommonWidgets.dividerWithText(
+                      text: 'Hoặc',
+                      textColor: Colors.grey,
+                      lineColor: Colors.grey.shade300,
                     ),
-                    const SizedBox(height: 24),
+                    AppSpacing.verticalXXL,
 
                     // Social Login Buttons
                     Row(
@@ -291,16 +231,16 @@ class _LoginScreenState extends State<LoginScreen> {
                               Icons.g_mobiledata,
                               color: Colors.red,
                             ),
-                            label: const Text('Google'),
+                            label: CustomText.body(text: 'Google'),
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              padding: AppPadding.verticalMD,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        AppSpacing.horizontalLG,
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: _handleFacebookLogin,
@@ -308,9 +248,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               Icons.facebook,
                               color: Colors.blue,
                             ),
-                            label: const Text('Facebook'),
+                            label: CustomText.body(text: 'Facebook'),
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              padding: AppPadding.verticalMD,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -322,24 +262,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              AppSpacing.verticalXXL,
 
               // Register Link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Bạn chưa có tài khoản? ',
-                    style: TextStyle(color: Colors.white70),
+                  CustomText.caption(
+                    text: 'Bạn chưa có tài khoản?',
+                    color: Colors.white70,
                   ),
                   TextButton(
                     onPressed: _navigateToRegister,
-                    child: const Text(
-                      'Đăng ký',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: CustomText.caption(
+                      text: 'Đăng ký',
+                      color: Colors.white,
                     ),
                   ),
                 ],

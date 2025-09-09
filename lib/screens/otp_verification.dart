@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:myapp/core/colors.dart';
 import 'package:myapp/route/navigate_helper.dart';
-import 'package:myapp/widget/boxContainer.dart';
+import 'package:myapp/widget/index.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String email;
@@ -14,11 +13,6 @@ class OTPVerificationScreen extends StatefulWidget {
 }
 
 class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
-  final List<TextEditingController> _otpControllers = List.generate(
-    4,
-    (index) => TextEditingController(),
-  );
-  final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
   bool _isLoading = false;
   int _resendCountdown = 60;
   bool _canResend = false;
@@ -27,17 +21,6 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   void initState() {
     super.initState();
     _startCountdown();
-  }
-
-  @override
-  void dispose() {
-    for (var controller in _otpControllers) {
-      controller.dispose();
-    }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
-    super.dispose();
   }
 
   void _startCountdown() {
@@ -64,34 +47,21 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     });
   }
 
-  void _handleOTPChange(String value, int index) {
-    if (value.isNotEmpty && index < 3) {
-      _focusNodes[index + 1].requestFocus();
-    } else if (value.isEmpty && index > 0) {
-      _focusNodes[index - 1].requestFocus();
-    }
-
-    // Check if all OTP fields are filled
-    if (_otpControllers.every((controller) => controller.text.isNotEmpty)) {
-      _verifyOTP();
-    }
-  }
-
-  void _verifyOTP() {
-    final otp = _otpControllers.map((controller) => controller.text).join();
-
-    // TODO: Implement OTP verification logic
+  void _verifyOTP([String? otp]) {
+    // TODO: Use the otp parameter for verification logic
     setState(() {
       _isLoading = true;
     });
 
     // Simulate API call
     Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        _isLoading = false;
-      });
-      // Navigate to reset password screen
-      _navigateToResetPassword();
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        // Navigate to reset password screen
+        _navigateToResetPassword();
+      }
     });
   }
 
@@ -137,7 +107,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -152,124 +122,42 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
               const SizedBox(height: 32),
 
               // Title
-              const Text(
-                'Xác nhận OTP',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 16),
+              CustomText.title(text: 'Xác nhận OTP', color: Colors.white),
+              AppSpacing.vertical(16),
 
               // Description
-              Text(
-                'Chúng tôi đã gửi mã xác nhận 4 số đến\n${widget.email}',
+              CustomText.body(
+                text: 'Chúng tôi đã gửi mã xác nhận 4 số đến\n${widget.email}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
-                  height: 1.5,
-                ),
+                color: Colors.white70,
               ),
-              const SizedBox(height: 40),
+              AppSpacing.vertical(40),
 
               // OTP Input
-              BoxContainerShadow(
-                padding: 24,
-                borderRadius: 20,
+              CustomCard.service(
                 child: Column(
                   children: [
-                    // OTP Fields
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(4, (index) {
-                        return SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: TextField(
-                            controller: _otpControllers[index],
-                            focusNode: _focusNodes[index],
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                            maxLength: 1,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            decoration: InputDecoration(
-                              counterText: '',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
-                                  width: 2,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.primary,
-                                  width: 2,
-                                ),
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey.shade50,
-                            ),
-                            onChanged: (value) =>
-                                _handleOTPChange(value, index),
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 32),
+                    OTPInputWidget(onCompleted: _verifyOTP),
+                    AppSpacing.vertical(32),
 
                     // Verify Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _verifyOTP,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'Xác nhận',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
+                    CustomElevatedButton.login(
+                      text: 'Xác nhận',
+                      onPressed: _isLoading ? null : () => _verifyOTP(),
+                      isLoading: _isLoading,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              AppSpacing.vertical(32),
 
               // Resend OTP
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Không nhận được mã? ',
-                    style: TextStyle(color: Colors.white70),
+                  CustomText.body(
+                    text: 'Không nhận được mã? ',
+                    color: Colors.white70,
                   ),
                   TextButton(
                     onPressed: _canResend ? _resendOTP : null,
