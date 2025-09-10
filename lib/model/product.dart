@@ -1,21 +1,28 @@
+import 'package:myapp/model/product_detail.dart';
+
 class Product {
   final String? _productId;
   final String? _shopId;
   final String? _productName;
   final String? _description;
   final bool? _status;
+  final ProductDetail? _productDetail;
 
   Product({
+    ProductDetail? productDetail,
     String? productId,
     String? shopId,
     String? productName,
     String? description,
     bool? status,
-  }) : _productId = productId,
+  }) : _productDetail = productDetail,
+       _productId = productId,
        _shopId = shopId,
        _productName = productName,
        _description = description,
        _status = status;
+
+  ProductDetail? get productDetail => _productDetail;
 
   String get productId {
     if (_productId == null) throw Exception('productId not set');
@@ -51,6 +58,9 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
+      productDetail: json['productDetail'] != null
+          ? ProductDetail.fromJson(json['productDetail'])
+          : null,
       productId: json['productId'],
       shopId: json['shopId'],
       productName: json['productName'],

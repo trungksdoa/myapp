@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:myapp/core/utils/logger_service.dart';
 import 'package:myapp/component/main_layout.dart';
 import 'package:myapp/screens/chat_box.dart';
+import 'package:myapp/screens/detail_product.dart';
 import 'package:myapp/screens/family_blog.dart';
 import 'package:myapp/screens/group.dart';
 import 'package:myapp/screens/group_setting.dart';
 import 'package:myapp/screens/group_setting_members.dart';
+import 'package:myapp/screens/list_product.dart';
 import 'package:myapp/screens/personal.dart';
 import 'package:myapp/screens/shop_screen.dart';
 import 'package:myapp/screens/home.dart';
@@ -98,6 +100,24 @@ class AppRouter {
                 path: 'map',
                 name: 'shop-map',
                 builder: (context, state) => const ShopMap(title: ''),
+              ),
+
+              GoRoute(
+                path: 'products',
+                name: 'list-product',
+                builder: (context, state) => const ListProductScreen(),
+              ),
+
+              GoRoute(
+                path: 'products/:id',
+                name: 'detail-product',
+                builder: (context, state) {
+                  logger.d(
+                    'Building detail product with state: ${state.fullPath}',
+                  );
+                  final params = state.extra as Map<String, String>?;
+                  return DetailProductScreen(productId: params?['id']);
+                },
               ),
             ],
           ),

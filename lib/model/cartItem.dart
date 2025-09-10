@@ -5,7 +5,7 @@ class CartItem {
   final String shopId;
   final bool isProduct;
   final double totalAmount;
-  final int quantity;
+  int quantity;
 
   CartItem({
     required this.cartItemId,
@@ -16,4 +16,15 @@ class CartItem {
     required this.totalAmount,
     required this.quantity,
   });
+
+  void updateQuantity(int newQuantity) {
+    // Assuming quantity is mutable for this example
+    // In a real-world scenario, you might want to return a new instance instead
+    // if you are following immutability principles.
+    if (newQuantity < 0) {
+      throw Exception('Quantity cannot be negative');
+    }
+
+    quantity = newQuantity; // Uncomment if quantity is mutable
+  }
 }

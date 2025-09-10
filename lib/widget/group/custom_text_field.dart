@@ -7,6 +7,7 @@ class CustomTextField extends StatelessWidget {
   final Icon? prefixIcon;
   final int maxLines;
   final bool required;
+  final Function(String)? onChanged;
 
   const CustomTextField({
     super.key,
@@ -16,6 +17,7 @@ class CustomTextField extends StatelessWidget {
     this.prefixIcon,
     this.maxLines = 1,
     this.required = false,
+    this.onChanged,
   });
 
   @override
@@ -40,6 +42,8 @@ class CustomTextField extends StatelessWidget {
         prefixIcon: prefixIcon,
         alignLabelWithHint: maxLines > 1,
       ),
+
+      onChanged: onChanged,
     );
   }
 }

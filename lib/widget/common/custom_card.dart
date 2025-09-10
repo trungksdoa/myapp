@@ -110,10 +110,33 @@ class CustomCard extends StatelessWidget {
   /// optimized for service listings and product cards in grids.
   ///
   /// [child] must not be null and represents the service content.
-  factory CustomCard.service({required Widget child, VoidCallback? onTap}) {
+  factory CustomCard.service({
+    required Widget child,
+    VoidCallback? onTap,
+    EdgeInsetsGeometry? margin,
+    EdgeInsetsGeometry? padding,
+  }) {
     return CustomCard(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(16),
+      margin: margin ?? const EdgeInsets.all(8),
+      padding: padding ?? const EdgeInsets.all(16),
+      borderRadius: 12.0,
+      backgroundColor: Colors.white,
+      elevation: 4.0,
+      shadowColor: Colors.grey.withValues(alpha: 0.2),
+      onTap: onTap,
+      child: child,
+    );
+  }
+
+  factory CustomCard.normalProduct({
+    required Widget child,
+    VoidCallback? onTap,
+    EdgeInsetsGeometry? margin,
+    EdgeInsetsGeometry? padding,
+  }) {
+    return CustomCard(
+      margin: margin ?? const EdgeInsets.all(8),
+      padding: padding ?? const EdgeInsets.all(16),
       borderRadius: 12.0,
       backgroundColor: Colors.white,
       elevation: 4.0,
