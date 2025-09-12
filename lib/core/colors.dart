@@ -126,7 +126,9 @@ class AppColors {
   static MaterialColor createMaterialColor(Color color) {
     List<double> strengths = <double>[.05];
     Map<int, Color> swatch = {};
-    final int r = color.red, g = color.green, b = color.blue;
+    final int r = (color.r * 255).toInt();
+    final int g = (color.g * 255).toInt();
+    final int b = (color.b * 255).toInt();
 
     for (int i = 1; i < 10; i++) {
       strengths.add(0.1 * i);
@@ -135,9 +137,9 @@ class AppColors {
     for (var strength in strengths) {
       final double ds = 0.5 - strength;
       swatch[(strength * 1000).round()] = Color.fromRGBO(
-        r + ((ds < 0 ? r : (255 - r)) * ds).round(),
-        g + ((ds < 0 ? g : (255 - g)) * ds).round(),
-        b + ((ds < 0 ? b : (255 - b)) * ds).round(),
+        (r + ((ds < 0 ? r : (255 - r)) * ds)).round(),
+        (g + ((ds < 0 ? g : (255 - g)) * ds)).round(),
+        (b + ((ds < 0 ? b : (255 - b)) * ds)).round(),
         1,
       );
     }
@@ -211,16 +213,27 @@ class AppColors {
   }
 
   /// Lấy màu với opacity
-  static Color withOpacity(Color color, double opacity) {
-    return color.withOpacity(opacity);
+  static Color withOpacity(Color color, {double alpha = 1.0}) {
+    return color.withValues(alpha: alpha);
   }
 
   /// Blend hai màu với nhau
   static Color blendColors(Color color1, Color color2, double ratio) {
-    final r = (color1.red * ratio + color2.red * (1 - ratio)).round();
-    final g = (color1.green * ratio + color2.green * (1 - ratio)).round();
-    final b = (color1.blue * ratio + color2.blue * (1 - ratio)).round();
-    final a = (color1.alpha * ratio + color2.alpha * (1 - ratio)).round();
+    final int r1 = (color1.r * 255).toInt();
+    final int g1 = (color1.g * 255).toInt();
+    final int b1 = (color1.b * 255).toInt();
+    final int a1 = (color1.a * 255).toInt();
+
+    final int r2 = (color2.r * 255).toInt();
+    final int g2 = (color2.g * 255).toInt();
+    final int b2 = (color2.b * 255).toInt();
+    final int a2 = (color2.a * 255).toInt();
+
+    final int r = ((r1 * ratio) + (r2 * (1 - ratio))).round();
+    final int g = ((g1 * ratio) + (g2 * (1 - ratio))).round();
+    final int b = ((b1 * ratio) + (b2 * (1 - ratio))).round();
+    final int a = ((a1 * ratio) + (a2 * (1 - ratio))).round();
+
     return Color.fromARGB(a, r, g, b);
   }
 }
@@ -235,10 +248,6 @@ extension ColorExtension on Color {
 
   /// Tạo MaterialColor từ Color hiện tại
   MaterialColor get asMaterialColor => AppColors.createMaterialColor(this);
-
-  /// Lấy màu với opacity
-  Color withOpacityValue(double opacity) =>
-      AppColors.withOpacity(this, opacity);
 
   /// Blend với màu khác
   Color blendWith(Color other, double ratio) =>

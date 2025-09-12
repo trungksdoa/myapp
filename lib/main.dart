@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/auth_factory.dart';
+import 'package:myapp/features/shop/logic/shop_logic.dart';
+import 'package:myapp/service/auth_factory.dart';
 import 'package:myapp/core/utils/app_performance.dart';
 import 'package:myapp/route/app_router.dart';
 import 'package:myapp/service/auth_service.dart';
 import 'package:myapp/service/notification_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_cart/flutter_cart.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -26,7 +28,14 @@ void main() async {
   // Initialize Notification Service
   await NotificationService().initNotification();
 
-  runApp(const MyApp());
+  var cart = FlutterCart();
+  await cart.initializeCart(isPersistenceSupportEnabled: true);
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => CartService())],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

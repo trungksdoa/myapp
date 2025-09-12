@@ -1,9 +1,16 @@
 // Mock data for shops and products
-import 'package:myapp/model/product_detail.dart';
+import 'package:myapp/shared/model/product_detail.dart';
+import 'package:myapp/shared/model/shop.dart';
+import 'package:myapp/shared/model/product.dart';
 
-import '../model/shop.dart';
-import '../model/product.dart';
-
+final services = [
+  {'icon': "assets/images/Home1.png", 'label': 'Dịch vụ chăm sóc thú cưng'},
+  {'icon': "assets/images/Home2.png", 'label': 'Sức khỏe và vệ sinh'},
+  {'icon': "assets/images/Home3.png", 'label': 'Thức ăn và dinh dưỡng'},
+  {'icon': "assets/images/Home4.png", 'label': 'Phụ kiện và đồ dùng'},
+  {'icon': "assets/images/Home5.png", 'label': 'Y tế thú y'},
+  {'icon': "assets/images/Home6.png", 'label': 'Khác'},
+];
 final mockShops = [
   Shop(
     shopId: 'shop_001',
@@ -15,6 +22,14 @@ final mockShops = [
   ),
   Shop(
     shopId: 'shop_002',
+    owner: 'owner_002@example.com',
+    shopName: 'Pet Grooming Center',
+    description: 'Professional grooming services',
+    status: true,
+    workingDays: 'Tue-Sun',
+  ),
+  Shop(
+    shopId: 'shop_003',
     owner: 'owner_002@example.com',
     shopName: 'Pet Grooming Center',
     description: 'Professional grooming services',

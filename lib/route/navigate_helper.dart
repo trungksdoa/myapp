@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myapp/auth_factory.dart';
+import 'package:myapp/service/auth_factory.dart';
 import 'package:myapp/core/utils/logger_service.dart';
 import 'package:myapp/service/interface/auth_repository.dart';
 
@@ -329,5 +329,17 @@ class NavigateHelper {
         ).showSnackBar(SnackBar(content: Text('Navigation error: $e')));
       }
     }
+  }
+
+  // =====================================
+  // SHOP NAVIGATION HELPERS
+  // =====================================
+
+  static void goToShopMap(BuildContext context) {
+    context.goNamed('shop-map');
+  }
+
+  static void goToDetailProduct(BuildContext context, String productId) {
+    context.pushNamed('detail-product', pathParameters: {'id': productId});
   }
 }

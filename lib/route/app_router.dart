@@ -2,31 +2,30 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/core/utils/logger_service.dart';
-import 'package:myapp/component/main_layout.dart';
-import 'package:myapp/screens/chat_box.dart';
-import 'package:myapp/screens/detail_product.dart';
-import 'package:myapp/screens/family_blog.dart';
-import 'package:myapp/screens/group.dart';
-import 'package:myapp/screens/group_setting.dart';
-import 'package:myapp/screens/group_setting_members.dart';
-import 'package:myapp/screens/list_product.dart';
-import 'package:myapp/screens/personal.dart';
-import 'package:myapp/screens/shop_screen.dart';
-import 'package:myapp/screens/home.dart';
-import 'package:myapp/screens/group_create.dart';
-import 'package:myapp/screens/chat_screen.dart';
+import 'package:myapp/features/chat/screen/chat_box.dart';
+import 'package:myapp/features/shop/screen/detail_product.dart';
+import 'package:myapp/features/family/screen/family_blog.dart';
+import 'package:myapp/features/family/screen/group.dart';
+import 'package:myapp/features/family/screen/group_setting.dart';
+import 'package:myapp/features/family/screen/group_setting_members.dart';
+import 'package:myapp/features/personal/screen/personal.dart';
+import 'package:myapp/features/shop/screen/shop_screen.dart';
+import 'package:myapp/features/home/screen/home.dart';
+import 'package:myapp/features/family/screen/group_create.dart';
+import 'package:myapp/features/chat/screen/chat_screen.dart';
 // Auth screens
-import 'package:myapp/screens/login.dart';
-import 'package:myapp/screens/register.dart';
-import 'package:myapp/screens/registration_success.dart';
-import 'package:myapp/screens/forgot_password.dart';
-import 'package:myapp/screens/otp_verification.dart';
-import 'package:myapp/screens/reset_password.dart';
-import 'package:myapp/screens/password_reset_success.dart';
-import 'package:myapp/screens/splash_screen.dart';
+import 'package:myapp/features/other/screen/login.dart';
+import 'package:myapp/features/other/screen/register.dart';
+import 'package:myapp/features/other/screen/registration_success.dart';
+import 'package:myapp/features/other/screen/forgot_password.dart';
+import 'package:myapp/features/other/screen/otp_verification.dart';
+import 'package:myapp/features/other/screen/reset_password.dart';
+import 'package:myapp/features/other/screen/password_reset_success.dart';
+import 'package:myapp/features/other/screen/splash_screen.dart';
 // Services
-import 'package:myapp/auth_factory.dart';
-import 'package:myapp/widget/shop_map.dart';
+import 'package:myapp/service/auth_factory.dart';
+import 'package:myapp/features/shop/widgets/shop_map.dart';
+import 'package:myapp/shared/widgets/common/main_layout.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -94,30 +93,27 @@ class AppRouter {
                 path: '/shop',
                 name: 'shop',
                 builder: (context, state) => const ShopScreen(title: "shop"),
-              ),
+                routes: [
+                  GoRoute(
+                    path: 'map',
+                    name: 'shop-map',
+                    builder: (context, state) => const ShopMap(),
+                  ),
 
-              GoRoute(
-                path: 'map',
-                name: 'shop-map',
-                builder: (context, state) => const ShopMap(title: ''),
-              ),
-
-              GoRoute(
-                path: 'products',
-                name: 'list-product',
-                builder: (context, state) => const ListProductScreen(),
-              ),
-
-              GoRoute(
-                path: 'products/:id',
-                name: 'detail-product',
-                builder: (context, state) {
-                  logger.d(
-                    'Building detail product with state: ${state.fullPath}',
-                  );
-                  final params = state.extra as Map<String, String>?;
-                  return DetailProductScreen(productId: params?['id']);
-                },
+                  GoRoute(
+                    path: 'products/:id',
+                    name: 'detail-product',
+                    builder: (context, state) {
+                      // logger.d(
+                      //   'Building detail product with state: ${state.fullPath}',
+                      // );
+                      // final params = state.extra as Map<String, String>?;
+                      final param = state.pathParameters['id'];
+                      return DetailProductScreen(productId: param);
+                    },
+                  ),
+                  // Sub-routes for shop can be added here
+                ],
               ),
             ],
           ),
