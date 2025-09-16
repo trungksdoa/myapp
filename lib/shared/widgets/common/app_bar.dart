@@ -5,10 +5,9 @@ import 'package:myapp/service/auth_factory.dart';
 import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/service/interface/auth_repository.dart';
 
-
 class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
-  static const double logoSize = 58;
-  static const double appBarFontSize = 25;
+  static const double logoSize = 45;
+  static const double appBarFontSize = 20;
   static const FontWeight appBarFontWeight = FontWeight.bold;
   static const Shadow nestTextShadow = Shadow(
     color: Colors.black45,
@@ -21,7 +20,7 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 
   const MyAppBar({
     super.key,
-    this.height = 90,
+    this.height = 70,
     this.logoPath = 'assets/images/logo.png',
   });
 
@@ -112,14 +111,14 @@ class _MyAppBarState extends State<MyAppBar> {
           // ),
           // Logout button
           IconButton(
-            icon: Icon(Icons.logout, size: 28, color: AppColors.textOnPrimary),
+            icon: Icon(Icons.logout, size: 24, color: AppColors.textOnPrimary),
             onPressed: _handleLogout,
             tooltip: 'Đăng xuất',
           ),
         ] else ...[
           // Login button if not authenticated
           IconButton(
-            icon: Icon(Icons.login, size: 28, color: AppColors.textOnPrimary),
+            icon: Icon(Icons.login, size: 24, color: AppColors.textOnPrimary),
             onPressed: () {
               Navigator.of(context).pushNamed('/auth/login');
             },

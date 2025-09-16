@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:myapp/features/cart/widgets/cart_icon_widget.dart';
 import 'package:myapp/features/shop/logic/shop_logic.dart';
+import 'package:myapp/route/navigate_helper.dart';
 
 class ShopAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final TextEditingController searchController;
   final Function(String) onSearchChanged;
   final VoidCallback onCartPressed;
+  final CartService cartService = CartService();
 
-  const ShopAppBarWidget({
+  ShopAppBarWidget({
     super.key,
     required this.searchController,
     required this.onSearchChanged,
@@ -18,7 +20,7 @@ class ShopAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       title: SizedBox(
-        height: 40,
+        height: 50,
         child: TextField(
           controller: searchController,
           decoration: InputDecoration(
@@ -39,52 +41,7 @@ class ShopAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
-        Container(
-          margin: const EdgeInsets.only(right: 8),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: onCartPressed,
-              ),
-
-              // Consumer DEEP - chỉ cho cart badge
-              Consumer<CartService>(
-                builder: (context, cartService, child) {
-                  final cartCount = cartService.getCartCount();
-                  if (cartCount == 0) return const SizedBox.shrink();
-
-                  return Positioned(
-                    right: 6,
-                    top: 6,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      constraints: const BoxConstraints(
-                        minWidth: 20,
-                        minHeight: 20,
-                      ),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          cartCount > 99 ? '99+' : cartCount.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
+        CartIconWidget(onCartPressed: () => NavigateHelper.goToCart(context)),
       ],
     );
   }

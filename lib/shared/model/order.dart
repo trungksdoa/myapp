@@ -42,8 +42,9 @@ class Order {
   }
 
   String get shippingAddressId {
-    if (_shippingAddressId == null)
+    if (_shippingAddressId == null) {
       throw Exception('shippingAddressId not set');
+    }
     return _shippingAddressId;
   }
 

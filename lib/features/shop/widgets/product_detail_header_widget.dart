@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:myapp/features/cart/widgets/cart_icon_widget.dart';
+import 'package:myapp/features/cart/screen/cart_widget.dart';
+import 'package:myapp/features/shop/logic/shop_logic.dart';
 
 class ProductDetailHeaderWidget extends StatelessWidget {
   final double padding;
   final VoidCallback? onBackPressed;
   final VoidCallback? onFavoritePressed;
+  final CartService _cartService = CartService();
 
-  const ProductDetailHeaderWidget({
+  ProductDetailHeaderWidget({
     super.key,
     required this.padding,
     this.onBackPressed,
@@ -29,20 +33,9 @@ class ProductDetailHeaderWidget extends StatelessWidget {
               elevation: 2,
             ),
           ),
-          IconButton(
-            onPressed:
-                onFavoritePressed ??
-                () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Đã thêm vào yêu thích')),
-                  );
-                },
-            icon: const Icon(Ionicons.heart_outline, color: Colors.black),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.white,
-              shadowColor: Colors.black12,
-              elevation: 2,
-            ),
+          CartIconWidget(
+            onCartPressed: () =>
+                CartWidget(_cartService).goToCartScreen(context),
           ),
         ],
       ),

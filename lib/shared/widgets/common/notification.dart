@@ -27,6 +27,20 @@ class NotificationUtils {
       duration: Duration(seconds: 3),
       behavior: SnackBarBehavior.floating,
       margin: EdgeInsets.all(16),
+      animation: CurvedAnimation(
+        parent: AnimationController(
+          duration: const Duration(milliseconds: 300),
+          vsync: ScaffoldMessenger.of(context),
+        )..forward(),
+        curve: Curves.easeInOut,
+      ),
+      onVisible: () {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (context.mounted) {
+            hideCurrentNotification(context);
+          }
+        });
+      },
       backgroundColor: Colors.black87,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       action: SnackBarAction(
@@ -68,6 +82,6 @@ class NotificationUtils {
   }
 
   static void hideCurrentNotification(BuildContext context) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).clearSnackBars();
   }
 }

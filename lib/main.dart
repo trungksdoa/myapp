@@ -8,13 +8,16 @@ import 'package:myapp/service/notification_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_cart/flutter_cart.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize performance monitoring
-  AppPerformance.initialize();
+  // Initialize performance monitoring (only in debug mode)
+  if (kDebugMode) {
+    AppPerformance.initialize();
+  }
 
   // Initialize AuthService
   await AuthService().initialize();
@@ -30,6 +33,7 @@ void main() async {
 
   var cart = FlutterCart();
   await cart.initializeCart(isPersistenceSupportEnabled: true);
+
   runApp(
     MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => CartService())],

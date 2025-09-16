@@ -1,4 +1,23 @@
 {
-  "IDX.agenticWorkspace": true,
-  "cmake.sourceDirectory": "C:/CareNest/myapp/windows"
+  "files.exclude": {
+    "**/android": true,
+    "**/ios": true,
+    "**/linux": true,
+    "**/web": true,
+    "**/windows": true,
+    "**/build": true,
+    "**/.dart_tool": true,
+    "**/.metadata": true,
+    "**/pubspec.lock": true
+  },
+  "dart.onlyAnalyzeProjectsWithOpenFiles": true,
+  "dart.analysisExcludedFolders": ["build", ".dart_tool"],
+  "editor.formatOnSave": true,
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.rulers": [80]
+  },
+  "dart.env": {
+    "DART_VM_OPTIONS": "--max_heap_size=4G --no-enable-mirrors"
+  }
 }

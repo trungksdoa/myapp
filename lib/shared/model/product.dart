@@ -6,6 +6,7 @@ class Product {
   final String? _productName;
   final String? _description;
   final bool? _status;
+  final String? _category;
   final ProductDetail? _productDetail;
 
   Product({
@@ -15,12 +16,14 @@ class Product {
     String? productName,
     String? description,
     bool? status,
+    String? category,
   }) : _productDetail = productDetail,
        _productId = productId,
        _shopId = shopId,
        _productName = productName,
        _description = description,
-       _status = status;
+       _status = status,
+       _category = category;
 
   ProductDetail? get productDetail => _productDetail;
 
@@ -55,6 +58,11 @@ class Product {
   String? get productNameNullable => _productName;
   String? get descriptionNullable => _description;
   bool? get statusNullable => _status;
+  String? get categoryNullable => _category;
+  String get category {
+    if (_category == null) throw Exception('category not set');
+    return _category;
+  }
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
@@ -66,6 +74,7 @@ class Product {
       productName: json['productName'],
       description: json['description'],
       status: json['status'],
+      category: json['category'],
     );
   }
 
@@ -77,5 +86,25 @@ class Product {
       'description': descriptionNullable,
       'status': statusNullable,
     };
+  }
+
+  Product copyWith({
+    ProductDetail? productDetail,
+    String? productId,
+    String? shopId,
+    String? productName,
+    String? description,
+    bool? status,
+    String? category,
+  }) {
+    return Product(
+      productDetail: productDetail ?? _productDetail,
+      productId: productId ?? _productId,
+      shopId: shopId ?? _shopId,
+      productName: productName ?? _productName,
+      description: description ?? _description,
+      status: status ?? _status,
+      category: category ?? _category,
+    );
   }
 }

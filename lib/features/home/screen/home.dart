@@ -52,95 +52,157 @@ class _HomeState extends State<Home> {
     double fontSize = DeviceSize.getResponsiveFontSize(
       MediaQuery.of(context).size.width,
     );
+
     final widget = SizedBox(
       child: CustomScrollView(
         slivers: [
-          // MyAppBar(), // Đã di chuyển vào MainLayout
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Xin chào!',
+                    style: TextStyle(
+                      fontSize: fontSize + 8,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Chọn dịch vụ bạn cần',
+                    style: TextStyle(
+                      fontSize: fontSize - 2,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           SliverPadding(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 20,
-                childAspectRatio: 0.72,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 0.85,
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
-                return PetServiceCard(
-                  assetIcon: services[index]['icon']!,
-                  label: services[index]['label']!,
-                  size: 75,
-                  onTap: () {
-                    NotificationUtils.showNotification(
-                      context,
-                      'Đã chọn ${services[index]['label']!}',
-                    );
-                  },
+                return Hero(
+                  tag: 'service-${services[index]['key']}',
+                  child: Material(
+                    color: Colors.transparent,
+                    child: PetServiceCard(
+                      assetIcon: services[index]['icon']!,
+                      label: services[index]['label']!,
+                      size: 75,
+                      onTap: () {
+                        NotificationUtils.showNotification(
+                          context,
+                          'Đã chọn ${services[index]['label']!}',
+                        );
+                      },
+                    ),
+                  ),
                 );
               }, childCount: services.length),
             ),
           ),
 
           if (!auth.isAuthenticated)
-            //Bản đồ
             SliverToBoxAdapter(
-              child: CustomCard(
-                margin: AppMargin.lg,
-                padding: AppPadding.md,
-                borderRadius: 16.0,
-                elevation: 6.0,
-                child: Row(
-                  children: [
-                    Flexible(
-                      flex: 6,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          height: 140,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage(
-                                'assets/images/preview_map.png',
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: CustomCard(
+                  margin: EdgeInsets.zero,
+                  padding: AppPadding.md,
+                  borderRadius: 20.0,
+                  elevation: 4.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Colors.blue[50]!, Colors.blue[100]!],
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Flexible(
+                          flex: 6,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              height: 160,
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                                image: const DecorationImage(
+                                  image: AssetImage(
+                                    'assets/images/preview_map.png',
+                                  ),
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                      ),
+                        AppSpacing.horizontalLG,
+                        Flexible(
+                          flex: 4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CustomText.title(
+                                text: 'Tìm phòng khám uy tín gần bạn',
+                                fontSize: fontSize + 2,
+                              ),
+                              AppSpacing.verticalLG,
+                              CustomElevatedButton.primary(
+                                text: 'Đăng nhập ngay',
+                                onPressed: () {},
+                                width: double.infinity,
+                              ),
+                              AppSpacing.verticalSM,
+                              CustomText.caption(
+                                text: "Đăng nhập để trải nghiệm đầy đủ",
+                                color: Colors.black54,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    AppSpacing.horizontalLG,
-                    Flexible(
-                      flex: 4,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CustomText.title(
-                            text:
-                                'Trải nghiệm tìm kiếm phòng khám uy tín gần khu vực của bạn',
-                            fontSize: fontSize + 2,
-                          ),
-                          AppSpacing.verticalLG,
-                          CustomElevatedButton.primary(
-                            text: 'Đăng nhập',
-                            onPressed: () {},
-                            width: double.infinity,
-                          ),
-                          AppSpacing.verticalXS,
-                          CustomText.caption(
-                            text: "Đăng nhập để trải nghiệm nhiều hơn",
-                            color: Colors.black54,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ShopMap(),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    spreadRadius: 1,
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: const ShopMap(),
             ),
           ),
           // --- Card đánh giá khách hàng ---

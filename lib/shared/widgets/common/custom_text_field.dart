@@ -57,6 +57,15 @@ class CustomTextField extends StatelessWidget {
   /// Custom padding around the input content.
   final EdgeInsetsGeometry? contentPadding;
 
+  /// check is password
+  final bool isPassword;
+
+  /// Whether the password is currently visible (only used when isPassword is true)
+  final bool? isPasswordVisible;
+
+  /// Callback for toggling password visibility (only used when isPassword is true)
+  final VoidCallback? onVisibilityToggle;
+
   /// Creates a customizable text input field.
   ///
   /// [controller] must not be null and manages the text input.
@@ -80,6 +89,9 @@ class CustomTextField extends StatelessWidget {
     this.borderColor,
     this.borderRadius = 12.0,
     this.contentPadding,
+    this.isPassword = false,
+    this.isPasswordVisible,
+    this.onVisibilityToggle,
   });
 
   /// Creates a password input field with visibility toggle.
@@ -117,6 +129,9 @@ class CustomTextField extends StatelessWidget {
         ),
         onPressed: onToggleVisibility,
       ),
+      isPassword: true,
+      isPasswordVisible: isPasswordVisible,
+      onVisibilityToggle: onToggleVisibility,
     );
   }
 
@@ -142,6 +157,7 @@ class CustomTextField extends StatelessWidget {
       keyboardType: TextInputType.emailAddress,
       required: required,
       prefixIcon: const Icon(Icons.email_outlined),
+      isPassword: false,
     );
   }
 
@@ -167,6 +183,7 @@ class CustomTextField extends StatelessWidget {
       keyboardType: TextInputType.text,
       required: required,
       prefixIcon: const Icon(Icons.person_outline),
+      isPassword: false,
     );
   }
 
@@ -194,6 +211,7 @@ class CustomTextField extends StatelessWidget {
       maxLines: maxLines,
       required: required,
       keyboardType: TextInputType.multiline,
+      isPassword: false,
     );
   }
 
@@ -218,6 +236,7 @@ class CustomTextField extends StatelessWidget {
       onChanged: onChanged,
       borderRadius: 25.0,
       fillColor: Colors.grey.shade100,
+      isPassword: false,
     );
   }
 
@@ -244,6 +263,7 @@ class CustomTextField extends StatelessWidget {
       borderColor: Colors.grey.shade300,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       onTap: onTap,
+      isPassword: false,
     );
   }
 
@@ -252,9 +272,24 @@ class CustomTextField extends StatelessWidget {
   /// Returns a TextFormField with comprehensive input decoration and validation.
   @override
   Widget build(BuildContext context) {
+    // Determine the effective obscureText and suffixIcon
+    final bool effectiveObscureText = isPassword && isPasswordVisible != null
+        ? !isPasswordVisible!
+        : obscureText;
+    final Widget? effectiveSuffixIcon =
+        isPassword && isPasswordVisible != null && onVisibilityToggle != null
+        ? IconButton(
+            icon: Icon(
+              isPasswordVisible! ? Icons.visibility : Icons.visibility_off,
+              color: Colors.grey.shade600,
+            ),
+            onPressed: onVisibilityToggle,
+          )
+        : suffixIcon;
+
     return TextFormField(
       controller: controller,
-      obscureText: obscureText,
+      obscureText: effectiveObscureText,
       keyboardType: keyboardType,
       maxLines: maxLines,
       validator: validator,
@@ -265,7 +300,7 @@ class CustomTextField extends StatelessWidget {
         labelText: required && labelText != null ? '$labelText *' : labelText,
         hintText: hintText,
         prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
+        suffixIcon: effectiveSuffixIcon,
         labelStyle: TextStyle(color: Colors.grey.shade600),
         hintStyle: TextStyle(color: Colors.grey.shade500),
         filled: true,

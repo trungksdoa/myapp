@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/core/currency_format.dart';
 import 'package:myapp/core/utils/device_size.dart';
 import 'package:myapp/core/utils/performance_monitor.dart';
+import 'package:myapp/features/cart/screen/cart_widget.dart';
 import 'package:myapp/features/shop/logic/shop_logic.dart';
 import 'package:myapp/features/shop/widgets/app_bar_shop_widget.dart';
-import 'package:myapp/features/shop/widgets/cart_empty_widget.dart';
-import 'package:myapp/features/shop/widgets/cart_items_list_widget.dart';
 import 'package:myapp/features/shop/widgets/shop_product_grid_widget.dart';
 import 'package:myapp/features/shop/widgets/shop_service_list_widget.dart';
 import 'package:myapp/mock_data/shop_mock.dart';
 import 'package:myapp/shared/model/product.dart';
 import 'package:myapp/shared/model/shop.dart';
 import 'package:myapp/shared/widgets/common/app_spacing.dart';
-import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key, required this.title});
@@ -28,6 +25,7 @@ class _ShopScreenState extends State<ShopScreen> {
   final List<Product> _productList = [];
   final List<Shop> _shopList = [];
   final Map<String, GlobalKey> _productKeys = {};
+  String? _selectedCategory;
 
   @override
   void initState() {
@@ -71,28 +69,39 @@ class _ShopScreenState extends State<ShopScreen> {
     double width = MediaQuery.of(context).size.width;
     double paddingResponsive = DeviceSize.getResponsivePadding(width);
 
+    final filteredProducts = _selectedCategory == null
+        ? _productList
+        : _productList.where((p) => p.category == _selectedCategory).toList();
+
     final widget = Scaffold(
       appBar: ShopAppBarWidget(
         searchController: _searchController,
         onSearchChanged: onSearch,
-        onCartPressed: () => modalShow(),
+        onCartPressed: () => CartWidget(
+          _cartService,
+        ).modalShowWithFloatingButtons(context, _cartService),
       ),
       body: Column(
         children: [
-          // Service list - NO Consumer needed (static)
-          ShopServiceListWidget(paddingResponsive: paddingResponsive),
-
-          AppSpacing.vertical(4),
+          ShopServiceListWidget(
+            paddingResponsive: paddingResponsive,
+            onServiceTap: (categoryKey) {
+              setState(() {
+                _selectedCategory = categoryKey;
+              });
+            },
+          ),
           const Divider(height: 1),
           AppSpacing.vertical(4),
-
-          // Product grid - NO Consumer needed here
           Expanded(
             child: ShopProductGridWidget(
-              productList: _productList,
+              productList: filteredProducts,
               productKeys: _productKeys,
               searchController: _searchController,
               paddingResponsive: paddingResponsive,
+              openCart: () => CartWidget(
+                _cartService,
+              ).modalShowWithFloatingButtons(context, _cartService),
             ),
           ),
         ],
@@ -105,102 +114,5 @@ class _ShopScreenState extends State<ShopScreen> {
 
   void onSearch(String name) {
     setState(() {});
-  }
-
-  void modalShow() {
-    WoltModalSheet.show(
-      context: context,
-      pageListBuilder: (bottomSheetContext) => [
-        SliverWoltModalSheetPage(
-          mainContentSliversBuilder: (context) => [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Your Cart',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ],
-                    ),
-                    const Divider(),
-                  ],
-                ),
-              ),
-            ),
-            _cartService.getCartCount() == 0
-                ? CartEmptyWidget()
-                : CartItemsListWidget(cartService: _cartService),
-
-            if (_cartService.getCartCount() > 0)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      const Divider(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Tổng cộng',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            Currency.formatVND(_cartService.getTotalAmount()),
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green[700],
-                            ),
-                          ),
-                        ],
-                      ),
-                      AppSpacing.vertical(24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            // Navigate to checkout page
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            'Thanh toán',
-                            style: TextStyle(fontSize: 16, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-          backgroundColor: Colors.white,
-          forceMaxHeight: true,
-        ),
-      ],
-    );
   }
 }

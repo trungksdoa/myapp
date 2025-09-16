@@ -4,8 +4,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:myapp/shared/model/blog.dart';
 import 'package:myapp/shared/model/pet.dart';
 
-
-
 class EditComposer extends StatefulWidget {
   final Blog blogToEdit; // Bài viết cần chỉnh sửa
 
@@ -354,10 +352,12 @@ class _EditComposerState extends State<EditComposer> {
 
     String message =
         'Đã cập nhật với pet: ${selectedPetName.isEmpty ? 'Không chọn' : selectedPetName}';
-    if (_deletedFileIds.isNotEmpty)
+    if (_deletedFileIds.isNotEmpty) {
       message += '\nĐã xóa ${_deletedFileIds.length} ảnh';
-    if (_selectedImages.isNotEmpty)
+    }
+    if (_selectedImages.isNotEmpty) {
       message += '\nĐã thêm ${_selectedImages.length} ảnh mới';
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

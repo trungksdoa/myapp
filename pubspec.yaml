@@ -34,8 +34,10 @@ dependencies:
   currency_formatter: ^2.3.0
   wolt_modal_sheet: ^0.11.0
   flutter_cart: ^0.0.9
-  imageflow: ^1.0.8
+  cached_network_image: ^3.4.1
   ionicons: ^0.2.2
+  board_datetime_picker: ^2.8.2
+
 
   # circle_nav_bar: ^1.0.3
 

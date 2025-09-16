@@ -27,6 +27,21 @@ class CartService extends ChangeNotifier {
   int getCartCount() => _flutterCart.cartLength;
   double getTotalAmount() => _flutterCart.total;
 
+  int getItemQuantity(String productId) {
+    final item = _flutterCart.cartItemsList.firstWhere(
+      (item) => item.productId == productId,
+      orElse: () => CartModel(
+        productId: '',
+        productName: '',
+        productImages: [],
+        variants: [],
+        productMeta: {},
+        productDetails: '',
+      ),
+    );
+    return item.quantity;
+  }
+
   // Get product image by ID
   String getProductImage(String productId) {
     return _productImages.containsKey(productId)
@@ -48,7 +63,12 @@ class CartService extends ChangeNotifier {
   }
 
   // Add product to cart
-  void addToCart(Product product) {
+  void addToCart(Product product, {Map<String, dynamic> options = const {}}) {
+    final meta = <String, dynamic>{
+      'items': product.toJson(),
+      'services': options,
+      'shopId': product.shopId, // Thêm shopId trực tiếp
+    };
     try {
       _flutterCart.addToCart(
         cartModel: CartModel(
@@ -58,7 +78,7 @@ class CartService extends ChangeNotifier {
           variants: [
             ProductVariant(price: product.productDetail?.price ?? 0.0),
           ],
-          productMeta: product.toJson(),
+          productMeta: meta, //Change from product product.toJson() to meta
           productDetails: '',
         ),
       );
