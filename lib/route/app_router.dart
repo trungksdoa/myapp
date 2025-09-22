@@ -2,35 +2,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/core/utils/logger_service.dart';
-import 'package:myapp/features/chat/screen/chat_box.dart';
 import 'package:myapp/features/personal/screen/account_profile.dart';
-import 'package:myapp/features/personal/screen/appintment_detail.dart';
-import 'package:myapp/features/personal/screen/bank_link.dart';
-import 'package:myapp/features/personal/screen/bank_selection.dart';
-import 'package:myapp/features/personal/screen/bank_success.dart';
-import 'package:myapp/features/personal/screen/bank_verify_otp.dart';
 import 'package:myapp/features/personal/screen/change_password.dart';
 import 'package:myapp/features/personal/screen/home.dart';
-import 'package:myapp/features/personal/screen/notification_screen.dart';
-import 'package:myapp/features/personal/screen/pet_personal.dart';
-import 'package:myapp/features/personal/screen/pet_personal_form.dart';
-import 'package:myapp/features/personal/screen/product_order.dart';
-import 'package:myapp/features/personal/screen/services_order.dart';
-import 'package:myapp/features/personal/screen/services_package.dart';
-import 'package:myapp/features/shop/screen/detail_product.dart';
-import 'package:myapp/features/family/screen/family_blog.dart';
-import 'package:myapp/features/family/screen/group.dart';
-import 'package:myapp/features/family/screen/group_setting.dart';
-import 'package:myapp/features/family/screen/group_setting_members.dart';
 import 'package:myapp/features/cart/screen/cart_screen.dart';
 import 'package:myapp/features/shop/screen/order_detail.dart';
 import 'package:myapp/features/shop/screen/order_success.dart';
 import 'package:myapp/features/shop/screen/service_order_screen.dart';
 import 'package:myapp/features/shop/screen/shop_detail_screen.dart';
 import 'package:myapp/features/shop/screen/shop_screen.dart';
+import 'package:myapp/features/shop/screen/detail_product.dart';
 import 'package:myapp/features/home/screen/home.dart';
-import 'package:myapp/features/family/screen/group_create.dart';
-import 'package:myapp/features/chat/screen/chat_screen.dart';
 // Auth screens
 import 'package:myapp/features/other/screen/login.dart';
 import 'package:myapp/features/other/screen/register.dart';
@@ -48,8 +30,6 @@ import 'package:myapp/shared/widgets/common/main_layout.dart';
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
 final _shopNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shop');
-final _aiNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'ai');
-final _familyNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'family');
 final _personalNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'personal');
 
 class AppRouter {
@@ -70,8 +50,6 @@ class AppRouter {
         '/cart',
         '/order',
         '/personal',
-        '/ai/chat',
-        '/family',
         '/shop/map', // keep map protected if you want to restrict it, otherwise remove
         // '/shop/products' removed so users can browse products without logging in
       ];
@@ -284,95 +262,6 @@ class AppRouter {
             ],
           ),
 
-          // AI Branch
-          StatefulShellBranch(
-            navigatorKey: _aiNavigatorKey,
-            routes: [
-              GoRoute(
-                path: '/ai',
-                name: 'ai',
-                builder: (context, state) => const ChatBox(),
-                routes: [
-                  // Sub-routes cho AI chat
-                  GoRoute(
-                    path: 'chat', // Bỏ dấu / → 'chat'
-                    name: 'chat-screen',
-                    builder: (context, state) {
-                      final initialMessage =
-                          state.uri.queryParameters['message'];
-                      final petName = state.uri.queryParameters['petName'];
-                      return ChatScreen(
-                        initialMessage: initialMessage,
-                        petName: petName,
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          // Family Branch
-          StatefulShellBranch(
-            navigatorKey: _familyNavigatorKey,
-            routes: [
-              GoRoute(
-                path: '/family', // Parent
-                name: 'family',
-                builder: (context, state) => const GroupScreen(title: "group"),
-                routes: [
-                  GoRoute(
-                    path: 'blog/home',
-                    name: 'family-blog',
-                    builder: (context, state) {
-                      logger.d(
-                        'Building FamilyBlog with state: ${state.fullPath}',
-                      );
-                      final params = state.extra as Map<String, String>?;
-
-                      logger.d('Received params: $params');
-
-                      return FamilyBlog(
-                        groupId: params?['groupId'],
-                        groupName: params?['groupName'],
-                        groupAvatar: params?['groupAvatar'],
-                        groupSize: params?['groupSize'],
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: 'create',
-                    name: 'group-create',
-                    builder: (context, state) => const GroupCreate(),
-                  ),
-                  GoRoute(
-                    path: 'settings', // Bỏ dấu / → 'settings'
-                    name: 'group-settings',
-                    builder: (context, state) {
-                      final params = state.extra as Map<String, String>?;
-                      final groupId = params?['groupId'];
-                      LoggerService.instance.d(
-                        'Navigating to GroupSetting with groupId: $groupId',
-                      );
-                      return GroupSetting(groupId: groupId);
-                    },
-                    routes: [
-                      GoRoute(
-                        path: 'members',
-                        name: 'group-setting-members',
-                        builder: (context, state) {
-                          final params = state.extra as Map<String, String>?;
-                          final groupId = params?['groupId'];
-                          return GroupSettingMembers(groupId: groupId);
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-
           // Personal Branch
           StatefulShellBranch(
             navigatorKey: _personalNavigatorKey,
@@ -382,26 +271,7 @@ class AppRouter {
                 name: 'personal',
                 builder: (context, state) => const PersonalHomeWidget(),
                 routes: [
-                  // Sub-routes cho Personal
-                  GoRoute(
-                    path: 'orders',
-                    name: 'personal-orders-products',
-                    builder: (context, state) => const OrdersBodyWidget(),
-                  ),
-                  GoRoute(
-                    path: 'products',
-                    name: 'personal-appointment-booking',
-                    builder: (context, state) =>
-                        const ServiceBookingBodyWidget(),
-                    routes: [
-                      GoRoute(
-                        path: 'orders',
-                        name: 'personal-appointment-detail',
-                        builder: (context, state) =>
-                            const AppointmentDetailsBodyWidget(),
-                      ),
-                    ],
-                  ),
+                  // Sub-routes cho Personal - chỉ giữ lại account/profile
                   GoRoute(
                     path: 'accounts',
                     name: 'personal-account',
@@ -415,81 +285,6 @@ class AppRouter {
                             const ChangePasswordBodyWidget(),
                       ),
                     ],
-                  ),
-
-                  GoRoute(
-                    path: 'service-packages',
-                    name: 'personal-packages',
-                    builder: (context, state) =>
-                        const ServicePackagesBodyWidget(),
-                    routes: [
-                      GoRoute(
-                        path: 'link-bank',
-                        name: 'personal-packages-link-bank',
-                        builder: (context, state) =>
-                            const BankSelectionBodyWidget(),
-                        routes: [
-                          GoRoute(
-                            path: 'link-bank-form',
-                            name: 'personal-packages-link-bank-form',
-                            builder: (context, state) =>
-                                const BankAccountLinkingBodyWidget(
-                                  bankName: 'Vietcombank',
-                                ),
-                            routes: [
-                              GoRoute(
-                                path: 'verify-otp',
-                                name:
-                                    'personal-packages-link-bank-form-verify-otp',
-                                builder: (context, state) =>
-                                    const OTPVerificationBodyWidget(),
-                              ),
-
-                              GoRoute(
-                                path: 'verify-otp-success',
-                                name:
-                                    'personal-packages-link-bank-form-verify-otp-success',
-                                builder: (context, state) =>
-                                    const SuccessBodyWidget(),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  //Router for personal pet , subrouter with add pet form , pet detail
-                  GoRoute(
-                    path: 'pets',
-                    name: 'personal-pets',
-                    builder: (context, state) =>
-                        const PetsScreen(), // Replace with actual pet list screen
-                    routes: [
-                      GoRoute(
-                        path: 'add',
-                        name: 'personal-pets-add',
-                        builder: (context, state) =>
-                            const PetFormScreen(), // Replace with add pet form
-                      ),
-                      // GoRoute(
-                      //   path: 'detail',
-                      //   name: 'personal-pets-detail',
-                      //   builder: (context, state) {
-                      //     final params = state.extra as Map<String, String>?;
-                      //     final petId = params?['petId'];
-                      //     return PetDetailCard(petId: petId);
-                      //   },
-                      // ),
-                    ],
-                  ),
-
-                  //Router for personal notification
-                  GoRoute(
-                    path: 'notifications',
-                    name: 'personal-notifications',
-                    builder: (context, state) =>
-                        const NotificationsScreen(), // Replace with actual notification screen
                   ),
                 ],
               ),
@@ -694,22 +489,6 @@ class AppRouter {
       ),
 
       // Full Screen Routes (without bottom nav)
-      GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
-        path: '/group-create-fullscreen',
-        name: 'group-create-fullscreen',
-        builder: (context, state) => const GroupCreate(),
-      ),
-      GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
-        path: '/chat-fullscreen',
-        name: 'chat-fullscreen',
-        builder: (context, state) {
-          final initialMessage = state.uri.queryParameters['message'];
-          final petName = state.uri.queryParameters['petName'];
-          return ChatScreen(initialMessage: initialMessage, petName: petName);
-        },
-      ),
     ],
   );
 }

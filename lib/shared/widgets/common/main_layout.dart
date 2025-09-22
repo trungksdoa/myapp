@@ -34,7 +34,7 @@ class MainLayout extends StatelessWidget {
 
   void _goBranch(BuildContext context, int index) {
     // Define the paths for each branch
-    const branchPaths = ['/home', '/shop', '/ai', '/family', '/personal'];
+    const branchPaths = ['/home', '/shop', '/personal'];
 
     // Use context.go() to clear the entire stack and navigate to the branch's initial route
     context.go(branchPaths[index]);
