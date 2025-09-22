@@ -98,14 +98,16 @@ class _SplashScreenState extends State<SplashScreen>
 
       // Navigation với animation smooth
       if (AuthService().isAuthenticated) {
+        // If authenticated, follow the normal post-login navigation
         NavigateHelper.navigateAfterLogin(context);
       } else {
-        NavigateHelper.goToLogin(context);
+        // Allow unauthenticated users to browse Home/products first
+        NavigateHelper.goToHome(context);
       }
     } catch (e) {
-      // Fallback nếu có lỗi
+      // Fallback nếu có lỗi - let user browse home
       if (mounted) {
-        NavigateHelper.goToLogin(context);
+        NavigateHelper.goToHome(context);
       }
     }
   }

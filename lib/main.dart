@@ -22,10 +22,12 @@ void main() async {
   // Initialize AuthService
   await AuthService().initialize();
 
-  var imageStorage = await Permission.photos.status;
-
-  if (!imageStorage.isGranted) {
-    await Permission.photos.request();
+  // Request photo permission (skip on web)
+  if (!kIsWeb) {
+    var imageStorage = await Permission.photos.status;
+    if (!imageStorage.isGranted) {
+      await Permission.photos.request();
+    }
   }
 
   // Initialize Notification Service

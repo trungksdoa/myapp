@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:myapp/core/colors.dart';
 import 'package:myapp/core/utils/device_size.dart';
 import 'package:myapp/core/utils/image_cache.dart';
@@ -31,9 +32,14 @@ class PetServiceCard extends StatelessWidget {
       screenWidth,
     );
 
+    // Với màn hình rất hẹp, tăng padding ngang cho text 1 chút
+    final extraTight = screenWidth < 340;
+    final textHPad = extraTight ? responsivePadding : responsivePadding * 0.5;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        padding: EdgeInsets.all(4 * scaleFactor),
         decoration: BoxDecoration(
           color: AppColors.background,
           borderRadius: BorderRadius.circular(responsiveBorderRadius),
@@ -72,23 +78,40 @@ class PetServiceCard extends StatelessWidget {
               // Responsive spacing
               SizedBox(height: 10 * responsiveSize / size),
 
-              // Auto-scale text
+              // Auto-fit text: clamp font theo chiều rộng khả dụng và độ dài label
               Flexible(
                 flex: 1,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: responsivePadding * 0.5,
-                  ),
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: responsiveFontSize,
-                      height: 1.2, // Line height
-                    ),
+                  padding: EdgeInsets.symmetric(horizontal: textHPad),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final availableW = constraints.maxWidth;
+
+                      // Estimate font size dựa trên độ dài label và chiều rộng khả dụng
+                      final clampedLen = label.length.clamp(6, 24);
+                      final estimated = (availableW / clampedLen) * 1.6;
+
+                      // Giới hạn min/max để đồng bộ với hệ responsive hiện có
+                      final minFont = 10.0;
+                      final maxFont = responsiveFontSize;
+                      final font = estimated.clamp(minFont, maxFont);
+
+                      // Letter spacing nhẹ khi font đủ lớn để nhìn cân đối hơn
+                      final ls = font >= 14 ? 0.2 : 0.0;
+
+                      return Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: font.toDouble(),
+                          height: 1.2,
+                          letterSpacing: ls,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),

@@ -4,7 +4,12 @@ import 'package:provider/provider.dart';
 
 class CartIconWidget extends StatefulWidget {
   final void Function() onCartPressed;
-  const CartIconWidget({super.key, required this.onCartPressed});
+  final Color? iconColor;
+  const CartIconWidget({
+    super.key,
+    required this.onCartPressed,
+    this.iconColor,
+  });
 
   @override
   State<CartIconWidget> createState() => _CartIconWidgetState();
@@ -19,7 +24,11 @@ class _CartIconWidgetState extends State<CartIconWidget> {
         alignment: Alignment.center,
         children: [
           IconButton(
-            icon: const Icon(Icons.shopping_cart),
+            icon: Icon(
+              Icons.shopping_cart_outlined,
+              size: 24,
+              color: widget.iconColor ?? Colors.black,
+            ),
             onPressed: widget.onCartPressed,
           ),
 

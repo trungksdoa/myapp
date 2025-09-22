@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myapp/core/currency_format.dart';
 import 'package:myapp/features/shop/logic/shop_logic.dart';
 import 'package:myapp/mock_data/shop_mock.dart';
+import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/shared/model/shop.dart';
 import 'package:myapp/shared/model/product.dart';
 import 'package:provider/provider.dart';
@@ -195,24 +196,31 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
     );
   }
 
-  void _processOrder() {
-    // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Đặt hàng thành công!'),
-        backgroundColor: Colors.green,
-        action: SnackBarAction(
-          label: 'Xem đơn hàng',
-          textColor: Colors.white,
-          onPressed: () {
-            // Navigate to order history
-          },
-        ),
-      ),
+  void _processOrder() async {
+    // Giả lập gọi server 1.2s
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    // Navigate back or to order confirmation
-    Navigator.of(context).pop();
+    try {
+      await Future.delayed(const Duration(milliseconds: 1200));
+      // server trả về orderId giả lập
+      final String orderId = DateTime.now().millisecondsSinceEpoch.toString();
+
+      if (!mounted) return;
+      Navigator.of(context).pop(); // đóng loading
+
+      // Điều hướng sang màn thành công
+      NavigateHelper.goToOrderSuccess(context, orderId);
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop(); // đóng loading
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Có lỗi khi đặt hàng: $e')));
+    }
   }
 
   Widget _buildCustomerInfoCard() {

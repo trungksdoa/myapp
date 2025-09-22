@@ -74,7 +74,6 @@ class _ShopServiceListWidgetState extends State<ShopServiceListWidget> {
       child: GestureDetector(
         onTap: () {
           setState(() {
-            NotificationUtils.hideCurrentNotification(context);
             // Chỉ set category được chọn, không có logic deselect
             _selectedCategory = categoryKey;
           });

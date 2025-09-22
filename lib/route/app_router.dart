@@ -11,6 +11,9 @@ import 'package:myapp/features/personal/screen/bank_success.dart';
 import 'package:myapp/features/personal/screen/bank_verify_otp.dart';
 import 'package:myapp/features/personal/screen/change_password.dart';
 import 'package:myapp/features/personal/screen/home.dart';
+import 'package:myapp/features/personal/screen/notification_screen.dart';
+import 'package:myapp/features/personal/screen/pet_personal.dart';
+import 'package:myapp/features/personal/screen/pet_personal_form.dart';
 import 'package:myapp/features/personal/screen/product_order.dart';
 import 'package:myapp/features/personal/screen/services_order.dart';
 import 'package:myapp/features/personal/screen/services_package.dart';
@@ -20,6 +23,8 @@ import 'package:myapp/features/family/screen/group.dart';
 import 'package:myapp/features/family/screen/group_setting.dart';
 import 'package:myapp/features/family/screen/group_setting_members.dart';
 import 'package:myapp/features/cart/screen/cart_screen.dart';
+import 'package:myapp/features/shop/screen/order_detail.dart';
+import 'package:myapp/features/shop/screen/order_success.dart';
 import 'package:myapp/features/shop/screen/service_order_screen.dart';
 import 'package:myapp/features/shop/screen/shop_detail_screen.dart';
 import 'package:myapp/features/shop/screen/shop_screen.dart';
@@ -60,18 +65,45 @@ class AppRouter {
       final isLoggingIn = state.matchedLocation.startsWith('/auth/login');
       final isOnSplash = state.matchedLocation == '/splash';
 
+      // Routes that require authentication. Keep product browsing and home open for anonymous users.
+      final protectedRoutes = [
+        '/cart',
+        '/order',
+        '/personal',
+        '/ai/chat',
+        '/family',
+        '/shop/map', // keep map protected if you want to restrict it, otherwise remove
+        // '/shop/products' removed so users can browse products without logging in
+      ];
+
       if (!isAuthenticated &&
           !isLoggingIn &&
           !isOnSplash &&
           !state.matchedLocation.startsWith('/auth/register') &&
           !state.matchedLocation.startsWith('/auth/otp-verification') &&
           !state.matchedLocation.startsWith('/auth/forgot-password') &&
-          !state.matchedLocation.startsWith('/auth/reset-password')) {
+          !state.matchedLocation.startsWith('/auth/reset-password') &&
+          protectedRoutes.any(
+            (route) => state.matchedLocation.startsWith(route),
+          )) {
         logger.d('Redirecting to login from ${state.matchedLocation}');
-        return '/auth/login';
+        // Preserve the original destination so we can return after login
+        final original = state.fullPath ?? state.uri.path;
+        final encoded = Uri.encodeComponent(original);
+        return '/auth/login?from=$encoded';
       }
 
       if (isAuthenticated && isLoggingIn) {
+        // If user successfully logged in and there is a 'from' param, go back there.
+        final from = state.uri.queryParameters['from'];
+        if (from != null && from.isNotEmpty) {
+          try {
+            final decoded = Uri.decodeComponent(from);
+            return decoded;
+          } catch (_) {
+            return '/home';
+          }
+        }
         return '/home';
       }
 
@@ -79,7 +111,7 @@ class AppRouter {
         return '/home';
       }
 
-      return state.fullPath;
+      return null;
     },
     routes: [
       StatefulShellRoute.indexedStack(
@@ -432,21 +464,23 @@ class AppRouter {
                     path: 'pets',
                     name: 'personal-pets',
                     builder: (context, state) =>
-                        const PersonalHomeWidget(), // Replace with actual pet list screen
+                        const PetsScreen(), // Replace with actual pet list screen
                     routes: [
                       GoRoute(
                         path: 'add',
                         name: 'personal-pets-add',
                         builder: (context, state) =>
-                            const PersonalHomeWidget(), // Replace with add pet form
+                            const PetFormScreen(), // Replace with add pet form
                       ),
-                      GoRoute(
-                        path: 'detail/:petId',
-                        name: 'personal-pets-detail',
-                        builder: (context, state) {
-                          return const PersonalHomeWidget(); // Replace with pet detail screen
-                        },
-                      ),
+                      // GoRoute(
+                      //   path: 'detail',
+                      //   name: 'personal-pets-detail',
+                      //   builder: (context, state) {
+                      //     final params = state.extra as Map<String, String>?;
+                      //     final petId = params?['petId'];
+                      //     return PetDetailCard(petId: petId);
+                      //   },
+                      // ),
                     ],
                   ),
 
@@ -455,7 +489,7 @@ class AppRouter {
                     path: 'notifications',
                     name: 'personal-notifications',
                     builder: (context, state) =>
-                        const PersonalHomeWidget(), // Replace with actual notification screen
+                        const NotificationsScreen(), // Replace with actual notification screen
                   ),
                 ],
               ),
@@ -464,6 +498,68 @@ class AppRouter {
         ],
       ),
 
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/order-success',
+        name: 'order-success',
+        pageBuilder: (context, state) {
+          final params = state.extra as Map<String, dynamic>?; // nhận extra
+          final orderId = params?['orderId'] as String? ?? 'N/A';
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: OrderSuccessScreen(orderId: orderId),
+            transitionDuration: const Duration(milliseconds: 300),
+            reverseTransitionDuration: const Duration(milliseconds: 300),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(1.0, 0.0);
+                  const end = Offset.zero;
+                  const curve = Curves.easeOutCubic;
+                  var tween = Tween(
+                    begin: begin,
+                    end: end,
+                  ).chain(CurveTween(curve: curve));
+                  return SlideTransition(
+                    position: animation.drive(tween),
+                    child: child,
+                  );
+                },
+          );
+        },
+      ),
+
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/order-detail',
+        name: 'order-detail',
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+
+          final orderId = extra?['orderId'] as String? ?? 'N/A';
+          final isService = extra?['isService'] as bool? ?? false;
+
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: OrderDetailScreen(orderId: orderId, isService: isService),
+            transitionDuration: const Duration(milliseconds: 300),
+            reverseTransitionDuration: const Duration(milliseconds: 300),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(1.0, 0.0);
+                  const end = Offset.zero;
+                  const curve = Curves.easeOutCubic;
+                  final tween = Tween(
+                    begin: begin,
+                    end: end,
+                  ).chain(CurveTween(curve: curve));
+                  return SlideTransition(
+                    position: animation.drive(tween),
+                    child: child,
+                  );
+                },
+          );
+        },
+      ),
       // Full Screen Routes (without bottom nav)
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey, // Quan trọng!
@@ -552,7 +648,8 @@ class AppRouter {
           // if (state.matchedLocation == '/auth') {
           //   return '/auth/login';
           // }
-          return state.fullPath;
+          // No redirect needed
+          return null;
         },
         routes: [
           GoRoute(

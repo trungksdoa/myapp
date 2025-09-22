@@ -232,14 +232,6 @@ class NavigateHelper {
     context.pushNamed('personal-orders-services');
   }
 
-  /// Navigate to specific order detail screen
-  static void goToOrderDetail(BuildContext context, String orderId) {
-    context.pushNamed(
-      'personal-orders-services-detail',
-      extra: {'orderId': orderId},
-    );
-  }
-
   /// Navigate to order history screen
   static void goToOrderHistory(BuildContext context) {
     context.pushNamed('personal-order-history');
@@ -281,23 +273,46 @@ class NavigateHelper {
 
   /// Navigate to pet list screen
   static void goToPetList(BuildContext context) {
-    context.pushNamed('personal-pet-list');
+    context.pushNamed('personal-pets');
   }
 
   /// Navigate to add new pet screen
   static void goToAddPet(BuildContext context) {
-    context.pushNamed('personal-add-pet');
+    context.pushNamed('personal-pets-add');
   }
 
   /// Navigate to pet detail screen
   static void goToPetDetail(BuildContext context, String petId) {
-    context.pushNamed('personal-pet-detail', extra: {'petId': petId});
+    final Map<String, String> params = {};
+    params['petId'] = petId;
+    context.pushNamed('personal-pets-detail', extra: params);
   }
 
-  /// Navigate to pet health records screen
-  static void goToPetHealthRecords(BuildContext context, String petId) {
-    context.pushNamed('personal-pet-health', extra: {'petId': petId});
+  // =====================================
+  // ORDER SUCCESS NAVIGATION
+  // =====================================
+  static void goToOrderSuccess(BuildContext context, String orderId) {
+    context.goNamed('order-success', extra: {'orderId': orderId});
   }
+
+  // =============================
+  // ORDER NAVIGATION
+  // =============================
+  static void goToOrderDetail(
+    BuildContext context, {
+    required String orderId,
+    bool isService = false,
+  }) {
+    context.pushNamed(
+      'order-detail',
+      extra: {'orderId': orderId, 'isService': isService},
+    );
+  }
+
+  // /// Navigate to pet health records screen
+  // static void goToPetHealthRecords(BuildContext context, String petId) {
+  //   context.pushNamed('personal-pet-health', extra: {'petId': petId});
+  // }
 
   // =====================================
   // 🛍️ SERVICE MANAGEMENT NAVIGATION

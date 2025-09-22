@@ -26,8 +26,8 @@ class ShopProductGridWidget extends StatefulWidget {
     required this.searchController,
     required this.paddingResponsive,
     this.openCart,
-    this.crossAxisCount = 2,
-    this.childAspectRatio = 0.7,
+    this.crossAxisCount = 4,
+    this.childAspectRatio = 0.6,
     this.crossAxisSpacing = 10,
     this.mainAxisSpacing = 16,
     this.isScrollable = false,
@@ -125,13 +125,24 @@ class _ShopProductGridWidgetState extends State<ShopProductGridWidget> {
         // Products count info
         Padding(
           padding: EdgeInsets.all(widget.paddingResponsive * 1.5),
-          child: Text(
-            'Hiển thị ${_displayedProducts.length} / ${filteredProducts.length} sản phẩm',
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-              fontWeight: FontWeight.w500,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Hiển thị ${_displayedProducts.length} / ${filteredProducts.length} sản phẩm',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (_isLoading)
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+            ],
           ),
         ),
 
@@ -148,65 +159,210 @@ class _ShopProductGridWidgetState extends State<ShopProductGridWidget> {
   }
 
   Widget _buildGridView() {
-    return GridView.builder(
-      controller: widget.isScrollable ? _scrollController : null,
-      shrinkWrap: true,
-      physics: widget.isScrollable
-          ? const AlwaysScrollableScrollPhysics()
-          : const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: widget.crossAxisCount,
-        childAspectRatio: widget.childAspectRatio,
-        crossAxisSpacing: widget.crossAxisSpacing,
-        mainAxisSpacing: widget.mainAxisSpacing,
-      ),
-      itemCount: _displayedProducts.length + (_isLoading ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == _displayedProducts.length) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final availableWidth = screenWidth - (widget.paddingResponsive * 2);
 
-        final product = _displayedProducts[index];
+    // Calculate responsive grid parameters
+    int crossAxisCount;
+    double childAspectRatio;
 
-        return ProductCard(
-          key: widget.productKeys[product.productId],
-          imageUrl:
-              "https://cdn3.iconfinder.com/data/icons/it-and-ui-mixed-filled-outlines/48/default_image-1024.png",
-          categoryName: 'Thực phẩm bổ sung cho thú cưng',
-          productName: product.productName,
-          price: Currency.formatVND(product.productDetail!.price),
-          onTap: () {
-            NavigateHelper.goToDetailProduct(
-              context,
-              product.productId,
-              category: product.category,
-            );
-          },
-          onFavoritePressed: () {
-            context.read<CartService>().addToCart(product);
-            NotificationUtils.showNotificationWithAction(
-              context,
-              "Đã thêm ${product.productName} vào giỏ hàng",
-              actionLabel: "Xem giỏ hàng",
-              onPressed: () {
-                widget.openCart?.call();
+    if (screenWidth < 360) {
+      // Very small screens (phones in portrait)
+      crossAxisCount = 2;
+      childAspectRatio = 0.65; // Taller cards for more content space
+    } else if (screenWidth < 600) {
+      // Small screens (normal phones)
+      crossAxisCount = 2;
+      childAspectRatio = 0.7;
+    } else if (screenWidth < 900) {
+      // Medium screens (tablets portrait)
+      crossAxisCount = 3;
+      childAspectRatio = 0.75;
+    } else {
+      // Large screens (tablets landscape, desktop)
+      crossAxisCount = 4;
+      childAspectRatio = 0.8;
+    }
+
+    // Calculate card dimensions to prevent overflow
+    final cardWidth =
+        (availableWidth - (widget.crossAxisSpacing * (crossAxisCount - 1))) /
+        crossAxisCount;
+    final cardHeight = cardWidth / childAspectRatio;
+
+    // Ensure minimum card height for content
+    final minCardHeight = 280.0;
+    if (cardHeight < minCardHeight) {
+      childAspectRatio = cardWidth / minCardHeight;
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return GridView.builder(
+          controller: widget.isScrollable ? _scrollController : null,
+          shrinkWrap: true,
+          physics: widget.isScrollable
+              ? const AlwaysScrollableScrollPhysics()
+              : const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: widget.paddingResponsive),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: childAspectRatio,
+            crossAxisSpacing: widget.crossAxisSpacing,
+            mainAxisSpacing: widget.mainAxisSpacing,
+          ),
+          itemCount:
+              _displayedProducts.length +
+              (_isLoading && widget.isScrollable ? 1 : 0),
+          itemBuilder: (context, index) {
+            // Loading indicator at the end
+            if (index == _displayedProducts.length) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 8),
+                      Text(
+                        'Đang tải...',
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final product = _displayedProducts[index];
+
+            return ProductCard(
+              key: widget.productKeys[product.productId],
+              id: product.productId,
+              imageUrl:
+                  "https://cdn3.iconfinder.com/data/icons/it-and-ui-mixed-filled-outlines/48/default_image-1024.png",
+              categoryName: _getCategoryDisplayName(product.category),
+              productName: product.productName,
+              price: Currency.formatVND(
+                product.productDetail!.price,
+              ).replaceAll('₫', ''),
+              currency: '₫',
+              originalPrice: Currency.formatVND(product.productDetail!.price),
+              // discountPercentage: _calculateDiscountPercentage(
+              //   product.productDetail!.originalPrice,
+              //   product.productDetail!.price,
+              // ),
+              rating: 4.2,
+              reviewCount: 42,
+              isAvailable: true,
+              isFavorite: false, // TODO: Implement favorite logic
+              badge: _getProductBadge(product),
+              onTap: () {
+                NavigateHelper.goToDetailProduct(
+                  context,
+                  product.productId,
+                  category: product.category,
+                );
               },
-              actionTextColor: Colors.yellow,
+              onFavoritePressed: () {
+                // TODO: Implement favorite logic
+                _toggleFavorite(product);
+              },
+              onAddToCart: () {
+                _addToCart(product);
+              },
+              showAddToCartButton: false,
+              borderRadius: 12.0,
+              cardColor: Colors.white,
+              textColor: Colors.black87,
             );
           },
-          shortDescription: product.description,
-          rating: 4.2,
-          isAvailable: true,
-          cardColor: Colors.white,
-          textColor: Colors.black,
-          borderRadius: 16.0,
         );
       },
     );
+  }
+
+  String _getCategoryDisplayName(String? category) {
+    if (category == null || category.isEmpty) {
+      return 'Thú cưng';
+    }
+
+    // Map category codes to display names
+    final categoryMap = {
+      'food': 'Thức ăn',
+      'toy': 'Đồ chơi',
+      'medicine': 'Y tế',
+      'accessory': 'Phụ kiện',
+      'grooming': 'Chăm sóc',
+    };
+
+    return categoryMap[category.toLowerCase()] ?? 'Thú cưng';
+  }
+
+  double? _calculateDiscountPercentage(
+    double? originalPrice,
+    double currentPrice,
+  ) {
+    if (originalPrice == null || originalPrice <= currentPrice) {
+      return null;
+    }
+    return ((originalPrice - currentPrice) / originalPrice) * 100;
+  }
+
+  String? _getProductBadge(Product product) {
+    // if (product.isNew == true) {
+    //   return 'Mới';
+    // }
+    // if (product.isBestSeller == true) {
+    //   return 'Bán chạy';
+    // }
+    // if (product.isPopular == true) {
+    //   return 'Phổ biến';
+    // }
+    return 'Mới';
+  }
+
+  void _toggleFavorite(Product product) {
+    // TODO: Implement favorite toggle logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Đã thêm ${product.productName} vào yêu thích'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  void _addToCart(Product product) {
+    try {
+      context.read<CartService>().addToCart(product);
+
+      if (!mounted) return;
+
+      NotificationUtils.showNotificationWithAction(
+        context,
+        "Đã thêm ${product.productName} vào giỏ hàng",
+        actionLabel: "Xem giỏ hàng",
+        onPressed: () {
+          widget.openCart?.call();
+        },
+        actionTextColor: Colors.yellow,
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Không thể thêm sản phẩm vào giỏ hàng'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
+    }
   }
 }

@@ -10,9 +10,11 @@ import 'package:myapp/mock_data/shop_mock.dart';
 import 'package:myapp/shared/model/product.dart';
 import 'package:myapp/shared/model/shop.dart';
 import 'package:myapp/shared/widgets/common/app_spacing.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class ShopScreen extends StatefulWidget {
-  const ShopScreen({super.key, required this.title});
+  final String? searchValue;
+  const ShopScreen({super.key, required this.title, this.searchValue});
   final String title;
 
   @override
@@ -27,10 +29,22 @@ class _ShopScreenState extends State<ShopScreen> {
   final Map<String, GlobalKey> _productKeys = {};
   String? _selectedCategory;
 
+  bool _enabled = true;
+  Future<void> _simulateLoading() async {
+    await Future.delayed(const Duration(seconds: 20));
+    if (mounted) {
+      setState(() {
+        _enabled = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _initializeData();
+    _simulateLoading();
+
     _cartService.addListener(_onCartUpdated);
   }
 
@@ -45,6 +59,10 @@ class _ShopScreenState extends State<ShopScreen> {
 
     if (_shopList.isEmpty) {
       _shopList.addAll(mockShops);
+    }
+
+    if (widget.searchValue != null && widget.searchValue!.isNotEmpty) {
+      _searchController.text = widget.searchValue!;
     }
 
     // Initialize cart service with product data
@@ -74,13 +92,13 @@ class _ShopScreenState extends State<ShopScreen> {
         : _productList.where((p) => p.category == _selectedCategory).toList();
 
     final widget = Scaffold(
-      appBar: ShopAppBarWidget(
-        searchController: _searchController,
-        onSearchChanged: onSearch,
-        onCartPressed: () => CartWidget(
-          _cartService,
-        ).modalShowWithFloatingButtons(context, _cartService),
-      ),
+      // appBar: ShopAppBarWidget(
+      //   searchController: _searchController,
+      //   onSearchChanged: onSearch,
+      //   onCartPressed: () => CartWidget(
+      //     _cartService,
+      //   ).modalShowWithFloatingButtons(context, _cartService),
+      // ),
       body: Column(
         children: [
           ShopServiceListWidget(
@@ -109,7 +127,8 @@ class _ShopScreenState extends State<ShopScreen> {
     );
 
     PerformanceMonitor.stop('HomeScreen build');
-    return widget;
+
+    return Skeletonizer(enabled: _enabled, child: widget);
   }
 
   void onSearch(String name) {

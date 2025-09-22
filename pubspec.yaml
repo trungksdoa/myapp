@@ -37,6 +37,7 @@ dependencies:
   cached_network_image: ^3.4.1
   ionicons: ^0.2.2
   board_datetime_picker: ^2.8.2
+  skeletonizer: ^2.1.0+1
 
 
   # circle_nav_bar: ^1.0.3

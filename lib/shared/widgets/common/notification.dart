@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class NotificationUtils {
   // Phương thức cơ bản - chỉ hiển thị message
   static void showNotification(BuildContext context, String message) {
+    //Hide before show new one
+    hideCurrentNotification(context);
     SnackBar snackBar = SnackBar(
       content: Text(message),
       duration: Duration(seconds: 3),
@@ -22,6 +24,8 @@ class NotificationUtils {
     required Function() onPressed,
     Color actionTextColor = Colors.yellow,
   }) {
+    //Hide before show new one
+    hideCurrentNotification(context);
     SnackBar snackBar = SnackBar(
       content: Text(message),
       duration: Duration(seconds: 3),
@@ -63,6 +67,9 @@ class NotificationUtils {
     Function()? onActionPressed,
     Color? actionTextColor,
   }) {
+    //Hide before show new one
+    hideCurrentNotification(context);
+
     SnackBar snackBar = SnackBar(
       content: Text(message),
       duration: duration ?? Duration(seconds: 3),

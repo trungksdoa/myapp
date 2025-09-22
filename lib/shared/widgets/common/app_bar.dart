@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp/core/colors.dart';
+import 'package:myapp/features/cart/widgets/cart_icon_widget.dart';
 import 'package:myapp/service/auth_factory.dart';
 import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/service/interface/auth_repository.dart';
@@ -55,20 +56,40 @@ class _MyAppBarState extends State<MyAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.primary,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
       toolbarHeight: widget.height,
+      automaticallyImplyLeading: true,
       leadingWidth: MyAppBar.logoSize + 18,
+      // Gradient background
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppColors.primary, AppColors.primary.withOpacity(0.85)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+      ),
+      // tappable logo
       leading: Padding(
         padding: const EdgeInsets.only(left: 12),
-        child: Image.asset(
-          widget.logoPath,
-          width: MyAppBar.logoSize,
-          height: MyAppBar.logoSize,
-          fit: BoxFit.contain,
+        child: Semantics(
+          label: 'Home',
+          button: true,
+          child: InkWell(
+            onTap: () => Navigator.of(context).pushNamed('/'),
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              widget.logoPath,
+              width: MyAppBar.logoSize,
+              height: MyAppBar.logoSize,
+              fit: BoxFit.contain,
+            ),
+          ),
         ),
       ),
       centerTitle: true,
-      automaticallyImplyLeading: true,
       title: Text.rich(
         TextSpan(
           children: [
@@ -94,37 +115,19 @@ class _MyAppBarState extends State<MyAppBar> {
         textAlign: TextAlign.center,
       ),
       actions: [
-        if (_authService.isAuthenticated) ...[
-          // User avatar/name
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 8),
-          //   child: Center(
-          //     child: Text(
-          //       _authService.username ?? 'User',
-          //       style: TextStyle(
-          //         color: AppColors.textOnPrimary,
-          //         fontSize: 14,
-          //         fontWeight: FontWeight.w500,
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          // Logout button
-          IconButton(
-            icon: Icon(Icons.logout, size: 24, color: AppColors.textOnPrimary),
-            onPressed: _handleLogout,
-            tooltip: 'Đăng xuất',
-          ),
-        ] else ...[
-          // Login button if not authenticated
-          IconButton(
-            icon: Icon(Icons.login, size: 24, color: AppColors.textOnPrimary),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/auth/login');
-            },
-            tooltip: 'Đăng nhập',
-          ),
-        ],
+        // Search
+        IconButton(
+          icon: const Icon(Icons.search, size: 24),
+          color: AppColors.textOnPrimary,
+          onPressed: () => Navigator.of(context).pushNamed('/search'),
+          tooltip: 'Tìm kiếm',
+        ),
+        // Cart
+        CartIconWidget(
+          onCartPressed: () => NavigateHelper.goToCart(context),
+          iconColor: Colors.white,
+        ),
+        const SizedBox(width: 6),
       ],
     );
   }

@@ -3,7 +3,6 @@
     "**/android": true,
     "**/ios": true,
     "**/linux": true,
-    "**/web": true,
     "**/windows": true,
     "**/build": true,
     "**/.dart_tool": true,
