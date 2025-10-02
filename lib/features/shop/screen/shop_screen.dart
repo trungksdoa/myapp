@@ -3,10 +3,10 @@ import 'package:myapp/core/utils/device_size.dart';
 import 'package:myapp/core/utils/performance_monitor.dart';
 import 'package:myapp/features/cart/screen/cart_widget.dart';
 import 'package:myapp/features/shop/logic/shop_logic.dart';
-import 'package:myapp/features/shop/widgets/app_bar_shop_widget.dart';
 import 'package:myapp/features/shop/widgets/shop_product_grid_widget.dart';
 import 'package:myapp/features/shop/widgets/shop_service_list_widget.dart';
-import 'package:myapp/mock_data/shop_mock.dart';
+// TODO: Comment out when API is ready
+import 'package:myapp/data/service_locator.dart';
 import 'package:myapp/shared/model/product.dart';
 import 'package:myapp/shared/model/shop.dart';
 import 'package:myapp/shared/widgets/common/app_spacing.dart';
@@ -48,17 +48,40 @@ class _ShopScreenState extends State<ShopScreen> {
     _cartService.addListener(_onCartUpdated);
   }
 
-  void _initializeData() {
-    for (var product in mockProducts) {
-      _productKeys[product.productId] = GlobalKey();
-    }
+  void _initializeData() async {
+    // TODO: Replace with service calls when API is ready
+    final productService = ServiceLocator().productService;
+    final shopService = ServiceLocator().shopService;
 
-    if (_productList.isEmpty) {
-      _productList.addAll(mockProducts);
-    }
+    try {
+      // Get data from services (currently using mock data)
+      final products = await productService.getAllProducts();
+      final shops = await shopService.getAllShops();
 
-    if (_shopList.isEmpty) {
-      _shopList.addAll(mockShops);
+      for (var product in products) {
+        _productKeys[product.productId] = GlobalKey();
+      }
+
+      if (_productList.isEmpty) {
+        _productList.addAll(products);
+      }
+
+      if (_shopList.isEmpty) {
+        _shopList.addAll(shops);
+      }
+    } catch (e) {
+      // Fallback to mock data if service fails
+      // for (var product in mockProducts) {
+      //   _productKeys[product.productId] = GlobalKey();
+      // }
+
+      // if (_productList.isEmpty) {
+      //   _productList.addAll(mockProducts);
+      // }
+
+      // if (_shopList.isEmpty) {
+      //   _shopList.addAll(mockShops);
+      // }
     }
 
     if (widget.searchValue != null && widget.searchValue!.isNotEmpty) {

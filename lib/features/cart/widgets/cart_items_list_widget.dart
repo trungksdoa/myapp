@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/data/mock/shops_mock.dart';
 import 'package:myapp/features/cart/widgets/product_card.dart';
 import 'package:myapp/features/cart/widgets/service_card.dart';
 import 'package:myapp/features/shop/logic/shop_logic.dart';
-import 'package:myapp/mock_data/shop_mock.dart';
 import 'package:myapp/shared/model/shop.dart';
 import 'package:myapp/shared/widgets/common/app_spacing.dart';
 import 'package:provider/provider.dart';

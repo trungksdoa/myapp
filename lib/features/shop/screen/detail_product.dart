@@ -9,11 +9,11 @@ import 'package:myapp/features/shop/widgets/product_detail_header_widget.dart';
 import 'package:myapp/features/shop/widgets/product_info_widget.dart';
 import 'package:myapp/features/shop/widgets/product_main_image_widget.dart';
 import 'package:myapp/features/shop/widgets/product_thumbnail_list_widget.dart';
-import 'package:myapp/mock_data/shop_mock.dart';
+// TODO: Comment out when API is ready
+import 'package:myapp/data/service_locator.dart';
 import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/shared/model/product.dart';
 import 'package:myapp/shared/widgets/common/notification.dart';
-import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 class DetailProductScreen extends StatefulWidget {
   final String? productId;
@@ -27,7 +27,7 @@ class DetailProductScreen extends StatefulWidget {
 
 class _DetailProductScreenState extends State<DetailProductScreen>
     with SingleTickerProviderStateMixin {
-  late Product _product;
+  Product? _product;
   int _currentImageIndex = 0;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -77,17 +77,40 @@ class _DetailProductScreenState extends State<DetailProductScreen>
     _animationController.forward();
   }
 
-  void _loadProduct() {
+  void _loadProduct() async {
     if (widget.productId != null) {
       try {
-        _product = mockProducts.firstWhere(
-          (product) => product.productId == widget.productId,
-        );
+        // TODO: Replace with service call when API is ready
+        final productService = ServiceLocator().productService;
+        final product = await productService.getProductById(widget.productId!);
+        if (product != null) {
+          setState(() {
+            _product = product;
+          });
+        } else {
+          setState(() {});
+        }
       } catch (e) {
-        _product = mockProducts.first;
+        // Fallback to mock data
+        // _product = mockProducts.firstWhere(
+        //   (product) => product.productId == widget.productId,
+        //   orElse: () => mockProducts.first,
+        // );
+        setState(() {});
       }
     } else {
-      _product = mockProducts.first;
+      // Default to first product
+      // try {
+      //   final productService = ServiceLocator().productService;
+      //   final products = await productService.getAllProducts();
+      //   setState(() {
+      //     _product = products.isNotEmpty ? products.first : mockProducts.first;
+      //   });
+      // } catch (e) {
+      //   setState(() {
+      //     _product = mockProducts.first;
+      //   });
+      // }
     }
   }
 
@@ -99,8 +122,9 @@ class _DetailProductScreenState extends State<DetailProductScreen>
 
   void _onAddToCart() async {
     HapticFeedback.mediumImpact();
+    if (_product == null) return; // Guard against uninitialized product
     if (widget.category == 'care') {
-      _product = _product.copyWith(
+      _product = _product!.copyWith(
         productName: 'New Name ${DateTime.now()}',
         description: 'New description',
         status: true,
@@ -108,7 +132,7 @@ class _DetailProductScreenState extends State<DetailProductScreen>
         productDetail: null,
       );
       // Show booking dialog and get selected date/time and note
-      Map<String, dynamic> bookingData = await _onBooking(_product);
+      Map<String, dynamic> bookingData = await _onBooking(_product!);
 
       final DateTime? selectedDateTime = bookingData['dateTime'];
       final String? note = bookingData['note'];
@@ -124,23 +148,23 @@ class _DetailProductScreenState extends State<DetailProductScreen>
       options['dateTime'] = selectedDateTime.toString();
 
       // Add to cart with options
-      _cartService.addToCart(_product, options: options);
+      _cartService.addToCart(_product!, options: options);
 
       NotificationUtils.showNotificationWithAction(
         context,
-        'Đã thêm ${_product.productName} vào giỏ hàng',
+        'Đã thêm ${_product!.productName} vào giỏ hàng',
         actionLabel: "Xem ngay",
         onPressed: () {},
       );
     } else {
       // Regular products
       setState(() {
-        _cartService.addToCart(_product);
+        _cartService.addToCart(_product!);
       });
 
       NotificationUtils.showNotificationWithAction(
         context,
-        'Đã thêm ${_product.productName} vào giỏ hàng',
+        'Đã thêm ${_product!.productName} vào giỏ hàng',
         actionLabel: "Xem ngay",
         onPressed: () {},
       );
@@ -150,8 +174,9 @@ class _DetailProductScreenState extends State<DetailProductScreen>
   void _onBuyNow() async {
     HapticFeedback.mediumImpact();
 
+    if (_product == null) return; // Guard
     if (widget.category == 'care') {
-      Map<String, dynamic> bookingData = await _onBooking(_product);
+      Map<String, dynamic> bookingData = await _onBooking(_product!);
       final DateTime? selectedDateTime = bookingData['dateTime'];
       final String? note = bookingData['note'];
 
@@ -160,7 +185,7 @@ class _DetailProductScreenState extends State<DetailProductScreen>
           NavigateHelper.goToOrderScreen(
             context,
             directBuy: true,
-            product: _product,
+            product: _product!,
             dateTime: selectedDateTime.toString(),
             note: note, // Pass the note to order screen
           );
@@ -171,7 +196,7 @@ class _DetailProductScreenState extends State<DetailProductScreen>
       NavigateHelper.goToOrderScreen(
         context,
         directBuy: true,
-        product: _product,
+        product: _product!,
       );
     }
   }
@@ -303,6 +328,22 @@ class _DetailProductScreenState extends State<DetailProductScreen>
     double paddingResponsive = DeviceSize.getResponsivePadding(width);
     double fontSize = DeviceSize.getResponsiveFontSize(width);
 
+    // Show loading placeholder while product is being loaded
+    if (_product == null) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -334,7 +375,7 @@ class _DetailProductScreenState extends State<DetailProductScreen>
                         // Main image with Hero animation - CENTERED
                         Center(
                           child: Hero(
-                            tag: 'product-${_product.productId}',
+                            tag: 'product-${_product!.productId}',
                             child: ProductMainImageWidget(
                               width: width * 0.65,
                               height: height * 0.4,
@@ -361,7 +402,7 @@ class _DetailProductScreenState extends State<DetailProductScreen>
 
                         // Product info with fade and slide animation
                         ProductInfoWidget(
-                          product: _product,
+                          product: _product!,
                           padding: paddingResponsive,
                           fontSize: fontSize,
                           category: widget.category,

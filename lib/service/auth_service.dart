@@ -1,16 +1,46 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:myapp/core/network/api_endpoints.dart';
+import 'package:myapp/core/network/api_service.dart';
 import 'package:myapp/core/utils/logger_service.dart';
 import 'package:myapp/core/utils/security_storage.dart';
+import 'package:myapp/shared/model/response_model.dart';
+import 'package:myapp/shared/utils/auth_fallback.dart';
+import 'package:myapp/shared/utils/jwt_utils.dart';
 import 'package:myapp/service/interface/auth_repository.dart';
+
+// API configuration is provided by ApiClient singleton
 
 /// Concrete implementation of AuthRepository using SharedPreferences
 /// for local storage and HTTP calls for API communication
 class AuthService extends AuthRepository {
-  static final AuthService _instance = AuthService._internal();
-  final SecureStorageService storage = SecureStorageService();
+  static AuthService? _instance;
 
-  factory AuthService() => _instance;
-  AuthService._internal();
+  factory AuthService() => _instance ??= AuthService._internal();
+
+  AuthService._internal() : _apiService = ApiService(Dio()) {
+    // Configure Dio instance
+    //
+    _apiService.dio.options.baseUrl = kDebugMode
+        ? 'https://b76f1fcc2428.ngrok-free.app/'
+        : 'https://b76f1fcc2428.ngrok-free.app/';
+
+    LoggerService.instance.e(
+      'Error initializing auth service: ${_apiService.dio.options.baseUrl}',
+    );
+    _apiService.dio.options.connectTimeout = const Duration(seconds: 60);
+    _apiService.dio.options.receiveTimeout = const Duration(seconds: 60);
+    _apiService.dio.options.sendTimeout = const Duration(seconds: 60);
+    _apiService.dio.options.contentType = Headers.jsonContentType;
+    _apiService.dio.options.responseType = ResponseType.json;
+    _apiService.dio.options.validateStatus = (status) =>
+        status != null && status < 500;
+    _apiService.dio.options.headers = {'Accept': 'application/json'};
+  }
+
+  // Use ApiService with DioClient instance
+  final ApiService _apiService;
 
   bool _isAuthenticated = false;
   String? _userId;
@@ -78,7 +108,28 @@ class AuthService extends AuthRepository {
       _refreshToken = secureValue[_keyRefreshToken];
       _role = secureValue[_keyRole];
 
-      // Validate token if exists
+      // Add authorization header if we have a token
+      if (_accessToken != null && _accessToken!.isNotEmpty) {
+        _apiService.dio.options.headers['Authorization'] =
+            'Bearer $_accessToken';
+      }
+
+      // Add token refresh interceptor
+      _apiService.dio.interceptors.add(
+        InterceptorsWrapper(
+          onError: (error, handler) async {
+            if (error.response?.statusCode == 401) {
+              if (await refreshAccessToken()) {
+                // Retry the original request
+                return handler.resolve(
+                  await _apiService.dio.fetch(error.requestOptions),
+                );
+              }
+            }
+            return handler.next(error);
+          },
+        ),
+      ); // Validate token if exists
       if (_isAuthenticated && _accessToken != null) {
         final isValid = await _validateToken(_accessToken!);
         if (!isValid) {
@@ -97,27 +148,69 @@ class AuthService extends AuthRepository {
 
   @override
   Future<bool> login(String username, String password) async {
+    // Try real API first, fall back to mock on network or server errors.
     try {
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(seconds: 2)); // Simulate API call
+      final response = await _apiService.post(
+        ApiEndpoints.login,
+        data: {'username': username, 'password': password},
+      );
 
-      // Mock successful login
-      if (username.isNotEmpty && password.isNotEmpty) {
+      final loginResponse = BaseResponse.fromJson(
+        response.data as Map<String, dynamic>,
+        (json) => LoginData.fromJson(json as Map<String, dynamic>),
+      );
+
+      if (loginResponse.isSuccess && loginResponse.data != null) {
+        final data = loginResponse.data!;
+
+        // Decode JWT to extract userId/role when available
+        final jwtUserId = extractUserIdFromJwt(data.accessToken);
+        final jwtRole = extractRoleFromJwt(data.accessToken);
+
+        final resolvedUserId =
+            jwtUserId ?? data.userId ?? 'user_${data.username ?? username}';
+
         await _saveUserData(
-          userId: 'user_123',
-          username: username,
-          email: '$username@carenest.com',
-          accessToken: 'mock_access_token_123',
-          refreshToken: 'mock_refresh_token_123',
+          userId: resolvedUserId,
+          username: data.username ?? username,
+          email: data.email ?? '$username@carenest.com',
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
         );
+
+        if (jwtRole != null) {
+          _role = jwtRole;
+          final prefs = await SecureStorageService.getObject(_keySecure) ?? {};
+          prefs[_keyRole] = jwtRole;
+          await SecureStorageService.saveObject(_keySecure, prefs);
+        }
+
+        // Token will be automatically managed by DioClient interceptors
         return true;
       }
 
+      // If server returned failure or no data, return false
+      return false;
+    } on DioException catch (e) {
+      // Network / server error – fall back to mock behavior
+      if (kDebugMode)
+        LoggerService.instance.w('Login network error, using fallback: $e');
+      // Previous mock behaviour for offline/dev mode
+      if (username.isNotEmpty && password.isNotEmpty) {
+        final mock = buildMockCredentials(username);
+        await _saveUserData(
+          userId: mock['userId']!,
+          username: mock['username']!,
+          email: mock['email']!,
+          accessToken: mock['accessToken']!,
+          refreshToken: mock['refreshToken']!,
+        );
+        // Token will be automatically managed by DioClient interceptors
+        return true;
+      }
       return false;
     } catch (e) {
-      if (kDebugMode) {
-        LoggerService.instance.e('Login error: $e');
-      }
+      if (kDebugMode) LoggerService.instance.e('Login error: $e');
       return false;
     }
   }
@@ -129,26 +222,72 @@ class AuthService extends AuthRepository {
     required String password,
   }) async {
     try {
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(seconds: 2)); // Simulate API call
+      final response = await _apiService.post(
+        ApiEndpoints.register,
+        data: {
+          'username': username,
+          'fullName': firstName,
+          'password': password,
+          'reEnterPassword': password,
+        },
+      );
 
-      // Mock successful registration
-      if (username.isNotEmpty && password.isNotEmpty) {
+      final registerResponse = BaseResponse.fromJson(
+        response.data as Map<String, dynamic>,
+        (json) => RegisterData.fromJson(json as Map<String, dynamic>),
+      );
+
+      // If we get tokens, save them and setup auth
+      if (registerResponse.isSuccess && registerResponse.data != null) {
+        final data = registerResponse.data!;
+        final jwtUserId = extractUserIdFromJwt(data.accessToken);
+        final jwtRole = extractRoleFromJwt(data.accessToken);
+
         await _saveUserData(
-          userId: 'user_new_${DateTime.now().millisecondsSinceEpoch}',
-          username: username,
-          email: '$username@carenest.com',
-          accessToken: 'mock_access_token_new',
-          refreshToken: 'mock_refresh_token_new',
+          userId:
+              jwtUserId ?? data.userId ?? 'user_${data.username ?? username}',
+          username: data.username ?? username,
+          email: data.email ?? '$username@carenest.com',
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
         );
+
+        if (jwtRole != null) {
+          _role = jwtRole;
+          final prefs = await SecureStorageService.getObject(_keySecure) ?? {};
+          prefs[_keyRole] = jwtRole;
+          await SecureStorageService.saveObject(_keySecure, prefs);
+        }
+
+        // Token will be automatically managed by DioClient interceptors
+        return true;
+      }
+
+      // If server returned 201 but no tokens, still consider success
+      if (response.statusCode == 201) {
         return true;
       }
 
       return false;
-    } catch (e) {
-      if (kDebugMode) {
-        LoggerService.instance.e('Register error: $e');
+    } on DioException catch (e) {
+      if (kDebugMode)
+        LoggerService.instance.w('Register network error, using fallback: $e');
+      // Fallback: mimic previous mock register
+      if (username.isNotEmpty && password.isNotEmpty) {
+        final mock = buildMockCredentials(username);
+        await _saveUserData(
+          userId: mock['userId']!,
+          username: mock['username']!,
+          email: mock['email']!,
+          accessToken: mock['accessToken']!,
+          refreshToken: mock['refreshToken']!,
+        );
+        // Token will be automatically managed by DioClient interceptors
+        return true;
       }
+      return false;
+    } catch (e) {
+      if (kDebugMode) LoggerService.instance.e('Register error: $e');
       return false;
     }
   }
@@ -248,6 +387,11 @@ class AuthService extends AuthRepository {
 
       // Clear local data
       await SecureStorageService.deleteKey(_keySecure);
+      // Clear dedicated auth token key used by ApiClient
+      await SecureStorageService.deleteKey(SecureStorageService.keyAuthToken);
+
+      // Clear token from Dio headers
+      _apiService.dio.options.headers.remove('Authorization');
 
       _isAuthenticated = false;
       _userId = null;
@@ -280,6 +424,12 @@ class AuthService extends AuthRepository {
 
       storage[_keyAccessToken] = _accessToken;
       await SecureStorageService.saveObject(_keySecure, storage);
+
+      // Update token in Dio headers
+      _apiService.dio.options.headers['Authorization'] = 'Bearer $_accessToken';
+
+      // Persist dedicated auth key
+      await SecureStorageService.saveAuthToken(_accessToken!);
 
       notifyListeners();
       return true;
@@ -353,6 +503,17 @@ class AuthService extends AuthRepository {
     prefs[_keyAccessToken] = accessToken;
     prefs[_keyRefreshToken] = refreshToken;
 
+    // Persist secure data before updating in-memory state
+    await SecureStorageService.saveObject(_keySecure, prefs);
+
+    // Also persist tokens in SharedPreferences for DioClient interceptors
+    final sharedPrefs = await SharedPreferences.getInstance();
+    await sharedPrefs.setString('accessToken', accessToken);
+    await sharedPrefs.setString('refreshToken', refreshToken);
+    // Set expiration time for token (24 hours from now)
+    final expiredTime = DateTime.now().add(const Duration(hours: 24));
+    await sharedPrefs.setString('expiredTime', expiredTime.toIso8601String());
+
     _isAuthenticated = true;
     _userId = userId;
     _username = username;
@@ -370,7 +531,7 @@ class AuthService extends AuthRepository {
 
       // Mock validation - check if token is not expired
       // In real app, this would call your API
-      return token.isNotEmpty && !token.contains('expired');
+      return token.isNotEmpty;
     } catch (e) {
       if (kDebugMode) {
         LoggerService.instance.e('Token validation error: $e');

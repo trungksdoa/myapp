@@ -38,7 +38,7 @@ class AuthFactory {
   /// Check if running in test environment
   static bool _isInTestEnvironment() {
     // This can be customized based on your testing setup
-    return true; // Set to true when testing
+    return false; // Set to true when testing
   }
 
   /// Create mock instance for testing

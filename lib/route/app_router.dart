@@ -44,6 +44,7 @@ import 'package:myapp/features/other/screen/splash_screen.dart';
 import 'package:myapp/service/auth_factory.dart';
 import 'package:myapp/features/shop/widgets/shop_map.dart';
 import 'package:myapp/shared/widgets/common/main_layout.dart';
+import 'package:myapp/shared/model/pet.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _homeNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -469,8 +470,10 @@ class AppRouter {
                       GoRoute(
                         path: 'add',
                         name: 'personal-pets-add',
-                        builder: (context, state) =>
-                            const PetFormScreen(), // Replace with add pet form
+                        builder: (context, state) {
+                          final arg = state.extra;
+                          return PetFormScreen(pet: arg is Pet ? arg : null);
+                        },
                       ),
                       // GoRoute(
                       //   path: 'detail',

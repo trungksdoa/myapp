@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/mock_data/shop_mock.dart';
+import 'package:myapp/data/mock/services_mock.dart';
+// TODO: Comment out when API is ready
+
+import 'package:myapp/data/service_locator.dart';
 import 'package:myapp/shared/widgets/common/notification.dart';
 
 class ShopServiceListWidget extends StatefulWidget {
@@ -43,27 +46,45 @@ class _ShopServiceListWidgetState extends State<ShopServiceListWidget> {
           ),
           SizedBox(
             height: 60,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(
-                horizontal: widget.paddingResponsive,
-                vertical: 4,
-              ),
-              children: [
-                // Bỏ phần "All" category
-                ...services.map(
-                  (service) => _buildServiceCard(
-                    service['key'] as String,
-                    service['icon']!,
-                    service['label']!,
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _getServices(),
+              builder: (context, snapshot) {
+                final serviceList = snapshot.data ?? services;
+
+                return ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: widget.paddingResponsive,
+                    vertical: 4,
                   ),
-                ),
-              ],
+                  children: [
+                    // Bỏ phần "All" category
+                    ...serviceList.map(
+                      (service) => _buildServiceCard(
+                        service['key'] as String,
+                        service['icon']!,
+                        service['label']!,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<List<Map<String, dynamic>>> _getServices() async {
+    try {
+      // TODO: Replace with service call when API is ready
+      final serviceCategoryService = ServiceLocator().serviceCategoryService;
+      return await serviceCategoryService.getAllServices();
+    } catch (e) {
+      // Fallback to mock data
+      return List<Map<String, dynamic>>.from([]);
+    }
   }
 
   Widget _buildServiceCard(String categoryKey, String icon, String label) {

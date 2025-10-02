@@ -40,9 +40,9 @@ class ShopAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
           onChanged: onSearchChanged,
         ),
       ),
-      actions: [
-        CartIconWidget(onCartPressed: () => NavigateHelper.goToCart(context)),
-      ],
+      // actions: [
+      //   CartIconWidget(onCartPressed: () => NavigateHelper.goToCart(context)),
+      // ],
     );
   }
 

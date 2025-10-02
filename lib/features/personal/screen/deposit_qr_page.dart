@@ -8,8 +8,12 @@ class DepositQRPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Nạp tiền qua QR'),
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
+        // backgroundColor: Colors.orange,
+        // foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

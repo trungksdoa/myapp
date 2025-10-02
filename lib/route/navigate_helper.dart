@@ -1,3 +1,4 @@
+// Navigator helper (regenerated) - primary navigation utilities
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/service/auth_factory.dart';
@@ -276,9 +277,14 @@ class NavigateHelper {
     context.pushNamed('personal-pets');
   }
 
-  /// Navigate to add new pet screen
-  static void goToAddPet(BuildContext context) {
-    context.pushNamed('personal-pets-add');
+  /// Navigate to add new pet screen. If `pet` is passed, it will be
+  /// forwarded as `extra` so the same form can be used for editing.
+  static void goToAddPet(BuildContext context, {Object? pet}) {
+    if (pet != null) {
+      context.pushNamed('personal-pets-add', extra: pet);
+    } else {
+      context.pushNamed('personal-pets-add');
+    }
   }
 
   /// Navigate to pet detail screen

@@ -116,13 +116,13 @@ class _MyAppBarState extends State<MyAppBar> {
       ),
       actions: [
         // Search
-        IconButton(
-          icon: const Icon(Icons.search, size: 24),
-          color: AppColors.textOnPrimary,
-          onPressed: () => Navigator.of(context).pushNamed('/search'),
-          tooltip: 'Tìm kiếm',
-        ),
-        // Cart
+        // IconButton(
+        //   icon: const Icon(Icons.search, size: 24),
+        //   color: AppColors.textOnPrimary,
+        //   onPressed: () => Navigator.of(context).pushNamed('/search'),
+        //   tooltip: 'Tìm kiếm',
+        // ),
+        // // Cart
         CartIconWidget(
           onCartPressed: () => NavigateHelper.goToCart(context),
           iconColor: Colors.white,

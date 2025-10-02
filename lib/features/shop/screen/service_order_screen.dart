@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/core/currency_format.dart';
+import 'package:myapp/data/mock/shops_mock.dart';
 import 'package:myapp/features/shop/logic/shop_logic.dart';
-import 'package:myapp/mock_data/shop_mock.dart';
+// TODO: Comment out when API is ready
+import 'package:myapp/data/service_locator.dart';
 import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/shared/model/shop.dart';
 import 'package:myapp/shared/model/product.dart';
@@ -35,8 +37,37 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize cart service with mock products if needed
-    CartService().initializeProductData(mockProducts);
+    // TODO: Replace with service call when API is ready
+    _initializeData();
+  }
+
+  void _initializeData() async {
+    try {
+      final productService = ServiceLocator().productService;
+      final products = await productService.getAllProducts();
+      CartService().initializeProductData(products);
+    } catch (e) {
+      // Fallback to mock data if service fails
+      // CartService().initializeProductData(mockProducts);
+    }
+  }
+
+  Future<String> _getShopName(String shopId) async {
+    // TODO: Replace with service call when API is ready
+    try {
+      final shopService = ServiceLocator().shopService;
+      final shop = await shopService.getShopById(shopId);
+      return shop?.shopName ?? 'Unknown Shop';
+    } catch (e) {
+      // Fallback to mock data
+      return 'Unknown Shop';
+      // try {
+      //   final shop = mockShops.firstWhere((shop) => shop.shopId == shopId);
+      //   return shop.shopName;
+      // } catch (e) {
+      //   return 'Unknown Shop';
+      // }
+    }
   }
 
   @override
@@ -253,64 +284,58 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
           if (widget.directBuy == true && widget.product != null) {
             final product = widget.product!;
             final shopId = product.shopId;
-            final shopName = mockShops
-                .firstWhere(
-                  (shop) => shop.shopId == shopId,
-                  orElse: () => Shop(
-                    shopId: shopId,
-                    shopName: 'Unknown Shop',
-                    description: '',
-                    owner: '',
-                    status: true,
-                    workingDays: '',
-                  ),
-                )
-                .shopName;
 
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Shop Header
-                  Row(
+            return FutureBuilder<String>(
+              future: _getShopName(shopId),
+              builder: (context, snapshot) {
+                final shopName = snapshot.data ?? 'Loading...';
+
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: primaryLightColor,
-                          borderRadius: BorderRadius.circular(8),
+                      // Shop Header
+                      Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: primaryLightColor,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(Icons.store, color: primaryColor),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            shopName,
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      if (product.category == 'care')
+                        _buildServiceItem(
+                          cartService.getProductImage(product.productId),
+                          product.productName,
+                          '60 phút',
+                          Currency.formatVND(product.productDetail?.price ?? 0),
+                          product.description,
+                          DateTime.now().add(Duration(days: 1)).toString(),
+                        )
+                      else
+                        _buildProductItem(
+                          cartService.getProductImage(product.productId),
+                          product.productName,
+                          Currency.formatVND(product.productDetail?.price ?? 0),
+                          1,
                         ),
-                        child: Icon(Icons.store, color: primaryColor),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        shopName,
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-
-                  if (product.category == 'care')
-                    _buildServiceItem(
-                      cartService.getProductImage(product.productId),
-                      product.productName,
-                      '60 phút',
-                      Currency.formatVND(product.productDetail?.price ?? 0),
-                      product.description,
-                      DateTime.now().add(Duration(days: 1)).toString(),
-                    )
-                  else
-                    _buildProductItem(
-                      cartService.getProductImage(product.productId),
-                      product.productName,
-                      Currency.formatVND(product.productDetail?.price ?? 0),
-                      1,
-                    ),
-                ],
-              ),
+                );
+              },
             );
           }
 
@@ -335,6 +360,7 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
                 ...itemsByShop.entries.map((entry) {
                   final shopId = entry.key;
                   final shopItems = entry.value;
+                  // TODO: Replace with service call when API is ready
                   final shopName = mockShops
                       .firstWhere(
                         (shop) => shop.shopId == shopId,

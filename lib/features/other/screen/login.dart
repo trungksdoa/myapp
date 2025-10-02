@@ -227,43 +227,43 @@ class _LoginScreenState extends State<LoginScreen> {
                     AppSpacing.verticalXXL,
 
                     // Social Login Buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _handleGoogleLogin,
-                            icon: const Icon(
-                              Icons.g_mobiledata,
-                              color: Colors.red,
-                            ),
-                            label: CustomText.body(text: 'Google'),
-                            style: OutlinedButton.styleFrom(
-                              padding: AppPadding.verticalMD,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        AppSpacing.horizontalLG,
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _handleFacebookLogin,
-                            icon: const Icon(
-                              Icons.facebook,
-                              color: Colors.blue,
-                            ),
-                            label: CustomText.body(text: 'Facebook'),
-                            style: OutlinedButton.styleFrom(
-                              padding: AppPadding.verticalMD,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     Expanded(
+                    //       child: OutlinedButton.icon(
+                    //         onPressed: _handleGoogleLogin,
+                    //         icon: const Icon(
+                    //           Icons.g_mobiledata,
+                    //           color: Colors.red,
+                    //         ),
+                    //         label: CustomText.body(text: 'Google'),
+                    //         style: OutlinedButton.styleFrom(
+                    //           padding: AppPadding.verticalMD,
+                    //           shape: RoundedRectangleBorder(
+                    //             borderRadius: BorderRadius.circular(12),
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     AppSpacing.horizontalLG,
+                    //     Expanded(
+                    //       child: OutlinedButton.icon(
+                    //         onPressed: _handleFacebookLogin,
+                    //         icon: const Icon(
+                    //           Icons.facebook,
+                    //           color: Colors.blue,
+                    //         ),
+                    //         label: CustomText.body(text: 'Facebook'),
+                    //         style: OutlinedButton.styleFrom(
+                    //           padding: AppPadding.verticalMD,
+                    //           shape: RoundedRectangleBorder(
+                    //             borderRadius: BorderRadius.circular(12),
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                   ],
                 ),
               ),

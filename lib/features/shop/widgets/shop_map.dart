@@ -11,7 +11,6 @@ class ShopMapAddress {
   final String address;
   final String phone;
   final String email;
-  // Thêm tọa độ cho mỗi shop
   final double latitude;
   final double longitude;
 
@@ -19,8 +18,8 @@ class ShopMapAddress {
     required this.address,
     required this.phone,
     required this.email,
-    required this.latitude, // Thêm vào
-    required this.longitude, // Thêm vào
+    required this.latitude,
+    required this.longitude,
   });
 }
 
@@ -33,8 +32,9 @@ class ShopMap extends StatefulWidget {
 
 class _ShopMapState extends State<ShopMap> {
   GoogleMapController? _mapController;
-  final Map<String, Marker> _markers = {}; // Sử dụng Set thay vì Map
+  final Map<String, Marker> _markers = {};
   TextEditingController searchLocationController = TextEditingController();
+  bool _isDisposed = false;
 
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(16.0, 108.0),
@@ -44,15 +44,14 @@ class _ShopMapState extends State<ShopMap> {
   @override
   void initState() {
     super.initState();
-    // Thêm markers khi widget được khởi tạo
     _addInitialMarkers();
   }
 
   void _addInitialMarkers() {
-    // Lấy danh sách shops từ phương thức của bạn
+    if (_isDisposed) return;
+
     final shopAddresses = _getShopAddresses();
 
-    // Tạo marker cho mỗi shop
     for (int i = 0; i < shopAddresses.length; i++) {
       final shop = shopAddresses[i];
       final markerId = MarkerId('shop_$i');
@@ -66,14 +65,17 @@ class _ShopMapState extends State<ShopMap> {
         ),
       );
 
-      setState(() {
-        _markers[markerId.value] = marker;
-      });
+      if (mounted && !_isDisposed) {
+        setState(() {
+          _markers[markerId.value] = marker;
+        });
+      }
     }
   }
 
-  // Thêm phương thức này để chuyển đến vị trí của shop
   void _goToShopLocation(ShopMapAddress shop) {
+    if (_isDisposed || _mapController == null) return;
+
     _mapController?.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(target: LatLng(shop.latitude, shop.longitude), zoom: 15),
@@ -82,6 +84,8 @@ class _ShopMapState extends State<ShopMap> {
   }
 
   Future<void> _getCurrentLocation() async {
+    if (_isDisposed) return;
+
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -103,6 +107,8 @@ class _ShopMapState extends State<ShopMap> {
         ),
       );
 
+      if (_isDisposed || _mapController == null) return;
+
       _mapController?.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -112,7 +118,7 @@ class _ShopMapState extends State<ShopMap> {
         ),
       );
 
-      if (mounted) {
+      if (mounted && !_isDisposed) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Đã cập nhật vị trí hiện tại'),
@@ -121,7 +127,7 @@ class _ShopMapState extends State<ShopMap> {
         );
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && !_isDisposed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Lỗi lấy vị trí: $e'),
@@ -132,36 +138,35 @@ class _ShopMapState extends State<ShopMap> {
     }
   }
 
-  // Thay đổi phương thức này để trả về danh sách ShopMapAddress
   List<ShopMapAddress> _getShopAddresses() {
     return [
       ShopMapAddress(
         address:
-            '49/12 Đường 51, Phường 14, Quận Gò Vấp, Thành Phố Hồ Chí Minh',
+            '49/12 Đường 51, Phường 14, Quận Gò Vấp, Thành Phố Hồ Chí Minh',
         phone: '0123 456 789',
         email: 'shop@example.com',
-        latitude: 10.762622, // Tọa độ giả định cho HCM
+        latitude: 10.762622,
         longitude: 106.660172,
       ),
       ShopMapAddress(
         address: '456 Đường DEF, Quận UVW, Thành phố HN',
         phone: '0987 654 321',
         email: 'shopsaddasdas2@example.com',
-        latitude: 21.028511, // Tọa độ giả định cho Hà Nội
+        latitude: 21.028511,
         longitude: 105.804817,
       ),
       ShopMapAddress(
         address: '789 Đường GHI, Quận JKL, Đà Nẵng',
         phone: '0987 654 321',
         email: 'shop3@example.com',
-        latitude: 16.047079, // Tọa độ giả định cho Đà Nẵng
+        latitude: 16.047079,
         longitude: 108.206230,
       ),
       ShopMapAddress(
         address: '101 Đường MNO, Quận PQR, Cần Thơ',
         phone: '0987 654 321',
         email: 'shop4@example.com',
-        latitude: 10.045162, // Tọa độ giả định cho Cần Thơ
+        latitude: 10.045162,
         longitude: 105.746857,
       ),
     ];
@@ -173,7 +178,6 @@ class _ShopMapState extends State<ShopMap> {
     return shopAddresses.map((shop) {
       return InkWell(
         onTap: () {
-          // Khi tap vào shop, di chuyển camera đến vị trí của shop
           _goToShopLocation(shop);
         },
         borderRadius: BorderRadius.circular(8),
@@ -197,7 +201,6 @@ class _ShopMapState extends State<ShopMap> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Address row
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -221,7 +224,6 @@ class _ShopMapState extends State<ShopMap> {
                   ],
                 ),
                 AppSpacing.vertical(4),
-                // Contact info row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -277,7 +279,27 @@ class _ShopMapState extends State<ShopMap> {
   }
 
   @override
+  void dispose() {
+    // Đánh dấu widget đã dispose
+    _isDisposed = true;
+
+    // Dispose Google Maps controller ngay lập tức
+    _mapController?.dispose();
+    _mapController = null;
+
+    // Clear markers để giải phóng memory
+    _markers.clear();
+
+    // Dispose text controller
+    searchLocationController.dispose();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Không gọi super.build(context) vì không dùng AutomaticKeepAliveClientMixin
+
     double paddingResponsive = DeviceSize.getResponsivePadding(
       MediaQuery.of(context).size.width,
     );
@@ -302,12 +324,13 @@ class _ShopMapState extends State<ShopMap> {
             mapType: MapType.normal,
             initialCameraPosition: _kGooglePlex,
             onMapCreated: (GoogleMapController controller) {
-              setState(() {
-                _mapController = controller;
-              });
+              if (!_isDisposed) {
+                setState(() {
+                  _mapController = controller;
+                });
+              }
             },
-            markers: _markers.values
-                .toSet(), // Sử dụng Set<Marker> trực tiếp tại đây
+            markers: _markers.values.toSet(),
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
@@ -329,7 +352,6 @@ class _ShopMapState extends State<ShopMap> {
           right: 16,
           child: Row(
             children: [
-              // Search TextField
               Expanded(
                 child: SizedBox(
                   height: 45,
@@ -351,14 +373,12 @@ class _ShopMapState extends State<ShopMap> {
                     ),
                     style: const TextStyle(fontSize: 14),
                     onSubmitted: (value) {
-                      // Có thể thêm logic tìm kiếm địa điểm ở đây sau
+                      // Logic tìm kiếm địa điểm
                     },
                   ),
                 ),
               ),
-              // Space between search and button
               AppSpacing.horizontalXS,
-              // Location Button
               SizedBox(
                 height: 45,
                 child: ElevatedButton(
