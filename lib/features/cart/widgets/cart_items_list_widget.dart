@@ -1,11 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/data/mock/shops_mock.dart';
 import 'package:myapp/features/cart/widgets/product_card.dart';
 import 'package:myapp/features/cart/widgets/service_card.dart';
 import 'package:myapp/features/shop/logic/shop_logic.dart';
 import 'package:myapp/shared/model/shop.dart';
 import 'package:myapp/shared/widgets/common/app_spacing.dart';
 import 'package:provider/provider.dart';
+
+// Mock shops data
+final List<Shop> mockShops = [
+  Shop(
+    shopId: 'shop_1',
+    owner: 'Nguyễn Văn A',
+    shopName: 'Pet Care Center',
+    description: 'Trung tâm chăm sóc thú cưng hàng đầu',
+    status: true,
+    workingDays: 'Thứ 2 - Chủ nhật',
+  ),
+  Shop(
+    shopId: 'shop_2',
+    owner: 'Trần Thị B',
+    shopName: 'Happy Pet Store',
+    description: 'Cửa hàng thú cưng và phụ kiện',
+    status: true,
+    workingDays: 'Thứ 2 - Thứ 7',
+  ),
+  Shop(
+    shopId: 'shop_3',
+    owner: 'Lê Văn C',
+    shopName: 'Veterinary Clinic Plus',
+    description: 'Phòng khám thú y chuyên nghiệp',
+    status: true,
+    workingDays: 'Thứ 2 - Chủ nhật',
+  ),
+  Shop(
+    shopId: 'shop_4',
+    owner: 'Phạm Thị D',
+    shopName: 'Pet Food Paradise',
+    description: 'Chuyên cung cấp thức ăn thú cưng cao cấp',
+    status: true,
+    workingDays: 'Thứ 2 - Thứ 6',
+  ),
+  Shop(
+    shopId: 'shop_5',
+    owner: 'Hoàng Văn E',
+    shopName: 'Pet Grooming Spa',
+    description: 'Dịch vụ spa và làm đẹp cho thú cưng',
+    status: true,
+    workingDays: 'Thứ 3 - Chủ nhật',
+  ),
+];
 
 class CartItemsListWidget extends StatefulWidget {
   final CartService cartService;

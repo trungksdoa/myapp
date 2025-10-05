@@ -155,8 +155,7 @@ class PersonalHomeWidget extends StatelessWidget {
   }
 
   void _logout(BuildContext context) {
-    // Create NavigateHelper instance for non-static methods
-    final navigateHelper = NavigateHelper();
-    navigateHelper.logoutAndNavigateToLogin(context);
+    // Use static method for logout
+    NavigateHelper.logoutAndNavigateToLogin(context);
   }
 }

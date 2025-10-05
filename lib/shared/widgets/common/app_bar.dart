@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp/core/colors.dart';
+import 'package:myapp/features/auth/service/auth_service.dart';
 import 'package:myapp/features/cart/widgets/cart_icon_widget.dart';
-import 'package:myapp/service/auth_factory.dart';
 import 'package:myapp/route/navigate_helper.dart';
-import 'package:myapp/service/interface/auth_repository.dart';
 
 class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
   static const double logoSize = 45;
@@ -33,24 +32,11 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _MyAppBarState extends State<MyAppBar> {
-  late AuthRepository _authService;
-
+  late final _authService = AuthService();
   @override
   void initState() {
     super.initState();
-    _authService = AuthFactory.instance;
-  }
-
-  Future<void> _handleLogout() async {
-    try {
-      await NavigateHelper().logoutAndNavigateToLogin(context);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi đăng xuất: $e')));
-      }
-    }
+    _authService.initialize();
   }
 
   @override
@@ -65,7 +51,10 @@ class _MyAppBarState extends State<MyAppBar> {
       flexibleSpace: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.primary, AppColors.primary.withOpacity(0.85)],
+            colors: [
+              AppColors.primary,
+              AppColors.primary.withValues(alpha: 0.85),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

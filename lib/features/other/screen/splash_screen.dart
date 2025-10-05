@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/core/colors.dart';
 import 'package:myapp/route/navigate_helper.dart';
-import 'package:myapp/service/auth_service.dart';
+import 'package:myapp/features/auth/service/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -85,8 +85,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _checkAuthAndNavigate() async {
     try {
-      // Initialize auth service song song với animation
-      await AuthService().initialize();
+      // Initialize AuthService
+      final authService = AuthService();
+      await authService.initialize();
 
       // Đợi animation hoàn thành (ít nhất 2.5 giây)
       await _animationController.forward().orCancel;
@@ -97,7 +98,8 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted) return;
 
       // Navigation với animation smooth
-      if (AuthService().isAuthenticated) {
+      final isAuthenticated = await authService.isAuthenticated();
+      if (isAuthenticated) {
         // If authenticated, follow the normal post-login navigation
         NavigateHelper.navigateAfterLogin(context);
       } else {

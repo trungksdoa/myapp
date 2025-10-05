@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myapp/service/auth_factory.dart';
 import 'package:myapp/core/RoleManage.dart';
 import 'package:myapp/core/utils/device_size.dart';
 import 'package:myapp/core/utils/logger_service.dart';
-import 'package:myapp/service/interface/auth_repository.dart';
 import 'package:myapp/shared/widgets/common/custom_card.dart';
 import 'package:myapp/shared/widgets/common/custom_elevated_button.dart';
 import 'package:myapp/shared/widgets/common/custom_text.dart';
 import 'package:myapp/shared/widgets/common/app_spacing.dart';
 import 'package:myapp/features/family/widgets/member_card_widget.dart';
-class GroupSettingMembers extends StatefulWidget{
+import 'package:myapp/features/auth/service/auth_service.dart';
+
+class GroupSettingMembers extends StatefulWidget {
   final String? groupId;
   const GroupSettingMembers({super.key, this.groupId});
 
@@ -47,15 +47,14 @@ List<Map<String, dynamic>> members = [
 ];
 
 class _GroupSettingMembersState extends State<GroupSettingMembers> {
-  AuthRepository get _authService => AuthFactory.instance;
+  final AuthService _authService = AuthService();
 
   /// Check if user is authenticated
-  bool get isAuthenticated => _authService.isAuthenticated;
+  Future<bool> get isAuthenticated => _authService.isAuthenticated();
 
   /// Get current user info
-  String? get currentUsername => _authService.username;
-  String? get currentUserEmail => _authService.email;
   String? get currentUserId => _authService.userId;
+  Map<String, dynamic>? get userData => _authService.userData;
 
   bool isAdmin = false;
   // Future<bool> isGroupAdmin = RoleManager.hasRole("BOSS");

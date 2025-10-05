@@ -1,15 +1,11 @@
 // Navigator helper (regenerated) - primary navigation utilities
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myapp/service/auth_factory.dart';
 import 'package:myapp/core/utils/logger_service.dart';
-import 'package:myapp/service/interface/auth_repository.dart';
 import 'package:myapp/shared/model/product.dart';
+import 'package:myapp/features/auth/service/auth_service.dart';
 
 class NavigateHelper {
-  // Get auth service instance
-  AuthRepository get _authService => AuthFactory.instance;
-
   // =====================================
   // 🏠 MAIN NAVIGATION (Bottom Tab Navigation)
   // =====================================
@@ -152,14 +148,16 @@ class NavigateHelper {
   }
 
   /// Login and navigate to home (async operation)
-  Future<void> loginAndNavigateToHome(BuildContext context) async {
-    await _authService.initialize();
+  static Future<void> loginAndNavigateToHome(BuildContext context) async {
+    final authService = AuthService();
+    await authService.initialize();
     context.go('/home');
   }
 
   /// Logout and navigate to login
-  Future<void> logoutAndNavigateToLogin(BuildContext context) async {
-    _authService.logout();
+  static Future<void> logoutAndNavigateToLogin(BuildContext context) async {
+    final authService = AuthService();
+    await authService.logout();
     context.go('/auth/login');
   }
 
@@ -406,6 +404,16 @@ class NavigateHelper {
   /// Navigate to shopping cart screen
   static void goToCart(BuildContext context) {
     context.pushNamed('cart');
+  }
+
+  /// Navigate to shop services screen
+  static void goToShopServices(BuildContext context) {
+    context.pushNamed('shop-services');
+  }
+
+  /// Navigate to shop products screen
+  static void goToShopProducts(BuildContext context) {
+    context.pushNamed('shop-products');
   }
 
   // =====================================
@@ -670,13 +678,8 @@ class NavigateHelper {
   // 🔍 UTILITY METHODS
   // =====================================
 
-  /// Check if user is authenticated
-  bool get isAuthenticated => _authService.isAuthenticated;
-
-  /// Get current user information
-  String? get currentUsername => _authService.username;
-  String? get currentUserEmail => _authService.email;
-  String? get currentUserId => _authService.userId;
+  /// Check if user is authenticated (requires AuthService instance)
+  // Note: These methods require an AuthService instance to be passed or accessed from context
 
   /// Check if can navigate back
   bool canGoBack(BuildContext context) {

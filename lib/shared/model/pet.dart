@@ -75,4 +75,19 @@ class Pet {
   String? get petTypeNullable => _petType;
   String? get sizeNullable => _size;
   String? get genderNullable => _gender;
+
+  static Pet fromJson(Map<String, dynamic> json) {
+    return Pet(
+      petId: json['petId'] as int?,
+      accountId: json['accountId'] as String?,
+      petName: json['petName'] as String?,
+      dateOfBirth: json['dateOfBirth'] != null
+          ? DateTime.parse(json['dateOfBirth'] as String)
+          : null,
+      petImage: json['petImage'] as String?,
+      petType: json['petType'] as String?,
+      size: json['size'] as String?,
+      gender: json['gender'] as String?,
+    );
+  }
 }

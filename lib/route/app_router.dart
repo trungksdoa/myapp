@@ -27,21 +27,22 @@ import 'package:myapp/features/shop/screen/order_detail.dart';
 import 'package:myapp/features/shop/screen/order_success.dart';
 import 'package:myapp/features/shop/screen/service_order_screen.dart';
 import 'package:myapp/features/shop/screen/shop_detail_screen.dart';
-import 'package:myapp/features/shop/screen/shop_screen.dart';
+import 'package:myapp/features/shop/screen/shop_product_screen.dart';
+import 'package:myapp/features/shop/screen/shop_routing.dart';
 import 'package:myapp/features/home/screen/home.dart';
 import 'package:myapp/features/family/screen/group_create.dart';
 import 'package:myapp/features/chat/screen/chat_screen.dart';
 // Auth screens
-import 'package:myapp/features/other/screen/login.dart';
-import 'package:myapp/features/other/screen/register.dart';
+import 'package:myapp/features/auth/screen/login.dart';
+import 'package:myapp/features/auth/screen/register.dart';
 import 'package:myapp/features/other/screen/registration_success.dart';
-import 'package:myapp/features/other/screen/forgot_password.dart';
-import 'package:myapp/features/other/screen/otp_verification.dart';
+import 'package:myapp/features/auth/screen/forgot_password.dart';
+import 'package:myapp/features/auth/screen/otp_verification.dart';
 import 'package:myapp/features/other/screen/reset_password.dart';
-import 'package:myapp/features/other/screen/password_reset_success.dart';
+import 'package:myapp/features/auth/screen/password_reset_success.dart';
 import 'package:myapp/features/other/screen/splash_screen.dart';
 // Services
-import 'package:myapp/service/auth_factory.dart';
+import 'package:myapp/features/auth/service/auth_service.dart';
 import 'package:myapp/features/shop/widgets/shop_map.dart';
 import 'package:myapp/shared/widgets/common/main_layout.dart';
 import 'package:myapp/shared/model/pet.dart';
@@ -54,15 +55,15 @@ final _familyNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'family');
 final _personalNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'personal');
 
 class AppRouter {
-  // Use AuthFactory instead of direct AuthService instantiation
-  static get _authService => AuthFactory.instance;
+  // Use AuthService instance
+  static final AuthService _authService = AuthService();
   static final logger = LoggerService.instance;
 
   static final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
-    redirect: (context, state) {
-      final isAuthenticated = _authService.isAuthenticated;
+    redirect: (context, state) async {
+      final isAuthenticated = await _authService.isAuthenticated();
       final isLoggingIn = state.matchedLocation.startsWith('/auth/login');
       final isOnSplash = state.matchedLocation == '/splash';
 
@@ -142,7 +143,7 @@ class AppRouter {
                 pageBuilder: (context, state) {
                   return CustomTransitionPage(
                     key: state.pageKey,
-                    child: const ShopScreen(title: "shop"),
+                    child: const ShopRoutingScreen(),
                     transitionDuration: const Duration(milliseconds: 300),
                     reverseTransitionDuration: const Duration(
                       milliseconds: 300,
@@ -233,7 +234,20 @@ class AppRouter {
                     builder: (context, state) {
                       final params = state.extra as Map<String, dynamic>?;
                       final shopId = params?['shopId'];
-                      return ShopDetailScreen(shopId: shopId);
+                      return ShopServiceScreen(shopId: shopId);
+                    },
+                  ),
+
+                  GoRoute(
+                    path: 'products',
+                    name: 'shop-products',
+                    builder: (context, state) {
+                      final params = state.extra as Map<String, dynamic>?;
+                      final searchValue = params?['searchValue'] as String?;
+                      return ShopProductScreen(
+                        searchValue: searchValue,
+                        title: '',
+                      );
                     },
                   ),
 

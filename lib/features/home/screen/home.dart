@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/data/mock/services_mock.dart';
-import 'package:myapp/service/auth_factory.dart';
 import 'package:myapp/core/utils/device_size.dart';
 import 'package:myapp/core/utils/performance_monitor.dart';
 import 'package:myapp/core/utils/image_cache.dart';
@@ -8,7 +6,34 @@ import 'package:myapp/core/colors.dart';
 import 'package:myapp/features/shop/widgets/shop_map.dart';
 import 'package:myapp/shared/widgets/common/custom_elevated_button.dart';
 import 'package:myapp/shared/widgets/common/notification.dart';
+import 'package:myapp/features/auth/service/auth_service.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+
+// Mock services data
+const List<Map<String, String>> services = [
+  {'key': 'vet', 'icon': 'assets/images/vet_icon.png', 'label': 'Thú y'},
+  {
+    'key': 'grooming',
+    'icon': 'assets/images/grooming_icon.png',
+    'label': 'Spa & Grooming',
+  },
+  {
+    'key': 'hotel',
+    'icon': 'assets/images/hotel_icon.png',
+    'label': 'Khách sạn',
+  },
+  {'key': 'food', 'icon': 'assets/images/food_icon.png', 'label': 'Thức ăn'},
+  {
+    'key': 'pharmacy',
+    'icon': 'assets/images/pharmacy_icon.png',
+    'label': 'Nhà thuốc',
+  },
+  {
+    'key': 'training',
+    'icon': 'assets/images/training_icon.png',
+    'label': 'Huấn luyện',
+  },
+];
 
 class Home extends StatefulWidget {
   const Home({super.key, required this.title});
@@ -55,7 +80,7 @@ class _HomeState extends State<Home> {
     // Detailed preloading will happen in build method
   }
 
-  final auth = AuthFactory.instance;
+  final AuthService auth = AuthService();
 
   bool _enabled = true;
 
@@ -138,44 +163,58 @@ class _HomeState extends State<Home> {
           ),
 
           // Login section — wrap the non-sliver content with RepaintBoundary inside the SliverToBoxAdapter
-          if (!auth.isAuthenticated)
-            SliverToBoxAdapter(
-              child: RepaintBoundary(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+          // Note: Using FutureBuilder for async authentication check
+          SliverToBoxAdapter(
+            child: FutureBuilder<bool>(
+              future: auth.isAuthenticated(),
+              builder: (context, snapshot) {
+                final isAuthenticated = snapshot.data ?? false;
+                if (isAuthenticated) return const SizedBox.shrink();
+                return RepaintBoundary(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: _buildLoginPrompt(fontSize),
                   ),
-                  child: _buildLoginPrompt(fontSize),
-                ),
-              ),
+                );
+              },
             ),
+          ),
 
           // Map section — apply RepaintBoundary to the box child inside SliverToBoxAdapter
-          if (auth.isAuthenticated)
-            SliverToBoxAdapter(
-              child: RepaintBoundary(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
+          SliverToBoxAdapter(
+            child: FutureBuilder<bool>(
+              future: auth.isAuthenticated(),
+              builder: (context, snapshot) {
+                final isAuthenticated = snapshot.data ?? false;
+                if (!isAuthenticated) return const SizedBox.shrink();
+                return RepaintBoundary(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          spreadRadius: 1,
+                          blurRadius: 10,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: const ShopMap(),
                   ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        spreadRadius: 1,
-                        blurRadius: 10,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: const ShopMap(),
-                ),
-              ),
+                );
+              },
             ),
+          ),
+
           // Reviews section title
           SliverToBoxAdapter(
             child: Padding(

@@ -1,10 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/shared/widgets/common/custom_card.dart';
 import 'package:myapp/shared/widgets/common/notification.dart';
-// Mock notifications used as fallback until real API is available
-import 'package:myapp/data/mock/notifications_mock.dart';
-import 'package:myapp/data/service_locator.dart';
-import 'package:myapp/data/repositories/interfaces/i_notification_service.dart';
+
+// Mock notification models
+class PersonalNotification {
+  final String title;
+  final String subtitle;
+  final PersonalNotificationType type;
+  final DateTime timestamp;
+
+  PersonalNotification({
+    required this.title,
+    required this.subtitle,
+    required this.type,
+    required this.timestamp,
+  });
+}
+
+enum PersonalNotificationType { invite, request, notification }
+
+// Mock notifications data
+final List<PersonalNotification> mockNotifications = [
+  PersonalNotification(
+    title: 'Lời mời tham gia nhóm',
+    subtitle: 'Bạn được mời tham gia nhóm "Yêu thú cưng"',
+    type: PersonalNotificationType.invite,
+    timestamp: DateTime.now().subtract(const Duration(hours: 1)),
+  ),
+  PersonalNotification(
+    title: 'Thông báo đặt lịch',
+    subtitle: 'Lịch hẹn spa cho thú cưng đã được xác nhận',
+    type: PersonalNotificationType.notification,
+    timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+  ),
+  PersonalNotification(
+    title: 'Yêu cầu tham gia',
+    subtitle: 'Yêu cầu tham gia nhóm "Chó cưng" đang chờ phê duyệt',
+    type: PersonalNotificationType.request,
+    timestamp: DateTime.now().subtract(const Duration(days: 1)),
+  ),
+];
 
 enum NotificationType { invite, request, notification }
 
@@ -40,7 +75,7 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen>
     with TickerProviderStateMixin {
   late final TabController _tab = TabController(length: 3, vsync: this);
-  final _notificationService = ServiceLocator().notificationService;
+  // TODO: Replace with actual service when API is ready
 
   List<PersonalNotification> _allNotifications = [];
   bool isLoading = true;
@@ -59,8 +94,12 @@ class _NotificationsScreenState extends State<NotificationsScreen>
         error = null;
       });
 
-      // Replace service call; keep fallback handling in catch
-      final notifications = await _notificationService.getAllNotifications();
+      // TODO: Replace with service call when API is ready
+      // Using mock data for now
+      await Future.delayed(
+        const Duration(milliseconds: 500),
+      ); // Simulate network delay
+      final notifications = mockNotifications;
 
       setState(() {
         _allNotifications = notifications;

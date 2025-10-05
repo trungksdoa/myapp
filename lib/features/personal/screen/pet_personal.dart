@@ -4,8 +4,28 @@ import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/shared/model/pet.dart' as pmodel;
 import 'package:myapp/shared/widgets/common/custom_card.dart';
 // TODO: Comment out when API is ready
-import 'package:myapp/data/mock/pets_mock.dart';
-import 'package:myapp/data/service_locator.dart';
+
+// Mock pets data
+final List<pmodel.Pet> mockPets = [
+  pmodel.Pet(
+    petId: 1,
+    petName: 'Buddy',
+    petType: 'Dog',
+    size: 'Medium',
+    dateOfBirth: DateTime(2020, 5, 15),
+    petImage: 'assets/images/pet_1.jpg',
+    gender: 'Male',
+  ),
+  pmodel.Pet(
+    petId: 2,
+    petName: 'Mimi',
+    petType: 'Cat',
+    size: 'Small',
+    dateOfBirth: DateTime(2021, 8, 20),
+    petImage: 'assets/images/pet_2.jpg',
+    gender: 'Female',
+  ),
+];
 
 class PetsScreen extends StatefulWidget {
   const PetsScreen({super.key});
@@ -15,7 +35,7 @@ class PetsScreen extends StatefulWidget {
 }
 
 class _PetsScreenState extends State<PetsScreen> {
-  final _petService = ServiceLocator().petService;
+  // TODO: Replace with actual service when API is ready
   List<pmodel.Pet> pets = [];
   bool isLoading = true;
   String? error;
@@ -34,24 +54,23 @@ class _PetsScreenState extends State<PetsScreen> {
       });
 
       // TODO: Replace with service call when API is ready
-      final loadedPets = await _petService.getAllPets();
+      // Using mock data for now
+      await Future.delayed(
+        const Duration(milliseconds: 500),
+      ); // Simulate network delay
+      final loadedPets = mockPets;
 
       setState(() {
         pets = loadedPets;
         isLoading = false;
       });
     } catch (e) {
-      // Fallback to mock data
       setState(() {
-        pets = mockPets;
+        pets = [];
         isLoading = false;
         error = 'Không thể tải danh sách thú cưng: $e';
       });
     }
-  }
-
-  Future<void> _refreshPets() async {
-    await _loadPets();
   }
 
   @override
@@ -168,10 +187,10 @@ class _PetsScreenState extends State<PetsScreen> {
                 contentPadding: EdgeInsets.zero,
                 leading: CircleAvatar(
                   radius: 24,
-                  backgroundImage: pet.petImage != null
-                      ? AssetImage(pet.petImage!)
+                  backgroundImage: pet.petImage.isNotEmpty
+                      ? AssetImage(pet.petImage)
                       : null,
-                  child: pet.petImage == null
+                  child: pet.petImage.isEmpty
                       ? Icon(Icons.pets, color: Colors.grey[600])
                       : null,
                 ),
@@ -185,11 +204,10 @@ class _PetsScreenState extends State<PetsScreen> {
                     Text(
                       '${pet.petTypeNullable ?? 'N/A'} • ${pet.sizeNullable ?? 'Medium'}',
                     ),
-                    if (pet.dateOfBirth != null)
-                      Text(
-                        '${_calculateAge(pet.dateOfBirth!)} tuổi',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
+                    Text(
+                      '${_calculateAge(pet.dateOfBirth)} tuổi',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
                   ],
                 ),
                 trailing: const Icon(Icons.chevron_right),

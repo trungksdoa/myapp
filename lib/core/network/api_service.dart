@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:myapp/core/network/dio_service_old.dart';
 
 class ApiService {
-  final Dio dio;
+  final DioClient dio;
 
   ApiService(this.dio);
 

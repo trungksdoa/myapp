@@ -46,6 +46,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
       account: Account(
         accountId: 'user1',
         fullName: 'Huỳnh Gia Bảo',
+        email: 'huynhgiabao@gmail.com',
         imgUrl: 'assets/images/home1.png',
       ),
       pets: Pet(
@@ -70,6 +71,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
       account: Account(
         accountId: 'user2',
         fullName: 'Nguyễn Thị Thùy Dương',
+        email: 'nguyenthuuyduong@gmail.com',
         imgUrl: 'assets/images/home2.png',
       ),
       pets: Pet(
@@ -93,6 +95,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
       ],
       account: Account(
         accountId: 'user3',
+        email: 'tranminhtuan@gmail.com',
         fullName: 'Trần Minh Tuấn',
         imgUrl: 'assets/images/home3.png',
       ),
@@ -118,6 +121,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
       account: Account(
         accountId: 'user4',
         fullName: 'Lê Thị Mỹ Linh',
+        email: 'lethimylinh@gmail.com',
         imgUrl: 'assets/images/home4.png',
       ),
       pets: Pet(
@@ -142,6 +146,7 @@ class _FamilyBlogState extends State<FamilyBlog> {
       account: Account(
         accountId: 'user5',
         fullName: 'Nguyễn Văn Nam',
+        email: 'nguyenvannam@gmail.com',
         imgUrl: 'assets/images/home5.png',
       ),
       pets: Pet(

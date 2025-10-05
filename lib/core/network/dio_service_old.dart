@@ -1,5 +1,4 @@
 // lib/shared/services/dio_service.dart
-
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -8,11 +7,11 @@ class DioClient {
   factory DioClient() => _instance;
   DioClient._internal();
 
-  late Dio _dio;
-  String? _currentBaseUrl;
-
+  late final Dio _dio;
   static const FlutterSecureStorage _secureStorage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    aOptions: AndroidOptions(
+      encryptedSharedPreferences: true,
+    ),
     iOptions: IOSOptions(
       accessibility: KeychainAccessibility.first_unlock_this_device,
     ),
@@ -23,14 +22,7 @@ class DioClient {
   static const String _refreshTokenKey = 'refresh_token';
   static const String _expiredTimeKey = 'token_expired_time';
 
-  /// Initialize with default base URL
   Future<void> initialize(String baseUrl) async {
-    // if(_dio != null && _currentBaseUrl == baseUrl) {
-    //   // Already initialized with the same baseUrl
-    //   return;
-    // }
-
-    _currentBaseUrl = baseUrl;
     _dio = Dio();
     _dio.options.baseUrl = baseUrl;
     _dio.options.connectTimeout = const Duration(seconds: 10);
@@ -40,22 +32,6 @@ class DioClient {
     // Add interceptors
     _addAuthInterceptor();
     _addLoggingInterceptor();
-  }
-
-  /// Create a temporary Dio instance with custom baseURL
-  Dio _createDioWithBaseUrl(String baseUrl) {
-    final dio = Dio();
-    dio.options.baseUrl = baseUrl;
-    dio.options.connectTimeout = const Duration(seconds: 10);
-    dio.options.receiveTimeout = const Duration(seconds: 10);
-    dio.options.sendTimeout = const Duration(seconds: 10);
-
-    // Copy interceptors from main instance if needed
-    for (final interceptor in _dio.interceptors) {
-      dio.interceptors.add(interceptor);
-    }
-
-    return dio;
   }
 
   void _addAuthInterceptor() {
@@ -73,6 +49,7 @@ class DioClient {
               // Retry the original request
               final newOptions = error.requestOptions;
               await _attachTokenToRequest(newOptions);
+
               try {
                 final response = await _dio.fetch(newOptions);
                 handler.resolve(response);
@@ -85,7 +62,6 @@ class DioClient {
             // Refresh failed or retry failed - logout user
             await _handleAuthFailure();
           }
-
           handler.next(error);
         },
       ),
@@ -99,6 +75,7 @@ class DioClient {
         responseBody: true,
         error: true,
         logPrint: (obj) {
+          // Custom logging - you can integrate with your logger service
           print('[DIO] $obj');
         },
       ),
@@ -126,7 +103,7 @@ class DioClient {
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        final data = response.data as Map;
+        final data = response.data as Map<String, dynamic>;
 
         // Store new tokens
         await _secureStorage.write(
@@ -156,7 +133,6 @@ class DioClient {
     } catch (e) {
       print('[DIO] Token refresh failed: $e');
     }
-
     return false;
   }
 
@@ -165,6 +141,9 @@ class DioClient {
     await _secureStorage.delete(key: _accessTokenKey);
     await _secureStorage.delete(key: _refreshTokenKey);
     await _secureStorage.delete(key: _expiredTimeKey);
+
+    // Notify auth service about logout (optional)
+    // You can implement an auth state notifier here
   }
 
   // Token management methods (for AuthService)
@@ -218,28 +197,15 @@ class DioClient {
     }
   }
 
-  // ✅ NEW: HTTP Methods with optional custom baseURL
-  Future<Response> get(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-    String? customBaseUrl, // ✅ Dynamic baseURL support
-  }) async {
+  // HTTP Methods
+  Future<Response<T>> get<T>(
+      String path, {
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
+      }) async {
     try {
-      if (customBaseUrl != null && customBaseUrl != _currentBaseUrl) {
-        // Use temporary Dio instance with custom baseURL
-        final tempDio = _createDioWithBaseUrl(customBaseUrl);
-        return await tempDio.get(
-          path,
-          queryParameters: queryParameters,
-          options: options,
-          cancelToken: cancelToken,
-        );
-      }
-
-      // Use default Dio instance
-      return await _dio.get(
+      return await _dio.get<T>(
         path,
         queryParameters: queryParameters,
         options: options,
@@ -250,29 +216,15 @@ class DioClient {
     }
   }
 
-  Future<Response> post(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-    String? customBaseUrl, // ✅ Dynamic baseURL support
-  }) async {
+  Future<Response<T>> post<T>(
+      String path, {
+        dynamic data,
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
+      }) async {
     try {
-      if (customBaseUrl != null && customBaseUrl != _currentBaseUrl) {
-        // Use temporary Dio instance with custom baseURL
-        final tempDio = _createDioWithBaseUrl(customBaseUrl);
-        return await tempDio.post(
-          path,
-          data: data,
-          queryParameters: queryParameters,
-          options: options,
-          cancelToken: cancelToken,
-        );
-      }
-
-      // Use default Dio instance
-      return await _dio.post(
+      return await _dio.post<T>(
         path,
         data: data,
         queryParameters: queryParameters,
@@ -284,27 +236,15 @@ class DioClient {
     }
   }
 
-  Future<Response> put(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-    String? customBaseUrl, // ✅ Dynamic baseURL support
-  }) async {
+  Future<Response<T>> put<T>(
+      String path, {
+        dynamic data,
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
+      }) async {
     try {
-      if (customBaseUrl != null && customBaseUrl != _currentBaseUrl) {
-        final tempDio = _createDioWithBaseUrl(customBaseUrl);
-        return await tempDio.put(
-          path,
-          data: data,
-          queryParameters: queryParameters,
-          options: options,
-          cancelToken: cancelToken,
-        );
-      }
-
-      return await _dio.put(
+      return await _dio.put<T>(
         path,
         data: data,
         queryParameters: queryParameters,
@@ -316,27 +256,15 @@ class DioClient {
     }
   }
 
-  Future<Response> delete(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-    String? customBaseUrl, // ✅ Dynamic baseURL support
-  }) async {
+  Future<Response<T>> delete<T>(
+      String path, {
+        dynamic data,
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
+      }) async {
     try {
-      if (customBaseUrl != null && customBaseUrl != _currentBaseUrl) {
-        final tempDio = _createDioWithBaseUrl(customBaseUrl);
-        return await tempDio.delete(
-          path,
-          data: data,
-          queryParameters: queryParameters,
-          options: options,
-          cancelToken: cancelToken,
-        );
-      }
-
-      return await _dio.delete(
+      return await _dio.delete<T>(
         path,
         data: data,
         queryParameters: queryParameters,

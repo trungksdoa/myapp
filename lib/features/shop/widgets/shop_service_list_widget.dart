@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/data/mock/services_mock.dart';
-// TODO: Comment out when API is ready
-
-import 'package:myapp/data/service_locator.dart';
 import 'package:myapp/shared/widgets/common/notification.dart';
+
+// Mock services data
+const List<Map<String, dynamic>> services = [
+  {'key': 'care', 'icon': 'assets/images/home1.png', 'label': 'Dịch vụ'},
+  {'key': 'medical', 'icon': 'assets/images/home2.png', 'label': 'Đồ chơi'},
+  {'key': 'grooming', 'icon': 'assets/images/home3.png', 'label': 'Đồ chơi'},
+  {'key': 'hotel', 'icon': 'assets/images/home4.png', 'label': 'Đồ chơi'},
+  {'key': 'food', 'icon': 'assets/images/home5.png', 'label': 'Thức ăn'},
+  {'key': 'accessory', 'icon': 'assets/images/home6.png', 'label': 'Phụ kiện'},
+  {'key': 'training', 'icon': 'assets/images/home7.png', 'label': 'Khác'},
+];
 
 class ShopServiceListWidget extends StatefulWidget {
   final double paddingResponsive;
@@ -77,14 +84,10 @@ class _ShopServiceListWidgetState extends State<ShopServiceListWidget> {
   }
 
   Future<List<Map<String, dynamic>>> _getServices() async {
-    try {
-      // TODO: Replace with service call when API is ready
-      final serviceCategoryService = ServiceLocator().serviceCategoryService;
-      return await serviceCategoryService.getAllServices();
-    } catch (e) {
-      // Fallback to mock data
-      return List<Map<String, dynamic>>.from([]);
-    }
+    // TODO: Replace with service call when API is ready
+    // For now, simulate a network delay and return mock data
+    await Future.delayed(const Duration(milliseconds: 300));
+    return List<Map<String, dynamic>>.from(services);
   }
 
   Widget _buildServiceCard(String categoryKey, String icon, String label) {

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:myapp/service/auth_factory.dart';
+import 'package:myapp/features/auth/service/auth_service.dart';
 import 'package:myapp/core/RoleManage.dart';
 import 'package:myapp/core/utils/device_size.dart';
 import 'package:myapp/core/utils/logger_service.dart';
 import 'package:myapp/core/utils/security_storage.dart';
 import 'package:myapp/route/navigate_helper.dart';
-import 'package:myapp/service/interface/auth_repository.dart';
 import 'package:myapp/service/notification_service.dart';
 import 'package:myapp/shared/widgets/dialogs/custom_diaglog.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -29,15 +28,11 @@ List<dynamic> listMenu = [
 ];
 
 class _GroupSettingState extends State<GroupSetting> {
-  AuthRepository get _authService => AuthFactory.instance;
-
-  /// Check if user is authenticated
-  bool get isAuthenticated => _authService.isAuthenticated;
+  final AuthService _authService = AuthService();
 
   /// Get current user info
-  String? get currentUsername => _authService.username;
-  String? get currentUserEmail => _authService.email;
   String? get currentUserId => _authService.userId;
+  Map<String, dynamic>? get userData => _authService.userData;
 
   bool isAdmin = false;
   // Future<bool> isGroupAdmin = RoleManager.hasRole("BOSS");
@@ -53,7 +48,8 @@ class _GroupSettingState extends State<GroupSetting> {
   }
 
   void checkRoleStatus() async {
-    final authRole = _authService.role;
+    final userData = _authService.userData;
+    final authRole = userData?['role'];
     final storedRole = await SecureStorageService.getUserRole();
     LoggerService.instance.d(
       'Auth service role: $authRole, Stored role: $storedRole',

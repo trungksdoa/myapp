@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/core/currency_format.dart';
-import 'package:myapp/data/mock/shops_mock.dart';
 import 'package:myapp/features/shop/logic/shop_logic.dart';
-// TODO: Comment out when API is ready
-import 'package:myapp/data/service_locator.dart';
-import 'package:myapp/route/navigate_helper.dart';
-import 'package:myapp/shared/model/shop.dart';
 import 'package:myapp/shared/model/product.dart';
+import 'package:myapp/route/navigate_helper.dart';
 import 'package:provider/provider.dart';
 
 class ServiceOrderScreen extends StatefulWidget {
@@ -37,37 +33,38 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
   @override
   void initState() {
     super.initState();
-    // TODO: Replace with service call when API is ready
     _initializeData();
   }
 
   void _initializeData() async {
     try {
-      final productService = ServiceLocator().productService;
-      final products = await productService.getAllProducts();
-      CartService().initializeProductData(products);
+      // TODO: Replace with service call when API is ready
+      // For now using mock data
+      final List<Product> mockProducts = [
+        Product(
+          productId: 'product_1',
+          productName: 'Dịch vụ spa thú cưng',
+          description: 'Dịch vụ spa chuyên nghiệp',
+          category: 'care',
+          status: true,
+          shopId: 'shop_1',
+        ),
+      ];
+      CartService().initializeProductData(mockProducts);
     } catch (e) {
-      // Fallback to mock data if service fails
-      // CartService().initializeProductData(mockProducts);
+      // Handle error silently
     }
   }
 
   Future<String> _getShopName(String shopId) async {
     // TODO: Replace with service call when API is ready
-    try {
-      final shopService = ServiceLocator().shopService;
-      final shop = await shopService.getShopById(shopId);
-      return shop?.shopName ?? 'Unknown Shop';
-    } catch (e) {
-      // Fallback to mock data
-      return 'Unknown Shop';
-      // try {
-      //   final shop = mockShops.firstWhere((shop) => shop.shopId == shopId);
-      //   return shop.shopName;
-      // } catch (e) {
-      //   return 'Unknown Shop';
-      // }
-    }
+    // Mock shop names for now
+    final Map<String, String> shopNames = {
+      'shop_1': 'Pet Care Center',
+      'shop_2': 'Happy Pet Store',
+      'shop_3': 'Veterinary Clinic Plus',
+    };
+    return shopNames[shopId] ?? 'Unknown Shop';
   }
 
   @override
@@ -77,7 +74,7 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
       builder: (context, cartCount, child) {
         return Scaffold(
           appBar: AppBar(
-            title: Text(
+            title: const Text(
               'Xác nhận đơn dịch vụ',
               style: TextStyle(color: Colors.black87),
             ),
@@ -98,21 +95,12 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Customer Info Section
                 _buildCustomerInfoCard(),
                 const SizedBox(height: 16),
-
-                // Service Items
                 _buildServiceItemsCard(),
                 const SizedBox(height: 16),
-
-                // Note Section (if note exists)
-                if (widget.note != null && widget.note!.isNotEmpty)
-                  _buildNoteCard(),
-                if (widget.note != null && widget.note!.isNotEmpty)
-                  const SizedBox(height: 16),
-
-                // Total Section
+                if (widget.note != null) _buildNoteCard(),
+                const SizedBox(height: 16),
                 _buildTotalSection(),
               ],
             ),
@@ -125,9 +113,8 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 1,
-                  blurRadius: 5,
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
                   offset: const Offset(0, -2),
                 ),
               ],
@@ -135,78 +122,44 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
             child: SafeArea(
               child: SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Handle confirm action
                     _handleConfirmOrder();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
-                    elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.check_circle_outline,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Xác nhận đặt hàng',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+                  child: const Text(
+                    'Xác nhận đặt hàng',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-
-          // Alternative: Floating Action Button (uncomment if preferred)
-          // floatingActionButton: FloatingActionButton.extended(
-          //   onPressed: () {
-          //     _handleConfirmOrder();
-          //   },
-          //   backgroundColor: primaryColor,
-          //   label: Text(
-          //     'Xác nhận',
-          //     style: TextStyle(
-          //       fontWeight: FontWeight.bold,
-          //       color: Colors.white,
-          //     ),
-          //   ),
-          //   icon: Icon(
-          //     Icons.check_circle_outline,
-          //     color: Colors.white,
-          //   ),
-          // ),
-          // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         );
       },
     );
   }
 
   void _handleConfirmOrder() {
-    // Handle confirm action here
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
+          title: const Text(
             'Xác nhận đặt hàng',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          content: Text('Bạn có chắc chắn muốn đặt hàng không?'),
+          content: const Text('Bạn có chắc chắn muốn đặt hàng không?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -215,11 +168,13 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Process order here
                 _processOrder();
               },
               style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
-              child: Text('Xác nhận', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -261,9 +216,19 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                Icon(Icons.person, color: primaryColor),
+                const SizedBox(width: 8),
+                const Text(
+                  'Thông tin khách hàng',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
             const Divider(),
             Text(
-              'Thông tin khách hàng',
+              'Thông tin giao hàng',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
@@ -310,7 +275,7 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
                           const SizedBox(width: 8),
                           Text(
                             shopName,
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
@@ -318,18 +283,18 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
 
                       if (product.category == 'care')
                         _buildServiceItem(
-                          cartService.getProductImage(product.productId),
+                          'https://res.cloudinary.com/dc1piksu8/image/upload/v1756239589/9725.jpg',
                           product.productName,
                           '60 phút',
-                          Currency.formatVND(product.productDetail?.price ?? 0),
+                          'Liên hệ',
                           product.description,
-                          DateTime.now().add(Duration(days: 1)).toString(),
+                          widget.datetime ?? 'Chưa chọn thời gian',
                         )
                       else
                         _buildProductItem(
-                          cartService.getProductImage(product.productId),
+                          'https://res.cloudinary.com/dc1piksu8/image/upload/v1756239589/9725.jpg',
                           product.productName,
-                          Currency.formatVND(product.productDetail?.price ?? 0),
+                          'Liên hệ',
                           1,
                         ),
                     ],
@@ -341,15 +306,11 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
 
           // Otherwise show all items from cart grouped by shop
           final cartItems = cartService.getCartItems();
-          final Map<String, List<dynamic>> itemsByShop = {};
-
-          // Group items by shop
-          for (var item in cartItems) {
-            final shopId = item.productMeta?['shopId'] ?? 'unknown';
-            if (!itemsByShop.containsKey(shopId)) {
-              itemsByShop[shopId] = [];
-            }
-            itemsByShop[shopId]!.add(item);
+          if (cartItems.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Giỏ hàng trống'),
+            );
           }
 
           return Padding(
@@ -357,82 +318,31 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...itemsByShop.entries.map((entry) {
-                  final shopId = entry.key;
-                  final shopItems = entry.value;
-                  // TODO: Replace with service call when API is ready
-                  final shopName = mockShops
-                      .firstWhere(
-                        (shop) => shop.shopId == shopId,
-                        orElse: () => Shop(
-                          shopId: shopId,
-                          shopName: 'Unknown Shop',
-                          description: '',
-                          owner: '',
-                          status: true,
-                          workingDays: '',
-                        ),
-                      )
-                      .shopName;
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Shop Header
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: primaryLightColor,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(Icons.store, color: primaryColor),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            shopName,
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Items from this shop
-                      ...shopItems.map((item) {
-                        final product = cartService.getProductFromId(
-                          item.productId,
-                        );
-                        final isService = product.category == 'care';
-
-                        if (isService) {
-                          return _buildServiceItem(
-                            cartService.getProductImage(item.productId),
-                            item.productName,
-                            '60 phút', // Get from metadata if available
-                            Currency.formatVND(
-                              item.variants.first.price * item.quantity,
-                            ),
-                            product.description,
-                            DateTime.now().add(Duration(days: 1)).toString(),
-                          );
-                        } else {
-                          return _buildProductItem(
-                            cartService.getProductImage(item.productId),
-                            item.productName,
-                            Currency.formatVND(
-                              item.variants.first.price * item.quantity,
-                            ),
-                            item.quantity,
-                          );
-                        }
-                      }),
-
-                      const SizedBox(height: 16),
-                    ],
-                  );
-                }),
+                const Text(
+                  'Dịch vụ trong giỏ hàng',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 16),
+                ...cartItems.map((item) {
+                  final product = cartService.getProductFromId(item.productId);
+                  if (product.category == 'care') {
+                    return _buildServiceItem(
+                      'https://res.cloudinary.com/dc1piksu8/image/upload/v1756239589/9725.jpg',
+                      product.productName,
+                      '60 phút',
+                      'Liên hệ',
+                      product.description,
+                      item.productMeta?['dateTime'] ?? 'Chưa chọn thời gian',
+                    );
+                  } else {
+                    return _buildProductItem(
+                      'https://res.cloudinary.com/dc1piksu8/image/upload/v1756239589/9725.jpg',
+                      product.productName,
+                      'Liên hệ',
+                      item.quantity,
+                    );
+                  }
+                }).toList(),
               ],
             ),
           );
@@ -465,7 +375,7 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               image: DecorationImage(
-                image: AssetImage(imagePath),
+                image: NetworkImage(imagePath),
                 fit: BoxFit.cover,
               ),
             ),
@@ -475,33 +385,24 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Flexible(
-                        child: Text(
-                          serviceName,
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-
-                    Text('x1', style: TextStyle(color: Colors.grey)),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Icon(Icons.access_time, size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text(duration, style: TextStyle(color: Colors.grey)),
-                  ],
+                Text(
+                  serviceName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  description,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  'Thời gian: $duration',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+                Text(
+                  'Giá: $price',
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Container(
@@ -515,18 +416,22 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
                   ),
                   child: Text(
                     'Lịch hẹn: $appointmentTime',
-                    style: TextStyle(fontSize: 12, color: primaryColor),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: primaryColor,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  price,
-                  style: TextStyle(
-                    color: primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                if (description.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    description,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -535,7 +440,6 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
     );
   }
 
-  // New Product Item Widget - Simpler than Service Item
   Widget _buildProductItem(
     String imagePath,
     String productName,
@@ -557,7 +461,7 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               image: DecorationImage(
-                image: AssetImage(imagePath),
+                image: NetworkImage(imagePath),
                 fit: BoxFit.cover,
               ),
             ),
@@ -569,15 +473,13 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
               children: [
                 Text(
                   productName,
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(height: 4),
                 Text(
                   price,
                   style: TextStyle(
                     color: primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -585,7 +487,10 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
           ),
           Text(
             'x$quantity',
-            style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -598,20 +503,15 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
         padding: const EdgeInsets.all(16),
         child: Consumer<CartService>(
           builder: (context, cartService, child) {
-            final totalAmount =
-                widget.directBuy == true && widget.product != null
-                ? widget.product!.productDetail?.price ?? 0
-                : cartService.getTotalAmount();
-
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Thành tiền',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                const Text(
+                  'Tổng cộng:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  Currency.formatVND(totalAmount),
+                  'Liên hệ',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -637,7 +537,10 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
               children: [
                 Icon(Icons.note, color: primaryColor),
                 const SizedBox(width: 8),
-                Text('Ghi chú', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Text(
+                  'Ghi chú',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -645,13 +548,11 @@ class _ServiceOrderScreenState extends State<ServiceOrderScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: primaryLightColor,
+                color: Colors.grey[50],
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
               ),
-              child: Text(
-                widget.note!,
-                style: TextStyle(color: Colors.black87, fontSize: 14),
-              ),
+              child: Text(widget.note ?? ''),
             ),
           ],
         ),

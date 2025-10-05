@@ -4,13 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/core/utils/device_size.dart';
 import 'package:myapp/features/shop/logic/shop_logic.dart';
+import 'package:myapp/features/auth/service/auth_service.dart';
 import 'package:myapp/features/shop/widgets/product_bottom_bar_widget.dart';
 import 'package:myapp/features/shop/widgets/product_detail_header_widget.dart';
 import 'package:myapp/features/shop/widgets/product_info_widget.dart';
 import 'package:myapp/features/shop/widgets/product_main_image_widget.dart';
 import 'package:myapp/features/shop/widgets/product_thumbnail_list_widget.dart';
 // TODO: Comment out when API is ready
-import 'package:myapp/data/service_locator.dart';
 import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/shared/model/product.dart';
 import 'package:myapp/shared/widgets/common/notification.dart';
@@ -81,36 +81,33 @@ class _DetailProductScreenState extends State<DetailProductScreen>
     if (widget.productId != null) {
       try {
         // TODO: Replace with service call when API is ready
-        final productService = ServiceLocator().productService;
-        final product = await productService.getProductById(widget.productId!);
-        if (product != null) {
-          setState(() {
-            _product = product;
-          });
-        } else {
-          setState(() {});
-        }
+        // For now using mock data
+        setState(() {
+          // Create a mock product for demonstration
+          _product = Product(
+            productId: widget.productId!,
+            productName: 'Dịch vụ chăm sóc thú cưng',
+            description: 'Dịch vụ chăm sóc chuyên nghiệp cho thú cưng',
+            category: widget.category ?? 'care',
+            status: true,
+            shopId: 'shop_1',
+          );
+        });
       } catch (e) {
-        // Fallback to mock data
-        // _product = mockProducts.firstWhere(
-        //   (product) => product.productId == widget.productId,
-        //   orElse: () => mockProducts.first,
-        // );
         setState(() {});
       }
     } else {
-      // Default to first product
-      // try {
-      //   final productService = ServiceLocator().productService;
-      //   final products = await productService.getAllProducts();
-      //   setState(() {
-      //     _product = products.isNotEmpty ? products.first : mockProducts.first;
-      //   });
-      // } catch (e) {
-      //   setState(() {
-      //     _product = mockProducts.first;
-      //   });
-      // }
+      // Default product
+      setState(() {
+        _product = Product(
+          productId: 'default_1',
+          productName: 'Dịch vụ mặc định',
+          description: 'Dịch vụ chăm sóc mặc định',
+          category: 'care',
+          status: true,
+          shopId: 'shop_1',
+        );
+      });
     }
   }
 
