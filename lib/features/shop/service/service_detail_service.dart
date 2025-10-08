@@ -41,7 +41,7 @@ class ServiceDetailService implements IServiceDetailService {
       // Đánh dấu đã khởi tạo để tránh vòng lặp khởi tạo vô hạn,
       // nhưng vẫn ném lại lỗi để caller có thể xử lý hoặc fallback.
       _isInitialized = true;
-      logger.e('[ServiceDetailService] Khởi tạo thất bại: $e\n$st');
+      logger.d('[ServiceDetailService] Khởi tạo thất bại: $e\n$st');
       rethrow;
     }
   }
@@ -61,6 +61,7 @@ class ServiceDetailService implements IServiceDetailService {
     int pageSize = 10,
     String? sortColumn,
     String sortDirection = 'asc',
+    String serviceId = '',
   }) async {
     await _ensureInitialized();
 
@@ -69,6 +70,7 @@ class ServiceDetailService implements IServiceDetailService {
         'pageIndex': pageIndex,
         'pageSize': pageSize,
         'sortDirection': sortDirection,
+        'serviceId': serviceId,
       };
 
       if (sortColumn != null && sortColumn.isNotEmpty) {
@@ -83,7 +85,7 @@ class ServiceDetailService implements IServiceDetailService {
 
       return ServiceDetailListResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceDetailService] Lấy danh sách thất bại: $e\n$st');
+      logger.d('[ServiceDetailService] Lấy danh sách thất bại: $e\n$st');
       throw Exception('Lấy danh sách dịch vụ thất bại: ${e.toString()}');
     }
   }
@@ -100,7 +102,7 @@ class ServiceDetailService implements IServiceDetailService {
       );
       return ServiceDetailResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceDetailService] Lấy chi tiết thất bại: $e\n$st');
+      logger.d('[ServiceDetailService] Lấy chi tiết thất bại: $e\n$st');
       throw Exception('Lấy chi tiết dịch vụ thất bại: ${e.toString()}');
     }
   }
@@ -121,7 +123,7 @@ class ServiceDetailService implements IServiceDetailService {
 
       return CreateServiceDetailResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceDetailService] Tạo mới thất bại: $e\n$st');
+      logger.d('[ServiceDetailService] Tạo mới thất bại: $e\n$st');
       throw Exception('Tạo dịch vụ thất bại: ${e.toString()}');
     }
   }
@@ -143,7 +145,7 @@ class ServiceDetailService implements IServiceDetailService {
 
       return ServiceDetailResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceDetailService] Cập nhật thất bại: $e\n$st');
+      logger.d('[ServiceDetailService] Cập nhật thất bại: $e\n$st');
       throw Exception('Cập nhật dịch vụ thất bại: ${e.toString()}');
     }
   }
@@ -161,7 +163,7 @@ class ServiceDetailService implements IServiceDetailService {
 
       return response.statusCode == 200;
     } catch (e, st) {
-      logger.e('[ServiceDetailService] Xóa thất bại: $e\n$st');
+      logger.d('[ServiceDetailService] Xóa thất bại: $e\n$st');
       throw Exception('Xóa dịch vụ thất bại: ${e.toString()}');
     }
   }
@@ -188,7 +190,7 @@ class ServiceDetailService implements IServiceDetailService {
 
       return ServiceDetailListResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceDetailService] Lấy theo category thất bại: $e\n$st');
+      logger.d('[ServiceDetailService] Lấy theo category thất bại: $e\n$st');
       throw Exception('Lấy dịch vụ theo category thất bại: ${e.toString()}');
     }
   }
@@ -215,7 +217,7 @@ class ServiceDetailService implements IServiceDetailService {
 
       return ServiceDetailListResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceDetailService] Tìm kiếm thất bại: $e\n$st');
+      logger.d('[ServiceDetailService] Tìm kiếm thất bại: $e\n$st');
       throw Exception('Tìm kiếm dịch vụ thất bại: ${e.toString()}');
     }
   }
@@ -242,7 +244,7 @@ class ServiceDetailService implements IServiceDetailService {
 
       return ServiceDetailListResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceDetailService] Lấy active thất bại: $e\n$st');
+      logger.d('[ServiceDetailService] Lấy active thất bại: $e\n$st');
       throw Exception('Lấy dịch vụ active thất bại: ${e.toString()}');
     }
   }
@@ -268,7 +270,7 @@ class ServiceDetailService implements IServiceDetailService {
 
       return ServiceDetailListResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceDetailService] Lấy theo shop thất bại: $e\n$st');
+      logger.d('[ServiceDetailService] Lấy theo shop thất bại: $e\n$st');
       throw Exception('Lấy dịch vụ theo shop thất bại: ${e.toString()}');
     }
   }
@@ -295,7 +297,7 @@ class ServiceDetailService implements IServiceDetailService {
 
       return ServiceDetailListResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceDetailService] Lấy theo service thất bại: $e\n$st');
+      logger.d('[ServiceDetailService] Lấy theo service thất bại: $e\n$st');
       throw Exception('Lấy dịch vụ theo service thất bại: ${e.toString()}');
     }
   }

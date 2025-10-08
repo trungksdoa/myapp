@@ -26,7 +26,7 @@ import 'package:myapp/features/cart/screen/cart_screen.dart';
 import 'package:myapp/features/shop/screen/order_detail.dart';
 import 'package:myapp/features/shop/screen/order_success.dart';
 import 'package:myapp/features/shop/screen/service_order_screen.dart';
-import 'package:myapp/features/shop/screen/shop_detail_screen.dart';
+import 'package:myapp/features/shop/screen/shop_service_screen.dart';
 import 'package:myapp/features/shop/screen/shop_product_screen.dart';
 import 'package:myapp/features/shop/screen/shop_routing.dart';
 import 'package:myapp/features/home/screen/home.dart';
@@ -40,6 +40,7 @@ import 'package:myapp/features/auth/screen/forgot_password.dart';
 import 'package:myapp/features/auth/screen/otp_verification.dart';
 import 'package:myapp/features/other/screen/reset_password.dart';
 import 'package:myapp/features/auth/screen/password_reset_success.dart';
+import 'package:myapp/features/auth/screen/register_otp_verification.dart';
 import 'package:myapp/features/other/screen/splash_screen.dart';
 // Services
 import 'package:myapp/features/auth/service/auth_service.dart';
@@ -88,7 +89,7 @@ class AppRouter {
           protectedRoutes.any(
             (route) => state.matchedLocation.startsWith(route),
           )) {
-        logger.d('Redirecting to login from ${state.matchedLocation}');
+        logger.e('Redirecting to login from ${state.matchedLocation}');
         // Preserve the original destination so we can return after login
         final original = state.fullPath ?? state.uri.path;
         final encoded = Uri.encodeComponent(original);
@@ -232,9 +233,9 @@ class AppRouter {
                     path: 'services',
                     name: 'shop-services',
                     builder: (context, state) {
-                      final params = state.extra as Map<String, dynamic>?;
-                      final shopId = params?['shopId'];
-                      return ShopServiceScreen(shopId: shopId);
+                      // final params = state.extra as Map<String, dynamic>?;
+                      // final shopId = params?['shopId'];
+                      return ShopServiceScreen();
                     },
                   ),
 
@@ -259,7 +260,7 @@ class AppRouter {
                   //     final directBuy = params?['directBuy'] as bool? ?? false;
                   //     final product = params?['product'];
                   //     final dateTime = params?['dateTime'] as String?;
-                  //     logger.d('Order params: $params, product: $product');
+                  //     logger.e('Order params: $params, product: $product');
                   //     return CustomTransitionPage(
                   //       key: state.pageKey,
                   //       child: ServiceOrderScreen(
@@ -309,19 +310,6 @@ class AppRouter {
                 builder: (context, state) => const ChatBox(),
                 routes: [
                   // Sub-routes cho AI chat
-                  GoRoute(
-                    path: 'chat', // Bỏ dấu / → 'chat'
-                    name: 'chat-screen',
-                    builder: (context, state) {
-                      final initialMessage =
-                          state.uri.queryParameters['message'];
-                      final petName = state.uri.queryParameters['petName'];
-                      return ChatScreen(
-                        initialMessage: initialMessage,
-                        petName: petName,
-                      );
-                    },
-                  ),
                 ],
               ),
             ],
@@ -340,12 +328,12 @@ class AppRouter {
                     path: 'blog/home',
                     name: 'family-blog',
                     builder: (context, state) {
-                      logger.d(
+                      logger.e(
                         'Building FamilyBlog with state: ${state.fullPath}',
                       );
                       final params = state.extra as Map<String, String>?;
 
-                      logger.d('Received params: $params');
+                      logger.e('Received params: $params');
 
                       return FamilyBlog(
                         groupId: params?['groupId'],
@@ -404,13 +392,16 @@ class AppRouter {
                     builder: (context, state) => const OrdersBodyWidget(),
                   ),
                   GoRoute(
-                    path: 'products',
+                    path: 'services',
                     name: 'personal-appointment-booking',
-                    builder: (context, state) =>
-                        const ServiceBookingBodyWidget(),
+                    builder: (context, state) {
+                      final params = state.extra as Map<String, dynamic>?;
+                      final userId = params?['userId'] as String?;
+                      return ServiceBookingBodyWidget(userId: userId);
+                    },
                     routes: [
                       GoRoute(
-                        path: 'orders',
+                        path: 'detail',
                         name: 'personal-appointment-detail',
                         builder: (context, state) =>
                             const AppointmentDetailsBodyWidget(),
@@ -517,6 +508,15 @@ class AppRouter {
 
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
+        path: '/chat-screen',
+        name: 'chat-screen',
+        builder: (context, state) {
+          final initialMessage = state.uri.queryParameters['message'];
+          return ChatScreen(initialMessage: initialMessage);
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/order-success',
         name: 'order-success',
         pageBuilder: (context, state) {
@@ -588,7 +588,7 @@ class AppRouter {
           final product = params?['product'];
           final dateTime = params?['dateTime'] as String?;
           final note = params?['note'] as String?;
-          logger.d('Order params: $params, product: $product');
+          logger.e('Order params: $params, product: $product');
           return CustomTransitionPage(
             key: state.pageKey,
             child: ServiceOrderScreen(
@@ -707,6 +707,19 @@ class AppRouter {
             name: 'password-reset-success',
             builder: (context, state) => const PasswordResetSuccessScreen(),
           ),
+          GoRoute(
+            path: 'register-otp-verification',
+            name: 'register-otp-verification',
+            builder: (context, state) {
+              final params = state.extra as Map<String, dynamic>?;
+              final email = params?['email'] as String? ?? '';
+              final xKeyApt = params?['xKeyApt'] as String? ?? '';
+              return RegisterOTPVerificationScreen(
+                email: email,
+                xKeyApt: xKeyApt,
+              );
+            },
+          ),
         ],
       ),
 
@@ -723,8 +736,7 @@ class AppRouter {
         name: 'chat-fullscreen',
         builder: (context, state) {
           final initialMessage = state.uri.queryParameters['message'];
-          final petName = state.uri.queryParameters['petName'];
-          return ChatScreen(initialMessage: initialMessage, petName: petName);
+          return ChatScreen(initialMessage: initialMessage);
         },
       ),
     ],

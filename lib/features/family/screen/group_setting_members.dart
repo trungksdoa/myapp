@@ -54,7 +54,6 @@ class _GroupSettingMembersState extends State<GroupSettingMembers> {
 
   /// Get current user info
   String? get currentUserId => _authService.userId;
-  Map<String, dynamic>? get userData => _authService.userData;
 
   bool isAdmin = false;
   // Future<bool> isGroupAdmin = RoleManager.hasRole("BOSS");

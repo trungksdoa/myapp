@@ -3,11 +3,14 @@ import 'package:myapp/core/utils/device_size.dart';
 import 'package:myapp/core/utils/performance_monitor.dart';
 import 'package:myapp/core/utils/image_cache.dart';
 import 'package:myapp/core/colors.dart';
+import 'package:myapp/features/home/service/branch_service';
+import 'package:myapp/features/home/service/interface/branch.dart';
 import 'package:myapp/features/shop/widgets/shop_map.dart';
 import 'package:myapp/shared/widgets/common/custom_elevated_button.dart';
 import 'package:myapp/shared/widgets/common/notification.dart';
 import 'package:myapp/features/auth/service/auth_service.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:myapp/features/home/service/interface/branch_interface.dart';
 
 // Mock services data
 const List<Map<String, String>> services = [
@@ -116,51 +119,51 @@ class _HomeState extends State<Home> {
                       color: Colors.grey[800],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Chọn dịch vụ bạn cần',
-                    style: TextStyle(
-                      fontSize: fontSize - 2,
-                      color: Colors.grey[600],
-                    ),
-                  ),
+                  // const SizedBox(height: 4),
+                  // Text(
+                  //   '',
+                  //   style: TextStyle(
+                  //     fontSize: fontSize - 2,
+                  //     color: Colors.grey[600],
+                  //   ),
+                  // ),
                 ],
               ),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.85,
-              ),
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final service = services[index];
-                return RepaintBoundary(
-                  child: Hero(
-                    tag: 'service-${service['key']}',
-                    child: Material(
-                      color: Colors.transparent,
-                      child: _OptimizedServiceCard(
-                        key: ValueKey(service['key']),
-                        assetIcon: service['icon']!,
-                        label: service['label']!,
-                        onTap: () {
-                          NotificationUtils.showNotification(
-                            context,
-                            'Đã chọn ${service['label']!}',
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                );
-              }, childCount: services.length),
-            ),
-          ),
+          // SliverPadding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          //   sliver: SliverGrid(
+          //     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          //       crossAxisCount: 3,
+          //       mainAxisSpacing: 16,
+          //       crossAxisSpacing: 16,
+          //       childAspectRatio: 0.85,
+          //     ),
+          //     delegate: SliverChildBuilderDelegate((context, index) {
+          //       final service = services[index];
+          //       return RepaintBoundary(
+          //         child: Hero(
+          //           tag: 'service-${service['key']}',
+          //           child: Material(
+          //             color: Colors.transparent,
+          //             child: _OptimizedServiceCard(
+          //               key: ValueKey(service['key']),
+          //               assetIcon: service['icon']!,
+          //               label: service['label']!,
+          //               onTap: () {
+          //                 NotificationUtils.showNotification(
+          //                   context,
+          //                   'Đã chọn ${service['label']!}',
+          //                 );
+          //               },
+          //             ),
+          //           ),
+          //         ),
+          //       );
+          //     }, childCount: services.length),
+          //   ),
+          // ),
 
           // Login section — wrap the non-sliver content with RepaintBoundary inside the SliverToBoxAdapter
           // Note: Using FutureBuilder for async authentication check

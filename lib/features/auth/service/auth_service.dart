@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:myapp/core/network/dio_service_old.dart';
+import 'package:myapp/core/utils/performance_monitor.dart';
+import 'package:myapp/features/personal/interface/user.dart';
 import 'package:myapp/shared/utils/jwt_utils.dart';
 import 'interface/i_auth_service.dart';
 
@@ -26,6 +28,9 @@ class AuthService implements IAuthService {
 
   String? _cachedUserId;
   Map<String, dynamic>? _cachedUserData;
+
+  User? _cachedUser;
+
   bool _isInitialized = false;
 
   // ✅ Proper async initialization
@@ -101,11 +106,37 @@ class AuthService implements IAuthService {
         '/api/accounts/register/customer',
         data: userData,
       );
-      return response.data as Map<String, dynamic>;
+      final xKeyApt = response.headers.value('x-key-apt');
+
+      // Return both status code and X-Key-APT header
+      return {'statusCode': response?.statusCode ?? 500, 'xKeyApt': xKeyApt};
     } catch (e) {
       print('[AuthService] Register failed: $e');
       if (e is Exception) rethrow;
       throw Exception('Đăng ký thất bại: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> verifyRegisterOTP(
+    String email,
+    String otp,
+    String xKeyApt,
+  ) async {
+    await _ensureInitialized();
+
+    try {
+      // ✅ API: POST /api/auth/registerVerifyToken
+      final otpInt = int.parse(otp);
+      await _dioService.post(
+        '/api/auth/registerVerifyToken',
+        data: {'email': email, 'otp': otpInt},
+        options: Options(headers: {'X-Key-APT': xKeyApt}),
+      );
+    } catch (e) {
+      print('[AuthService] Verify register OTP failed: $e');
+      if (e is Exception) rethrow;
+      throw Exception('Xác thực OTP thất bại: ${e.toString()}');
     }
   }
 
@@ -134,6 +165,9 @@ class AuthService implements IAuthService {
 
   @override
   Map<String, dynamic>? get userData => _cachedUserData;
+
+  @override
+  User? get user => _cachedUser;
 
   @override
   Future<void> sendPasswordResetOTP(String email) async {
@@ -212,19 +246,19 @@ class AuthService implements IAuthService {
   }
 
   @override
-  Future<Map<String, dynamic>?> getCurrentUser() async {
-    if (_cachedUserData != null) return _cachedUserData;
-
+  Future<User?> getCurrentUser() async {
     await _ensureInitialized();
 
     try {
       // ✅ API: GET /api/auth/me
       final response = await _dioService.get('/api/auth/me');
-      final userData = response.data as Map<String, dynamic>;
-      await _saveUserData(userData);
-      return userData;
+      final serverResponse = response.data;
+      logger.d('Get current user response: $serverResponse');
+      final userData = serverResponse['data'] as Map<String, dynamic>;
+
+      return User.fromJson(userData);
     } catch (e) {
-      print('[AuthService] Get current user failed: $e');
+      logger.e('Get current user failed: $e');
       return null;
     }
   }

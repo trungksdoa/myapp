@@ -3,10 +3,10 @@
 enum AppointmentStatus {
   pending(0),
   confirmed(1),
-  inProgress(2),
-  completed(3),
-  cancelled(4),
-  noShow(5);
+  checkin(2),
+  processing(3),
+  finished(4),
+  cancel(5);
 
   const AppointmentStatus(this.value);
   final int value;
@@ -63,17 +63,17 @@ class AppointmentSummary {
   final String id;
   final String? customerId;
   final String? shopId;
-  final String? shopName; // ✅ ADDED shopName
-  final double totalAmount; // ✅ totalAmount ở đây
+  final String? shopName;
+  final double totalAmount;
   final String? paymentMethod;
   final String? note;
   final AppointmentStatus status;
   final DateTime startTime;
   final String? staffName;
-  final String? bankId; // ✅ ADDED bankId
-  final String? bankTransactionId; // ✅ ADDED bankTransactionId
+  final String? bankId;
+  final String? bankTransactionId;
   final bool isPaid;
-  final List<AppointmentDetailResponse> details; // ✅ ADDED details array
+  final List<AppointmentDetail> details;
 
   AppointmentSummary({
     required this.id,
@@ -97,83 +97,67 @@ class AppointmentSummary {
       id: json['id'] as String,
       customerId: json['customerId'] as String?,
       shopId: json['shopId'] as String?,
-      shopName: json['shopName'] as String?, // ✅ NEW
+      shopName: json['shopName'] as String?,
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
       paymentMethod: json['paymentMethod'] as String?,
       note: json['note'] as String?,
       status: AppointmentStatus.fromValue(json['status'] as int? ?? 0),
       startTime: DateTime.parse(json['startTime'] as String),
       staffName: json['staffName'] as String?,
-      bankId: json['bankId'] as String?, // ✅ NEW
-      bankTransactionId: json['bankTransactionId'] as String?, // ✅ NEW
+      bankId: json['bankId'] as String?,
+      bankTransactionId: json['bankTransactionId'] as String?,
       isPaid: json['isPaid'] as bool? ?? false,
       details: (json['details'] as List<dynamic>? ?? [])
           .map(
-            (item) => AppointmentDetailResponse.fromJson(
-              item as Map<String, dynamic>,
-            ),
+            (item) => AppointmentDetail.fromJson(item as Map<String, dynamic>),
           )
           .toList(),
     );
   }
 }
 
-// ✅ UPDATED: AppointmentDetailResponse theo API structure
-class AppointmentDetailResponse {
+// ✅ UPDATED: AppointmentDetail theo API structure thực tế
+class AppointmentDetail {
   final String id;
-  final String? customerId;
-  final String? shopId;
-  final String? shopName; // ✅ ADDED
-  final String? paymentMethod;
-  final String? note;
-  final AppointmentStatus status;
-  final DateTime startTime;
-  final String? staffName;
-  final String? bankId; // ✅ ADDED
-  final String? bankTransactionId; // ✅ ADDED
-  final bool isPaid;
+  final String? appointmentId;
+  final String? serviceDetailId;
+  final String? serviceDetailName;
   final double totalAmount;
-  final List<AppointmentDetailInput> details;
+  final String? note;
+  final int petQuantity;
 
-  AppointmentDetailResponse({
+  AppointmentDetail({
     required this.id,
-    this.customerId,
-    this.shopId,
-    this.shopName,
-    this.paymentMethod,
-    this.note,
-    required this.status,
-    required this.startTime,
-    this.staffName,
-    this.bankId,
-    this.bankTransactionId,
-    this.isPaid = false,
+    this.appointmentId,
+    this.serviceDetailId,
+    this.serviceDetailName,
     this.totalAmount = 0.0,
-    this.details = const [],
+    this.note,
+    this.petQuantity = 1,
   });
 
-  factory AppointmentDetailResponse.fromJson(Map<String, dynamic> json) {
-    return AppointmentDetailResponse(
+  factory AppointmentDetail.fromJson(Map<String, dynamic> json) {
+    return AppointmentDetail(
       id: json['id'] as String,
-      customerId: json['customerId'] as String?,
-      shopId: json['shopId'] as String?,
-      shopName: json['shopName'] as String?, // ✅ NEW
-      paymentMethod: json['paymentMethod'] as String?,
-      note: json['note'] as String?,
-      status: AppointmentStatus.fromValue(json['status'] as int? ?? 0),
-      startTime: DateTime.parse(json['startTime'] as String),
-      staffName: json['staffName'] as String?,
-      bankId: json['bankId'] as String?, // ✅ NEW
-      bankTransactionId: json['bankTransactionId'] as String?, // ✅ NEW
-      isPaid: json['isPaid'] as bool? ?? false,
+      appointmentId: json['appointmentId'] as String?,
+      serviceDetailId: json['serviceDetailId'] as String?,
+      serviceDetailName: json['serviceDetailName'] as String?,
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
-      details: (json['details'] as List<dynamic>? ?? [])
-          .map(
-            (item) =>
-                AppointmentDetailInput.fromJson(item as Map<String, dynamic>),
-          )
-          .toList(),
+      note: json['note'] as String?,
+      petQuantity: json['petQuantity'] as int? ?? 1,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'appointmentId': appointmentId,
+      'serviceDetailId': serviceDetailId,
+      'serviceDetailName': serviceDetailName,
+      'totalAmount': totalAmount,
+      'note': note,
+      'petQuantity': petQuantity,
+    };
   }
 }
 

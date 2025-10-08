@@ -216,7 +216,7 @@ class UpdateServiceDetailRequest {
 
 // ✅ Service Detail List Response Model
 class ServiceDetailListResponse {
-  final List<ServiceDetail> items;
+  List<ServiceDetail> items;
   final int totalItems;
   final int pageIndex;
   final int pageSize;

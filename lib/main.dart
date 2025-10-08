@@ -14,6 +14,14 @@ void main() async {
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Web-specific CORS handling
+  if (kIsWeb) {
+    print('[WEB] Running in web mode - CORS restrictions may apply');
+    print(
+      '[WEB] If you encounter network errors, please use mobile app for full functionality',
+    );
+  }
+
   // Initialize performance monitoring (only in debug mode)
   if (kDebugMode) {
     AppPerformance.initialize();

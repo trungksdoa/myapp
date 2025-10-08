@@ -1,9 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/core/utils/logger_service.dart';
+import 'package:myapp/features/auth/service/auth_service.dart';
+import 'package:myapp/features/auth/service/interface/i_auth_service.dart';
+import 'package:myapp/features/personal/interface/user.dart';
 import 'package:myapp/route/navigate_helper.dart';
 import 'package:myapp/shared/widgets/common/custom_elevated_button.dart';
 
-class PersonalHomeWidget extends StatelessWidget {
+final logger = LoggerService.instance;
+
+class PersonalHomeWidget extends StatefulWidget {
   const PersonalHomeWidget({super.key});
+
+  @override
+  State<PersonalHomeWidget> createState() => _PersonalHomeWidgetState();
+}
+
+class _PersonalHomeWidgetState extends State<PersonalHomeWidget> {
+  User? user;
+  final IAuthService _authService = AuthService();
+
+  /// Get current user info
+  String? get currentUserId => _authService.userId;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentUser();
+  }
+
+  Future<void> _getCurrentUser() async {
+    user = await AuthService().getCurrentUser();
+    setState(() {});
+    printUser();
+  }
+
+  void printUser() {
+    LoggerService.instance.e('Current user: $user');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +53,12 @@ class PersonalHomeWidget extends StatelessWidget {
                 backgroundImage: AssetImage('assets/images/user_avatar.jpg'),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'Mèo thần chết',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                user?.fullName ?? 'Unknown',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -38,12 +74,12 @@ class PersonalHomeWidget extends StatelessWidget {
                 _buildMenuItem(
                   icon: Icons.shopping_bag,
                   title: 'Đơn hàng',
-                  onTap: () => _navigateToOrders(context),
+                  onTap: () => _navigateToOrders(context, currentUserId!),
                 ),
                 _buildMenuItem(
                   icon: Icons.calendar_today,
                   title: 'Cuộc hẹn',
-                  onTap: () => _navigateToAppointments(context),
+                  onTap: () => _navigateToAppointments(context, currentUserId!),
                 ),
                 _buildMenuItem(
                   icon: Icons.article,
@@ -120,12 +156,12 @@ class PersonalHomeWidget extends StatelessWidget {
     );
   }
 
-  void _navigateToOrders(BuildContext context) {
-    NavigateHelper.goToPersonalOrders(context);
+  void _navigateToOrders(BuildContext context, String userId) {
+    NavigateHelper.goToPersonalOrders(context, userId);
   }
 
-  void _navigateToAppointments(BuildContext context) {
-    NavigateHelper.goToAppointmentBooking(context);
+  void _navigateToAppointments(BuildContext context, String userId) {
+    NavigateHelper.goToAppointmentBooking(context, userId);
   }
 
   void _navigateToPosts(BuildContext context) {

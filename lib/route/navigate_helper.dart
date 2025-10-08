@@ -82,26 +82,16 @@ class NavigateHelper {
   // =====================================
 
   /// Navigate to chat screen with optional initial message
-  static void goToChat(
-    BuildContext context, {
-    String? message,
-    String? petName,
-  }) {
+  static void goToChat(BuildContext context, {String? message}) {
     final params = <String, String>{};
     if (message != null) params['message'] = message;
-    if (petName != null) params['petName'] = petName;
     context.pushNamed('chat-screen', queryParameters: params);
   }
 
   /// Navigate to fullscreen chat mode
-  static void goToChatFullscreen(
-    BuildContext context, {
-    String? message,
-    String? petName,
-  }) {
+  static void goToChatFullscreen(BuildContext context, {String? message}) {
     final params = <String, String>{};
     if (message != null) params['message'] = message;
-    if (petName != null) params['petName'] = petName;
     context.goNamed('chat-fullscreen', queryParameters: params);
   }
 
@@ -135,6 +125,18 @@ class NavigateHelper {
     required String email,
   }) {
     context.go('/auth/otp-verification?email=$email');
+  }
+
+  /// Navigate to register OTP verification screen
+  static void goToRegisterOTPVerification(
+    BuildContext context,
+    String email,
+    String xKeyApt,
+  ) {
+    context.goNamed(
+      'register-otp-verification',
+      extra: {'email': email, 'xKeyApt': xKeyApt},
+    );
   }
 
   /// Navigate to reset password screen
@@ -222,13 +224,13 @@ class NavigateHelper {
   // =====================================
 
   /// Navigate to personal orders (products)
-  static void goToPersonalOrders(BuildContext context) {
-    context.pushNamed('personal-orders-products');
+  static void goToPersonalOrders(BuildContext context, String userId) {
+    context.pushNamed('personal-orders-products', extra: {'userId': userId});
   }
 
   /// Navigate to personal service bookings
-  static void goToPersonalServiceOrders(BuildContext context) {
-    context.pushNamed('personal-orders-services');
+  static void goToPersonalServiceOrders(BuildContext context, String userId) {
+    context.pushNamed('personal-orders-services', extra: {'userId': userId});
   }
 
   /// Navigate to order history screen
@@ -246,8 +248,11 @@ class NavigateHelper {
   // =====================================
 
   /// Navigate to appointment booking screen
-  static void goToAppointmentBooking(BuildContext context) {
-    context.pushNamed('personal-appointment-booking');
+  static void goToAppointmentBooking(BuildContext context, String userId) {
+    context.pushNamed(
+      'personal-appointment-booking',
+      extra: {'userId': userId},
+    );
   }
 
   /// Navigate to appointment calendar view

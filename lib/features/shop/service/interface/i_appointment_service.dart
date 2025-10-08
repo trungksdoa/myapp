@@ -10,7 +10,7 @@ abstract class IAppointmentService {
     String sortDirection = 'asc',
   });
 
-  Future<AppointmentDetailResponse> getAppointmentById(String id);
+  // Future<AppointmentDetailResponse> getAppointmentById(String id);
 
   Future<CreateAppointmentResponse> createAppointment(
     CreateAppointmentRequest request,

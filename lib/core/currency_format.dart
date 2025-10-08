@@ -13,4 +13,8 @@ class Currency {
   static String formatVND(double amount) {
     return CurrencyFormatter.format(amount, vndSettings);
   }
+
+  static String formatIntVND(int amount) {
+    return CurrencyFormatter.format(amount, vndSettings);
+  }
 }

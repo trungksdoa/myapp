@@ -1,0 +1,202 @@
+import 'package:myapp/core/network/dio_service.dart';
+import 'package:myapp/core/utils/logger_service.dart';
+import 'interface/branch_interface.dart';
+import 'interface/branch.dart';
+
+final logger = LoggerService.instance;
+
+/// Service để tương tác với API Branch.
+/// - Sử dụng DioClient singleton (hỗ trợ customBaseUrl).
+/// - Chỉ cung cấp các API GET: list, search theo shop.
+class BranchService implements IBranchService {
+  static final BranchService _instance = BranchService._internal();
+  factory BranchService() => _instance;
+  BranchService._internal();
+
+  late final DioClient _dioService;
+  bool _isInitialized = false;
+
+  // Base URL cho branch API
+  static const String _baseUrl = "https://branch.devnest.io.vn";
+
+  // Prefix endpoint
+  static const String _apiPrefix = '/api/branches';
+
+  /// Khởi tạo service (gọi một lần).
+  @override
+  Future<void> initialize() async {
+    if (_isInitialized) return;
+
+    try {
+      logger.d('[BranchService] Bắt đầu khởi tạo với baseUrl: $_baseUrl');
+      _dioService = DioClient();
+      await _dioService.initialize(_baseUrl);
+      _isInitialized = true;
+      logger.d('[BranchService] Khởi tạo thành công');
+    } catch (e, st) {
+      _isInitialized = true;
+      logger.d('[BranchService] Khởi tạo thất bại: $e\n$st');
+      rethrow;
+    }
+  }
+
+  /// Đảm bảo service đã được khởi tạo trước khi gọi API.
+  Future<void> _ensureInitialized() async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+  }
+
+  /// Lấy tất cả branches (có phân trang và sắp xếp).
+  @override
+  Future<BranchListResponse> getAllBranches({
+    int pageIndex = 1,
+    int pageSize = 10,
+    String? sortColumn,
+    String sortDirection = 'asc',
+  }) async {
+    await _ensureInitialized();
+
+    try {
+      final queryParams = <String, dynamic>{
+        'pageIndex': pageIndex,
+        'pageSize': pageSize,
+        'sortDirection': sortDirection,
+      };
+
+      if (sortColumn != null && sortColumn.isNotEmpty) {
+        queryParams['sortColumn'] = sortColumn;
+      }
+
+      final response = await _dioService.get(
+        _apiPrefix,
+        queryParameters: queryParams,
+        customBaseUrl: _baseUrl,
+      );
+
+      logger.d('[BranchService] Response data: ${response.data}');
+
+      return BranchListResponse.fromJson(response.data);
+    } catch (e, st) {
+      logger.d('[BranchService] Lấy danh sách branch thất bại: $e\n$st');
+      throw Exception('Lấy danh sách chi nhánh thất bại: ${e.toString()}');
+    }
+  }
+
+  /// Lấy branches theo shop ID.
+  @override
+  Future<BranchListResponse> getBranchesByShop(
+    String shopId, {
+    int pageIndex = 1,
+    int pageSize = 10,
+  }) async {
+    await _ensureInitialized();
+
+    try {
+      final queryParams = <String, dynamic>{
+        'pageIndex': pageIndex,
+        'pageSize': pageSize,
+        'shopId': shopId,
+      };
+
+      final response = await _dioService.get(
+        _apiPrefix,
+        queryParameters: queryParams,
+        customBaseUrl: _baseUrl,
+      );
+
+      return BranchListResponse.fromJson(response.data);
+    } catch (e, st) {
+      logger.d('[BranchService] Lấy branch theo shop thất bại: $e\n$st');
+      throw Exception('Lấy chi nhánh theo shop thất bại: ${e.toString()}');
+    }
+  }
+
+  /// Tìm kiếm branches theo từ khóa.
+  @override
+  Future<BranchListResponse> searchBranches(
+    String searchTerm, {
+    int pageIndex = 1,
+    int pageSize = 10,
+  }) async {
+    await _ensureInitialized();
+
+    try {
+      final queryParams = <String, dynamic>{
+        'pageIndex': pageIndex,
+        'pageSize': pageSize,
+        'search': searchTerm,
+      };
+
+      final response = await _dioService.get(
+        _apiPrefix,
+        queryParameters: queryParams,
+        customBaseUrl: _baseUrl,
+      );
+
+      return BranchListResponse.fromJson(response.data);
+    } catch (e, st) {
+      logger.d('[BranchService] Tìm kiếm branch thất bại: $e\n$st');
+      throw Exception('Tìm kiếm chi nhánh thất bại: ${e.toString()}');
+    }
+  }
+
+  /// Lấy thống kê branch.
+  Future<Map<String, int>> getBranchStatistics() async {
+    await _ensureInitialized();
+
+    try {
+      // Get all branches to calculate statistics
+      final response = await getAllBranches(pageSize: 1000);
+
+      return {
+        'total': response.totalItems,
+        'pages': response.totalPages,
+      };
+    } catch (e, st) {
+      logger.d('[BranchService] Lấy thống kê branch thất bại: $e\n$st');
+      throw Exception('Lấy thống kê chi nhánh thất bại: ${e.toString()}');
+    }
+  }
+
+  /// Lấy branches theo nhiều shop IDs.
+  Future<BranchListResponse> getBranchesByMultipleShops(
+    List<String> shopIds, {
+    int pageIndex = 1,
+    int pageSize = 10,
+  }) async {
+    await _ensureInitialized();
+
+    try {
+      final queryParams = <String, dynamic>{
+        'pageIndex': pageIndex,
+        'pageSize': pageSize,
+        'shopIds': shopIds.join(','), // Join shop IDs with comma
+      };
+
+      final response = await _dioService.get(
+        _apiPrefix,
+        queryParameters: queryParams,
+        customBaseUrl: _baseUrl,
+      );
+
+      return BranchListResponse.fromJson(response.data);
+    } catch (e, st) {
+      logger.d('[BranchService] Lấy branch theo multiple shops thất bại: $e\n$st');
+      throw Exception('Lấy chi nhánh theo multiple shops thất bại: ${e.toString()}');
+    }
+  }
+
+  /// Fetch all branches (convenience method - lấy tất cả không phân trang)
+  Future<List<Branch>> fetchAllBranches() async {
+    await _ensureInitialized();
+
+    try {
+      final response = await getAllBranches(pageSize: 1000); // Get large page
+      return response.items;
+    } catch (e, st) {
+      logger.d('[BranchService] Fetch all branches thất bại: $e\n$st');
+      throw Exception('Lấy tất cả chi nhánh thất bại: ${e.toString()}');
+    }
+  }
+}

@@ -11,6 +11,7 @@ abstract class IServiceService {
     int pageSize = 10,
     String? sortColumn,
     String sortDirection = 'asc',
+    String serviceCategoryId = '',
   });
 
   /// Lấy chi tiết service theo id

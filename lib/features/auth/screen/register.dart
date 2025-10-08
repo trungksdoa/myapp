@@ -115,8 +115,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'reEnterPassword': _confirmPasswordController.text,
       });
 
-      if (response.isNotEmpty && mounted) {
-        NavigateHelper.goToRegistrationSuccess(context);
+      if (response['statusCode'] == 201 && mounted) {
+        final xKeyApt = response['xKeyApt'] as String?;
+        if (xKeyApt != null) {
+          NavigateHelper.goToRegisterOTPVerification(
+            context,
+            _emailController.text,
+            xKeyApt,
+          );
+        } else {
+          NavigateHelper.goToRegistrationSuccess(context);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -155,7 +164,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => NavigateHelper.pop(context),
         ),
       ),
       body: SafeArea(

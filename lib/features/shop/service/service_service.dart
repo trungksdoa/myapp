@@ -35,7 +35,7 @@ class ServiceService implements IServiceService {
       logger.d('[ServiceService] Khởi tạo thành công');
     } catch (e, st) {
       _isInitialized = true;
-      logger.e('[ServiceService] Khởi tạo thất bại: $e\n$st');
+      logger.d('[ServiceService] Khởi tạo thất bại: $e\n$st');
       rethrow;
     }
   }
@@ -54,6 +54,7 @@ class ServiceService implements IServiceService {
     int pageSize = 10,
     String? sortColumn,
     String sortDirection = 'asc',
+    String serviceCategoryId = '',
   }) async {
     await _ensureInitialized();
 
@@ -64,8 +65,8 @@ class ServiceService implements IServiceService {
         'sortDirection': sortDirection,
       };
 
-      if (sortColumn != null && sortColumn.isNotEmpty) {
-        queryParams['sortColumn'] = sortColumn;
+      if (serviceCategoryId.isNotEmpty) {
+        queryParams['serviceCategoryId'] = serviceCategoryId;
       }
 
       final response = await _dioService.get(
@@ -74,9 +75,11 @@ class ServiceService implements IServiceService {
         customBaseUrl: _baseUrl,
       );
 
+      print('Response data: ${response.data}'); // Debug log
+
       return ServiceListResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceService] Lấy danh sách service thất bại: $e\n$st');
+      logger.d('[ServiceService] Lấy danh sách service thất bại: $e\n$st');
       throw Exception('Lấy danh sách service thất bại: ${e.toString()}');
     }
   }
@@ -93,7 +96,7 @@ class ServiceService implements IServiceService {
       );
       return ServiceResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceService] Lấy chi tiết service thất bại: $e\n$st');
+      logger.d('[ServiceService] Lấy chi tiết service thất bại: $e\n$st');
       throw Exception('Lấy chi tiết service thất bại: ${e.toString()}');
     }
   }
@@ -120,7 +123,7 @@ class ServiceService implements IServiceService {
 
       return ServiceListResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceService] Tìm kiếm service thất bại: $e\n$st');
+      logger.d('[ServiceService] Tìm kiếm service thất bại: $e\n$st');
       throw Exception('Tìm kiếm service thất bại: ${e.toString()}');
     }
   }
@@ -146,7 +149,7 @@ class ServiceService implements IServiceService {
 
       return ServiceListResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceService] Lấy service active thất bại: $e\n$st');
+      logger.d('[ServiceService] Lấy service active thất bại: $e\n$st');
       throw Exception('Lấy service active thất bại: ${e.toString()}');
     }
   }
@@ -173,7 +176,7 @@ class ServiceService implements IServiceService {
 
       return ServiceListResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e('[ServiceService] Lấy service theo shop thất bại: $e\n$st');
+      logger.d('[ServiceService] Lấy service theo shop thất bại: $e\n$st');
       throw Exception('Lấy service theo shop thất bại: ${e.toString()}');
     }
   }
@@ -186,20 +189,13 @@ class ServiceService implements IServiceService {
       // Get all services to calculate statistics
       final response = await getAllServices(pageSize: 1000);
 
-      final activeCount = response.items
-          .where((service) => service.status == true)
-          .length;
-      final inactiveCount = response.items
-          .where((service) => service.status == false)
-          .length;
-
       return {
         'total': response.totalItems,
-        'active': activeCount,
-        'inactive': inactiveCount,
+        'active': response.items.where((service) => service.isActive).length,
+        'inactive': response.items.where((service) => !service.isActive).length,
       };
     } catch (e, st) {
-      logger.e('[ServiceService] Lấy thống kê service thất bại: $e\n$st');
+      logger.d('[ServiceService] Lấy thống kê service thất bại: $e\n$st');
       throw Exception('Lấy thống kê service thất bại: ${e.toString()}');
     }
   }
@@ -225,7 +221,7 @@ class ServiceService implements IServiceService {
 
       return ServiceListResponse.fromJson(response.data);
     } catch (e, st) {
-      logger.e(
+      logger.d(
         '[ServiceService] Lấy service theo multiple shops thất bại: $e\n$st',
       );
       throw Exception(
